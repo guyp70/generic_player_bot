@@ -1,0 +1,8 @@
+# Environment Server, linux only
+pip install -r Server\requirements.txt
+set vars in Server\settings.py
+python Server\Environments_Server.py
+
+# Client - Model runner, cross platform
+pip install -r pip_freeze.txt
+python main.py

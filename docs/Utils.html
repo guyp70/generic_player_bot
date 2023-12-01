@@ -1,0 +1,1146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.6.2" />
+<title>Beta.Utils API documentation</title>
+<meta name="description" content="" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase;cursor:pointer}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>Beta.Utils</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">from threading import Lock
+import datetime
+import os
+import tensorflow as tf
+from tensorflow.python.tools import inspect_checkpoint as chkp  # import the inspect_checkpoint library
+import pickle
+
+class Coordinator(object):
+    &#34;&#34;&#34;
+    A class to coordinate Worker threads.
+    &#34;&#34;&#34;
+    def __init__(self, n_episodes, init_global_step_cnt=0):
+        &#34;&#34;&#34;
+        A class to coordinate Worker threads.  
+
+        :param n_episodes: The number of episodes, we wish to go through overall. (the sum of the number of episodes
+                           each thread goes through.  
+        :param init_global_step_cnt: Initializes the global step count at the given value.
+        &#34;&#34;&#34;
+        self.max_episodes = n_episodes
+        self._episode_cnt = 0
+        self._episode_cnt_lock = Lock()
+        self._global_step_cnt = init_global_step_cnt  # Used to count how many batches we&#39;ve trained our model through.
+        #                                               Should be incremented every time we calc gradients and update
+        #                                               our model.
+        self._global_step_cnt_lock = Lock()
+
+        self._shutdown_requested_lock = Lock()
+        self._shutdown_requested = False
+
+    @property
+    def shutdown_requested(self):
+        &#34;&#34;&#34;
+        shutdown_requested Property getter. Safely returns the value of self._shutdown_requested.  
+
+        :return: The value of self._shutdown_requested.
+        &#34;&#34;&#34;
+        with self._shutdown_requested_lock:
+            return self._shutdown_requested
+
+    @shutdown_requested.setter
+    def shutdown_requested(self, value):
+        &#34;&#34;&#34;
+        shutdown_requested Property setter. Safely sets the value of self._shutdown_requested.  
+
+        :param value: The value to which we set self._shutdown_requested  
+        :return: None
+        &#34;&#34;&#34;
+        with self._shutdown_requested_lock:
+            self._shutdown_requested = value
+
+    def shutdown(self):
+        &#34;&#34;&#34;
+        Signals the instance to shut down.  
+
+        :return: None
+        &#34;&#34;&#34;
+        self.shutdown_requested = True
+
+    def should_stop_training(self, inc_episode_cnt=False):
+        &#34;&#34;&#34;
+        Returns True if cnt is no smaller than max_episodes.  
+
+        :param inc_episode_cnt: If true, increments the episode counter.  
+        :return: True if cnt is no smaller than max_episodes, False otherwise.
+        &#34;&#34;&#34;
+        with self._episode_cnt_lock:
+            should_stop = (not (self.max_episodes &gt; self._episode_cnt)) or self.shutdown_requested
+            if inc_episode_cnt and not should_stop:
+                self._episode_cnt += 1
+            return should_stop
+
+    def get_episode_cnt(self):
+        &#34;&#34;&#34;
+        Returns self._episodes_cnt.  
+
+        :return:  episodes count
+        &#34;&#34;&#34;
+        with self._episode_cnt_lock:
+            return self._episode_cnt
+
+    def get_global_step_cnt(self):
+        &#34;&#34;&#34;
+        Returns self._global_step_cnt  
+
+        :return: global step count
+        &#34;&#34;&#34;
+        with self._global_step_cnt_lock:
+            return self._global_step_cnt
+
+    def inc_global_step_cnt(self):
+        &#34;&#34;&#34;
+        Increments the global step count  
+
+        :return: None
+        &#34;&#34;&#34;
+        with self._global_step_cnt_lock:
+            self._global_step_cnt += 1
+
+
+class Memory(object):
+    Default_Max_Size = 30
+
+    def __init__(self, max_size=Default_Max_Size):
+        &#34;&#34;&#34;
+        A class meant store experience data for training. Facilitating the easy storing of experience and it&#39;s eventual
+        recall top be used in gradient calculatin.  
+
+        :param max_size: Max size of memory space in time steps (int).
+        &#34;&#34;&#34;
+        self.max_size = max_size
+        self.states = []
+        self.actions = []
+        self.values = []
+        self.rnn_states = []
+        self.rewards = []
+
+    def is_full(self):
+        &#34;&#34;&#34;
+        Returns True if no more space is left in memory.
+        &#34;&#34;&#34;
+        return not (self.max_size &gt; len(self.states))
+
+    def is_empty(self):
+        &#34;&#34;&#34;
+        Returns True if  memory is empty.
+        &#34;&#34;&#34;
+        return len(self.states) == 0
+
+    def add_time_step(self, s, a, v, rnn_state_in, r):
+        &#34;&#34;&#34;
+        Use this func to add data to memory. Will raise exception if memory is full.  
+
+        :param s: state  
+        :param a: action  
+        :param v: value  
+        :param rnn_state_in: the in rnn_state (the one that was used as the in state in the current time step)  
+        :param r: reward  
+        :return: None
+        &#34;&#34;&#34;
+        if not self.is_full():
+            self.states.append(s)
+            self.actions.append(a)
+            self.values.append(v)
+            self.rnn_states.append(rnn_state_in)
+            self.rewards.append(r)
+        else:
+            raise NoSpaceLeftInMemoryException()
+
+    def get_episode_data_for_grads(self):
+        &#34;&#34;&#34;
+        Returns all data needed for gradient calculations. Returns data as an iterator of tuples each of the
+        following structure:(state, action, value, in_rnn_state, target_v, new_state).  
+
+        :return: Returns all data needed for gradient calculations. Returns data as an iterator of tuples each of the
+                 following structure:(state, action, value, in_rnn_state, target_v, new_state).
+        &#34;&#34;&#34;
+        return self.states, self.actions, self.values, self.rnn_states, self.rewards
+
+    def reset(self):
+        &#34;&#34;&#34;
+        Resets the memory.  
+
+        :param batch_initial_state: The first in rnn_state in the batch (the out state of the previous batch&#39;s last step).  
+        :return: None
+        &#34;&#34;&#34;
+        self.states = []
+        self.actions = []
+        self.values = []
+        self.rnn_states = []
+        self.rewards = []
+
+
+class NoSpaceLeftInMemoryException(Exception):
+    pass
+
+
+class SavesManager(object):
+    &#34;&#34;&#34;simplified saving mechanized, made for distribution build&#34;&#34;&#34;
+    PickleFileName = &#34;save.pkl&#34;
+    ckptFileName = &#34;save.ckpt&#34;
+
+    def __init__(self, saves_folder_path):
+        &#34;&#34;&#34;
+        Returns a SaveManager object.
+        Uses tf.train.Saver() to save and load tf vars to and from files.
+        Make sure to give it a valid path as saves_folder_path for it will crash otherwise.  
+
+        :param saves_folder_path: Path to the folder where the save folders will be saved to and loaded from.
+        &#34;&#34;&#34;
+        self.saver = tf.train.Saver()
+        self.saves_folder_path = saves_folder_path
+        if not os.path.exists(self.saves_folder_path):
+            print(os.path.exists(self.saves_folder_path))
+            raise CannotFindDesignatedSavesFolderException()
+
+    def save(self, sess, params_dict):
+        &#34;&#34;&#34;
+        Saves the model&#39;s vars to file.  
+
+        :param sess: tensorflow session object  
+        :param params_dict: a dictionary with parameters to save  
+        :return: path of save file
+        &#34;&#34;&#34;
+        print(&#34;Model Saved! Save Folder Path: %s&#34; % self.saves_folder_path)
+        # print([v.name for v in sess.graph.as_graph_def().node])
+        # print(self.saver.saver_def)
+        success = self.saver.save(sess, os.path.join(self.saves_folder_path, self.ckptFileName))
+        with open(os.path.join(self.saves_folder_path, self.PickleFileName), &#34;wb&#34;) as f:
+            pickle.dump(params_dict, f)
+        return success
+
+    def load(self, sess, print_func=print):
+        &#34;&#34;&#34;
+        Loads the model&#39;s vars from file.  
+
+        :param sess: tensorflow session object  
+        :return: a tuple (path of save file loaded (str), a dictionary with the saved parameters (dict)).
+        &#34;&#34;&#34;
+        try:
+            self.saver.restore(sess, os.path.join(self.saves_folder_path, self.ckptFileName))
+            with open(os.path.join(self.saves_folder_path, self.PickleFileName), &#34;rb&#34;) as f:
+                saved_params_dict = pickle.load(f)
+            return self.saves_folder_path, saved_params_dict
+        except (tf.errors.DataLossError, FileNotFoundError):
+            print_func(&#34;Failed to load Properly. Please check that the folder contains a valid save.&#34;)
+            raise InvalidSavePathException()
+
+    @classmethod
+    def check_for_save(cls, saves_folder_path):
+        &#34;&#34;&#34;Returns true if the folder contains a save. Returns False otherwise.&#34;&#34;&#34;
+        try:
+
+            with open(os.path.join(saves_folder_path, cls.PickleFileName), &#34;rb&#34;) as f:
+                pickle.load(f)
+            if os.path.exists(os.path.join(saves_folder_path, &#34;checkpoint&#34;)):
+                return True
+        except (FileNotFoundError, pickle.UnpicklingError):
+            pass
+        return False
+
+
+class CannotFindDesignatedSavesFolderException(Exception):
+    pass
+
+
+class InvalidSavePathException(Exception):
+    pass
+
+
+class FilesWithNamesThatDoNotConformToSaveNameFormatExistInSavesFolderException(Exception):
+    pass
+
+
+def main():
+    &#34;&#34;&#34; Tests &#34;&#34;&#34;
+    import os
+
+    # Memory Class Test
+    a = Memory(max_size=1)
+    a.add_time_step(1, 2, 3, 3, 4)
+    print(a.is_full())
+    for i in a.get_episode_data_for_grads():
+        print(i)
+
+    # Coordinator Class Test
+    from threading import Thread
+    b = Coordinator(1000)
+    def work(coord):
+        coord.should_stop_training()
+    threads = [Thread(target=work, args=(b,)) for i in range(1000)]
+    [t.start() for t in threads]
+    [t.join() for t in threads]
+    with b._episode_cnt_lock:
+        print(b._episode_cnt)
+
+    # SavesManager Class Test
+    a = tf.Variable(initial_value=3, dtype=tf.int32, name=&#39;a&#39;)
+    b = tf.Variable(initial_value=4, dtype=tf.int32, name=&#39;b&#39;)
+
+    if not os.path.exists(&#34;Saves&#34;):
+        os.mkdir(&#34;Saves&#34;)
+    sm = SavesManager(&#34;Saves&#34;)
+    &#34;&#34;&#34;for _ in range(10):
+        with open(sm.get_new_save_path(), &#34;wb&#34;):
+            pass&#34;&#34;&#34;
+    with tf.Session() as sess:
+        sess.run(tf.global_variables_initializer())
+        sess.run(tf.print(a))
+        sess.run(a.assign(5))
+        sm.save(sess, {&#34;heyheyhey&#34;:6})
+    with tf.Session() as sess:
+        sess.run(tf.global_variables_initializer())  # not necessary, just here to show that load() overwrites previous
+        #                                              values.
+        path, params_dict = sm.load(sess)
+        sess.run(tf.print(a))
+    print(&#34;PARAMS START&#34;)  # it appears that tensorflow interferes with printing so don&#39;t be surprised if you find
+    #                            the output of tf.print(a) in between &#34;CKPT PRINT START&#34; and &#34;CKPT PRINT END&#34;
+    print(params_dict)
+    print(&#34;PARAMS END&#34;)
+
+if __name__ == &#34;__main__&#34;:
+    main()</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="Beta.Utils.main"><code class="name flex">
+<span>def <span class="ident">main</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Tests</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def main():
+    &#34;&#34;&#34; Tests &#34;&#34;&#34;
+    import os
+
+    # Memory Class Test
+    a = Memory(max_size=1)
+    a.add_time_step(1, 2, 3, 3, 4)
+    print(a.is_full())
+    for i in a.get_episode_data_for_grads():
+        print(i)
+
+    # Coordinator Class Test
+    from threading import Thread
+    b = Coordinator(1000)
+    def work(coord):
+        coord.should_stop_training()
+    threads = [Thread(target=work, args=(b,)) for i in range(1000)]
+    [t.start() for t in threads]
+    [t.join() for t in threads]
+    with b._episode_cnt_lock:
+        print(b._episode_cnt)
+
+    # SavesManager Class Test
+    a = tf.Variable(initial_value=3, dtype=tf.int32, name=&#39;a&#39;)
+    b = tf.Variable(initial_value=4, dtype=tf.int32, name=&#39;b&#39;)
+
+    if not os.path.exists(&#34;Saves&#34;):
+        os.mkdir(&#34;Saves&#34;)
+    sm = SavesManager(&#34;Saves&#34;)
+    &#34;&#34;&#34;for _ in range(10):
+        with open(sm.get_new_save_path(), &#34;wb&#34;):
+            pass&#34;&#34;&#34;
+    with tf.Session() as sess:
+        sess.run(tf.global_variables_initializer())
+        sess.run(tf.print(a))
+        sess.run(a.assign(5))
+        sm.save(sess, {&#34;heyheyhey&#34;:6})
+    with tf.Session() as sess:
+        sess.run(tf.global_variables_initializer())  # not necessary, just here to show that load() overwrites previous
+        #                                              values.
+        path, params_dict = sm.load(sess)
+        sess.run(tf.print(a))
+    print(&#34;PARAMS START&#34;)  # it appears that tensorflow interferes with printing so don&#39;t be surprised if you find
+    #                            the output of tf.print(a) in between &#34;CKPT PRINT START&#34; and &#34;CKPT PRINT END&#34;
+    print(params_dict)
+    print(&#34;PARAMS END&#34;)</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="Beta.Utils.CannotFindDesignatedSavesFolderException"><code class="flex name class">
+<span>class <span class="ident">CannotFindDesignatedSavesFolderException</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Common base class for all non-exit exceptions.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class CannotFindDesignatedSavesFolderException(Exception):
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="Beta.Utils.Coordinator"><code class="flex name class">
+<span>class <span class="ident">Coordinator</span></span>
+<span>(</span><span>n_episodes, init_global_step_cnt=0)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>A class to coordinate Worker threads.</p>
+<p>A class to coordinate Worker threads.
+</p>
+<p>:param n_episodes: The number of episodes, we wish to go through overall. (the sum of the number of episodes
+each thread goes through.<br>
+:param init_global_step_cnt: Initializes the global step count at the given value.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class Coordinator(object):
+    &#34;&#34;&#34;
+    A class to coordinate Worker threads.
+    &#34;&#34;&#34;
+    def __init__(self, n_episodes, init_global_step_cnt=0):
+        &#34;&#34;&#34;
+        A class to coordinate Worker threads.  
+
+        :param n_episodes: The number of episodes, we wish to go through overall. (the sum of the number of episodes
+                           each thread goes through.  
+        :param init_global_step_cnt: Initializes the global step count at the given value.
+        &#34;&#34;&#34;
+        self.max_episodes = n_episodes
+        self._episode_cnt = 0
+        self._episode_cnt_lock = Lock()
+        self._global_step_cnt = init_global_step_cnt  # Used to count how many batches we&#39;ve trained our model through.
+        #                                               Should be incremented every time we calc gradients and update
+        #                                               our model.
+        self._global_step_cnt_lock = Lock()
+
+        self._shutdown_requested_lock = Lock()
+        self._shutdown_requested = False
+
+    @property
+    def shutdown_requested(self):
+        &#34;&#34;&#34;
+        shutdown_requested Property getter. Safely returns the value of self._shutdown_requested.  
+
+        :return: The value of self._shutdown_requested.
+        &#34;&#34;&#34;
+        with self._shutdown_requested_lock:
+            return self._shutdown_requested
+
+    @shutdown_requested.setter
+    def shutdown_requested(self, value):
+        &#34;&#34;&#34;
+        shutdown_requested Property setter. Safely sets the value of self._shutdown_requested.  
+
+        :param value: The value to which we set self._shutdown_requested  
+        :return: None
+        &#34;&#34;&#34;
+        with self._shutdown_requested_lock:
+            self._shutdown_requested = value
+
+    def shutdown(self):
+        &#34;&#34;&#34;
+        Signals the instance to shut down.  
+
+        :return: None
+        &#34;&#34;&#34;
+        self.shutdown_requested = True
+
+    def should_stop_training(self, inc_episode_cnt=False):
+        &#34;&#34;&#34;
+        Returns True if cnt is no smaller than max_episodes.  
+
+        :param inc_episode_cnt: If true, increments the episode counter.  
+        :return: True if cnt is no smaller than max_episodes, False otherwise.
+        &#34;&#34;&#34;
+        with self._episode_cnt_lock:
+            should_stop = (not (self.max_episodes &gt; self._episode_cnt)) or self.shutdown_requested
+            if inc_episode_cnt and not should_stop:
+                self._episode_cnt += 1
+            return should_stop
+
+    def get_episode_cnt(self):
+        &#34;&#34;&#34;
+        Returns self._episodes_cnt.  
+
+        :return:  episodes count
+        &#34;&#34;&#34;
+        with self._episode_cnt_lock:
+            return self._episode_cnt
+
+    def get_global_step_cnt(self):
+        &#34;&#34;&#34;
+        Returns self._global_step_cnt  
+
+        :return: global step count
+        &#34;&#34;&#34;
+        with self._global_step_cnt_lock:
+            return self._global_step_cnt
+
+    def inc_global_step_cnt(self):
+        &#34;&#34;&#34;
+        Increments the global step count  
+
+        :return: None
+        &#34;&#34;&#34;
+        with self._global_step_cnt_lock:
+            self._global_step_cnt += 1</code></pre>
+</details>
+<h3>Instance variables</h3>
+<dl>
+<dt id="Beta.Utils.Coordinator.shutdown_requested"><code class="name">var <span class="ident">shutdown_requested</span></code></dt>
+<dd>
+<section class="desc"><p>shutdown_requested Property getter. Safely returns the value of self._shutdown_requested.
+</p>
+<p>:return: The value of self._shutdown_requested.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@property
+def shutdown_requested(self):
+    &#34;&#34;&#34;
+    shutdown_requested Property getter. Safely returns the value of self._shutdown_requested.  
+
+    :return: The value of self._shutdown_requested.
+    &#34;&#34;&#34;
+    with self._shutdown_requested_lock:
+        return self._shutdown_requested</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="Beta.Utils.Coordinator.get_episode_cnt"><code class="name flex">
+<span>def <span class="ident">get_episode_cnt</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Returns self._episodes_cnt.
+</p>
+<p>:return:
+episodes count</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def get_episode_cnt(self):
+    &#34;&#34;&#34;
+    Returns self._episodes_cnt.  
+
+    :return:  episodes count
+    &#34;&#34;&#34;
+    with self._episode_cnt_lock:
+        return self._episode_cnt</code></pre>
+</details>
+</dd>
+<dt id="Beta.Utils.Coordinator.get_global_step_cnt"><code class="name flex">
+<span>def <span class="ident">get_global_step_cnt</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Returns self._global_step_cnt
+</p>
+<p>:return: global step count</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def get_global_step_cnt(self):
+    &#34;&#34;&#34;
+    Returns self._global_step_cnt  
+
+    :return: global step count
+    &#34;&#34;&#34;
+    with self._global_step_cnt_lock:
+        return self._global_step_cnt</code></pre>
+</details>
+</dd>
+<dt id="Beta.Utils.Coordinator.inc_global_step_cnt"><code class="name flex">
+<span>def <span class="ident">inc_global_step_cnt</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Increments the global step count
+</p>
+<p>:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def inc_global_step_cnt(self):
+    &#34;&#34;&#34;
+    Increments the global step count  
+
+    :return: None
+    &#34;&#34;&#34;
+    with self._global_step_cnt_lock:
+        self._global_step_cnt += 1</code></pre>
+</details>
+</dd>
+<dt id="Beta.Utils.Coordinator.should_stop_training"><code class="name flex">
+<span>def <span class="ident">should_stop_training</span></span>(<span>self, inc_episode_cnt=False)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Returns True if cnt is no smaller than max_episodes.
+</p>
+<p>:param inc_episode_cnt: If true, increments the episode counter.<br>
+:return: True if cnt is no smaller than max_episodes, False otherwise.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def should_stop_training(self, inc_episode_cnt=False):
+    &#34;&#34;&#34;
+    Returns True if cnt is no smaller than max_episodes.  
+
+    :param inc_episode_cnt: If true, increments the episode counter.  
+    :return: True if cnt is no smaller than max_episodes, False otherwise.
+    &#34;&#34;&#34;
+    with self._episode_cnt_lock:
+        should_stop = (not (self.max_episodes &gt; self._episode_cnt)) or self.shutdown_requested
+        if inc_episode_cnt and not should_stop:
+            self._episode_cnt += 1
+        return should_stop</code></pre>
+</details>
+</dd>
+<dt id="Beta.Utils.Coordinator.shutdown"><code class="name flex">
+<span>def <span class="ident">shutdown</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Signals the instance to shut down.
+</p>
+<p>:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def shutdown(self):
+    &#34;&#34;&#34;
+    Signals the instance to shut down.  
+
+    :return: None
+    &#34;&#34;&#34;
+    self.shutdown_requested = True</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="Beta.Utils.FilesWithNamesThatDoNotConformToSaveNameFormatExistInSavesFolderException"><code class="flex name class">
+<span>class <span class="ident">FilesWithNamesThatDoNotConformToSaveNameFormatExistInSavesFolderException</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Common base class for all non-exit exceptions.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class FilesWithNamesThatDoNotConformToSaveNameFormatExistInSavesFolderException(Exception):
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="Beta.Utils.InvalidSavePathException"><code class="flex name class">
+<span>class <span class="ident">InvalidSavePathException</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Common base class for all non-exit exceptions.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class InvalidSavePathException(Exception):
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="Beta.Utils.Memory"><code class="flex name class">
+<span>class <span class="ident">Memory</span></span>
+<span>(</span><span>max_size=30)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>A class meant store experience data for training. Facilitating the easy storing of experience and it's eventual
+recall top be used in gradient calculatin.
+</p>
+<p>:param max_size: Max size of memory space in time steps (int).</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class Memory(object):
+    Default_Max_Size = 30
+
+    def __init__(self, max_size=Default_Max_Size):
+        &#34;&#34;&#34;
+        A class meant store experience data for training. Facilitating the easy storing of experience and it&#39;s eventual
+        recall top be used in gradient calculatin.  
+
+        :param max_size: Max size of memory space in time steps (int).
+        &#34;&#34;&#34;
+        self.max_size = max_size
+        self.states = []
+        self.actions = []
+        self.values = []
+        self.rnn_states = []
+        self.rewards = []
+
+    def is_full(self):
+        &#34;&#34;&#34;
+        Returns True if no more space is left in memory.
+        &#34;&#34;&#34;
+        return not (self.max_size &gt; len(self.states))
+
+    def is_empty(self):
+        &#34;&#34;&#34;
+        Returns True if  memory is empty.
+        &#34;&#34;&#34;
+        return len(self.states) == 0
+
+    def add_time_step(self, s, a, v, rnn_state_in, r):
+        &#34;&#34;&#34;
+        Use this func to add data to memory. Will raise exception if memory is full.  
+
+        :param s: state  
+        :param a: action  
+        :param v: value  
+        :param rnn_state_in: the in rnn_state (the one that was used as the in state in the current time step)  
+        :param r: reward  
+        :return: None
+        &#34;&#34;&#34;
+        if not self.is_full():
+            self.states.append(s)
+            self.actions.append(a)
+            self.values.append(v)
+            self.rnn_states.append(rnn_state_in)
+            self.rewards.append(r)
+        else:
+            raise NoSpaceLeftInMemoryException()
+
+    def get_episode_data_for_grads(self):
+        &#34;&#34;&#34;
+        Returns all data needed for gradient calculations. Returns data as an iterator of tuples each of the
+        following structure:(state, action, value, in_rnn_state, target_v, new_state).  
+
+        :return: Returns all data needed for gradient calculations. Returns data as an iterator of tuples each of the
+                 following structure:(state, action, value, in_rnn_state, target_v, new_state).
+        &#34;&#34;&#34;
+        return self.states, self.actions, self.values, self.rnn_states, self.rewards
+
+    def reset(self):
+        &#34;&#34;&#34;
+        Resets the memory.  
+
+        :param batch_initial_state: The first in rnn_state in the batch (the out state of the previous batch&#39;s last step).  
+        :return: None
+        &#34;&#34;&#34;
+        self.states = []
+        self.actions = []
+        self.values = []
+        self.rnn_states = []
+        self.rewards = []</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="Beta.Utils.Memory.Default_Max_Size"><code class="name">var <span class="ident">Default_Max_Size</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="Beta.Utils.Memory.add_time_step"><code class="name flex">
+<span>def <span class="ident">add_time_step</span></span>(<span>self, s, a, v, rnn_state_in, r)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Use this func to add data to memory. Will raise exception if memory is full.
+</p>
+<p>:param s: state<br>
+:param a: action<br>
+:param v: value<br>
+:param rnn_state_in: the in rnn_state (the one that was used as the in state in the current time step)<br>
+:param r: reward<br>
+:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def add_time_step(self, s, a, v, rnn_state_in, r):
+    &#34;&#34;&#34;
+    Use this func to add data to memory. Will raise exception if memory is full.  
+
+    :param s: state  
+    :param a: action  
+    :param v: value  
+    :param rnn_state_in: the in rnn_state (the one that was used as the in state in the current time step)  
+    :param r: reward  
+    :return: None
+    &#34;&#34;&#34;
+    if not self.is_full():
+        self.states.append(s)
+        self.actions.append(a)
+        self.values.append(v)
+        self.rnn_states.append(rnn_state_in)
+        self.rewards.append(r)
+    else:
+        raise NoSpaceLeftInMemoryException()</code></pre>
+</details>
+</dd>
+<dt id="Beta.Utils.Memory.get_episode_data_for_grads"><code class="name flex">
+<span>def <span class="ident">get_episode_data_for_grads</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Returns all data needed for gradient calculations. Returns data as an iterator of tuples each of the
+following structure:(state, action, value, in_rnn_state, target_v, new_state).
+</p>
+<p>:return: Returns all data needed for gradient calculations. Returns data as an iterator of tuples each of the
+following structure:(state, action, value, in_rnn_state, target_v, new_state).</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def get_episode_data_for_grads(self):
+    &#34;&#34;&#34;
+    Returns all data needed for gradient calculations. Returns data as an iterator of tuples each of the
+    following structure:(state, action, value, in_rnn_state, target_v, new_state).  
+
+    :return: Returns all data needed for gradient calculations. Returns data as an iterator of tuples each of the
+             following structure:(state, action, value, in_rnn_state, target_v, new_state).
+    &#34;&#34;&#34;
+    return self.states, self.actions, self.values, self.rnn_states, self.rewards</code></pre>
+</details>
+</dd>
+<dt id="Beta.Utils.Memory.is_empty"><code class="name flex">
+<span>def <span class="ident">is_empty</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Returns True if
+memory is empty.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def is_empty(self):
+    &#34;&#34;&#34;
+    Returns True if  memory is empty.
+    &#34;&#34;&#34;
+    return len(self.states) == 0</code></pre>
+</details>
+</dd>
+<dt id="Beta.Utils.Memory.is_full"><code class="name flex">
+<span>def <span class="ident">is_full</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Returns True if no more space is left in memory.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def is_full(self):
+    &#34;&#34;&#34;
+    Returns True if no more space is left in memory.
+    &#34;&#34;&#34;
+    return not (self.max_size &gt; len(self.states))</code></pre>
+</details>
+</dd>
+<dt id="Beta.Utils.Memory.reset"><code class="name flex">
+<span>def <span class="ident">reset</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Resets the memory.
+</p>
+<p>:param batch_initial_state: The first in rnn_state in the batch (the out state of the previous batch's last step).<br>
+:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def reset(self):
+    &#34;&#34;&#34;
+    Resets the memory.  
+
+    :param batch_initial_state: The first in rnn_state in the batch (the out state of the previous batch&#39;s last step).  
+    :return: None
+    &#34;&#34;&#34;
+    self.states = []
+    self.actions = []
+    self.values = []
+    self.rnn_states = []
+    self.rewards = []</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="Beta.Utils.NoSpaceLeftInMemoryException"><code class="flex name class">
+<span>class <span class="ident">NoSpaceLeftInMemoryException</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Common base class for all non-exit exceptions.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class NoSpaceLeftInMemoryException(Exception):
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="Beta.Utils.SavesManager"><code class="flex name class">
+<span>class <span class="ident">SavesManager</span></span>
+<span>(</span><span>saves_folder_path)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>simplified saving mechanized, made for distribution build</p>
+<p>Returns a SaveManager object.
+Uses tf.train.Saver() to save and load tf vars to and from files.
+Make sure to give it a valid path as saves_folder_path for it will crash otherwise.
+</p>
+<p>:param saves_folder_path: Path to the folder where the save folders will be saved to and loaded from.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class SavesManager(object):
+    &#34;&#34;&#34;simplified saving mechanized, made for distribution build&#34;&#34;&#34;
+    PickleFileName = &#34;save.pkl&#34;
+    ckptFileName = &#34;save.ckpt&#34;
+
+    def __init__(self, saves_folder_path):
+        &#34;&#34;&#34;
+        Returns a SaveManager object.
+        Uses tf.train.Saver() to save and load tf vars to and from files.
+        Make sure to give it a valid path as saves_folder_path for it will crash otherwise.  
+
+        :param saves_folder_path: Path to the folder where the save folders will be saved to and loaded from.
+        &#34;&#34;&#34;
+        self.saver = tf.train.Saver()
+        self.saves_folder_path = saves_folder_path
+        if not os.path.exists(self.saves_folder_path):
+            print(os.path.exists(self.saves_folder_path))
+            raise CannotFindDesignatedSavesFolderException()
+
+    def save(self, sess, params_dict):
+        &#34;&#34;&#34;
+        Saves the model&#39;s vars to file.  
+
+        :param sess: tensorflow session object  
+        :param params_dict: a dictionary with parameters to save  
+        :return: path of save file
+        &#34;&#34;&#34;
+        print(&#34;Model Saved! Save Folder Path: %s&#34; % self.saves_folder_path)
+        # print([v.name for v in sess.graph.as_graph_def().node])
+        # print(self.saver.saver_def)
+        success = self.saver.save(sess, os.path.join(self.saves_folder_path, self.ckptFileName))
+        with open(os.path.join(self.saves_folder_path, self.PickleFileName), &#34;wb&#34;) as f:
+            pickle.dump(params_dict, f)
+        return success
+
+    def load(self, sess, print_func=print):
+        &#34;&#34;&#34;
+        Loads the model&#39;s vars from file.  
+
+        :param sess: tensorflow session object  
+        :return: a tuple (path of save file loaded (str), a dictionary with the saved parameters (dict)).
+        &#34;&#34;&#34;
+        try:
+            self.saver.restore(sess, os.path.join(self.saves_folder_path, self.ckptFileName))
+            with open(os.path.join(self.saves_folder_path, self.PickleFileName), &#34;rb&#34;) as f:
+                saved_params_dict = pickle.load(f)
+            return self.saves_folder_path, saved_params_dict
+        except (tf.errors.DataLossError, FileNotFoundError):
+            print_func(&#34;Failed to load Properly. Please check that the folder contains a valid save.&#34;)
+            raise InvalidSavePathException()
+
+    @classmethod
+    def check_for_save(cls, saves_folder_path):
+        &#34;&#34;&#34;Returns true if the folder contains a save. Returns False otherwise.&#34;&#34;&#34;
+        try:
+
+            with open(os.path.join(saves_folder_path, cls.PickleFileName), &#34;rb&#34;) as f:
+                pickle.load(f)
+            if os.path.exists(os.path.join(saves_folder_path, &#34;checkpoint&#34;)):
+                return True
+        except (FileNotFoundError, pickle.UnpicklingError):
+            pass
+        return False</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="Beta.Utils.SavesManager.PickleFileName"><code class="name">var <span class="ident">PickleFileName</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="Beta.Utils.SavesManager.ckptFileName"><code class="name">var <span class="ident">ckptFileName</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+</dl>
+<h3>Static methods</h3>
+<dl>
+<dt id="Beta.Utils.SavesManager.check_for_save"><code class="name flex">
+<span>def <span class="ident">check_for_save</span></span>(<span>saves_folder_path)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Returns true if the folder contains a save. Returns False otherwise.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@classmethod
+def check_for_save(cls, saves_folder_path):
+    &#34;&#34;&#34;Returns true if the folder contains a save. Returns False otherwise.&#34;&#34;&#34;
+    try:
+
+        with open(os.path.join(saves_folder_path, cls.PickleFileName), &#34;rb&#34;) as f:
+            pickle.load(f)
+        if os.path.exists(os.path.join(saves_folder_path, &#34;checkpoint&#34;)):
+            return True
+    except (FileNotFoundError, pickle.UnpicklingError):
+        pass
+    return False</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="Beta.Utils.SavesManager.load"><code class="name flex">
+<span>def <span class="ident">load</span></span>(<span>self, sess, print_func=<built-in function print>)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Loads the model's vars from file.
+</p>
+<p>:param sess: tensorflow session object<br>
+:return: a tuple (path of save file loaded (str), a dictionary with the saved parameters (dict)).</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def load(self, sess, print_func=print):
+    &#34;&#34;&#34;
+    Loads the model&#39;s vars from file.  
+
+    :param sess: tensorflow session object  
+    :return: a tuple (path of save file loaded (str), a dictionary with the saved parameters (dict)).
+    &#34;&#34;&#34;
+    try:
+        self.saver.restore(sess, os.path.join(self.saves_folder_path, self.ckptFileName))
+        with open(os.path.join(self.saves_folder_path, self.PickleFileName), &#34;rb&#34;) as f:
+            saved_params_dict = pickle.load(f)
+        return self.saves_folder_path, saved_params_dict
+    except (tf.errors.DataLossError, FileNotFoundError):
+        print_func(&#34;Failed to load Properly. Please check that the folder contains a valid save.&#34;)
+        raise InvalidSavePathException()</code></pre>
+</details>
+</dd>
+<dt id="Beta.Utils.SavesManager.save"><code class="name flex">
+<span>def <span class="ident">save</span></span>(<span>self, sess, params_dict)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Saves the model's vars to file.
+</p>
+<p>:param sess: tensorflow session object<br>
+:param params_dict: a dictionary with parameters to save<br>
+:return: path of save file</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def save(self, sess, params_dict):
+    &#34;&#34;&#34;
+    Saves the model&#39;s vars to file.  
+
+    :param sess: tensorflow session object  
+    :param params_dict: a dictionary with parameters to save  
+    :return: path of save file
+    &#34;&#34;&#34;
+    print(&#34;Model Saved! Save Folder Path: %s&#34; % self.saves_folder_path)
+    # print([v.name for v in sess.graph.as_graph_def().node])
+    # print(self.saver.saver_def)
+    success = self.saver.save(sess, os.path.join(self.saves_folder_path, self.ckptFileName))
+    with open(os.path.join(self.saves_folder_path, self.PickleFileName), &#34;wb&#34;) as f:
+        pickle.dump(params_dict, f)
+    return success</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="Beta" href="index.html">Beta</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="Beta.Utils.main" href="#Beta.Utils.main">main</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="Beta.Utils.CannotFindDesignatedSavesFolderException" href="#Beta.Utils.CannotFindDesignatedSavesFolderException">CannotFindDesignatedSavesFolderException</a></code></h4>
+</li>
+<li>
+<h4><code><a title="Beta.Utils.Coordinator" href="#Beta.Utils.Coordinator">Coordinator</a></code></h4>
+<ul class="">
+<li><code><a title="Beta.Utils.Coordinator.get_episode_cnt" href="#Beta.Utils.Coordinator.get_episode_cnt">get_episode_cnt</a></code></li>
+<li><code><a title="Beta.Utils.Coordinator.get_global_step_cnt" href="#Beta.Utils.Coordinator.get_global_step_cnt">get_global_step_cnt</a></code></li>
+<li><code><a title="Beta.Utils.Coordinator.inc_global_step_cnt" href="#Beta.Utils.Coordinator.inc_global_step_cnt">inc_global_step_cnt</a></code></li>
+<li><code><a title="Beta.Utils.Coordinator.should_stop_training" href="#Beta.Utils.Coordinator.should_stop_training">should_stop_training</a></code></li>
+<li><code><a title="Beta.Utils.Coordinator.shutdown" href="#Beta.Utils.Coordinator.shutdown">shutdown</a></code></li>
+<li><code><a title="Beta.Utils.Coordinator.shutdown_requested" href="#Beta.Utils.Coordinator.shutdown_requested">shutdown_requested</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="Beta.Utils.FilesWithNamesThatDoNotConformToSaveNameFormatExistInSavesFolderException" href="#Beta.Utils.FilesWithNamesThatDoNotConformToSaveNameFormatExistInSavesFolderException">FilesWithNamesThatDoNotConformToSaveNameFormatExistInSavesFolderException</a></code></h4>
+</li>
+<li>
+<h4><code><a title="Beta.Utils.InvalidSavePathException" href="#Beta.Utils.InvalidSavePathException">InvalidSavePathException</a></code></h4>
+</li>
+<li>
+<h4><code><a title="Beta.Utils.Memory" href="#Beta.Utils.Memory">Memory</a></code></h4>
+<ul class="">
+<li><code><a title="Beta.Utils.Memory.Default_Max_Size" href="#Beta.Utils.Memory.Default_Max_Size">Default_Max_Size</a></code></li>
+<li><code><a title="Beta.Utils.Memory.add_time_step" href="#Beta.Utils.Memory.add_time_step">add_time_step</a></code></li>
+<li><code><a title="Beta.Utils.Memory.get_episode_data_for_grads" href="#Beta.Utils.Memory.get_episode_data_for_grads">get_episode_data_for_grads</a></code></li>
+<li><code><a title="Beta.Utils.Memory.is_empty" href="#Beta.Utils.Memory.is_empty">is_empty</a></code></li>
+<li><code><a title="Beta.Utils.Memory.is_full" href="#Beta.Utils.Memory.is_full">is_full</a></code></li>
+<li><code><a title="Beta.Utils.Memory.reset" href="#Beta.Utils.Memory.reset">reset</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="Beta.Utils.NoSpaceLeftInMemoryException" href="#Beta.Utils.NoSpaceLeftInMemoryException">NoSpaceLeftInMemoryException</a></code></h4>
+</li>
+<li>
+<h4><code><a title="Beta.Utils.SavesManager" href="#Beta.Utils.SavesManager">SavesManager</a></code></h4>
+<ul class="">
+<li><code><a title="Beta.Utils.SavesManager.PickleFileName" href="#Beta.Utils.SavesManager.PickleFileName">PickleFileName</a></code></li>
+<li><code><a title="Beta.Utils.SavesManager.check_for_save" href="#Beta.Utils.SavesManager.check_for_save">check_for_save</a></code></li>
+<li><code><a title="Beta.Utils.SavesManager.ckptFileName" href="#Beta.Utils.SavesManager.ckptFileName">ckptFileName</a></code></li>
+<li><code><a title="Beta.Utils.SavesManager.load" href="#Beta.Utils.SavesManager.load">load</a></code></li>
+<li><code><a title="Beta.Utils.SavesManager.save" href="#Beta.Utils.SavesManager.save">save</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.6.2</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

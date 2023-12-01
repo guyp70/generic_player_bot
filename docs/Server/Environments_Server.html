@@ -1,0 +1,1263 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.6.2" />
+<title>Beta.Server.Environments_Server API documentation</title>
+<meta name="description" content="" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase;cursor:pointer}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>Beta.Server.Environments_Server</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">from Shared_Code import *
+import socket
+import select
+from Environments import EnvironmentsInitializer
+import settings
+import time
+import datetime
+
+TimeStampFormat = &#39;%H:%M:%S&#39;  # &#39;%Y-%m-%d %H:%M:%S&#39;
+
+class Server(Threadable):
+    Listen_Queue_Size = 10
+    Select_Timeout = 0.01
+
+    def __init__(self, ip, port):
+        &#34;&#34;&#34;
+        A class that handles the set up and operation of an environments server.  
+
+        :param ip: Server ip to bind the server socket to (string). (usually &#34;0.0.0.0&#34;)  
+        :param port: Server port to bind the server socket to (int).
+        &#34;&#34;&#34;
+        super(Server, self).__init__()
+        self.server_sock = socket.socket()
+        self.server_sock.bind((ip, port))
+        self.server_sock.listen(self.Listen_Queue_Size)
+        self.envs_initializer = EnvironmentsInitializer(environments_settings_folder=
+                                                        settings.environments_settings_folder_path)
+
+        self.client_handlers_lock = threading.Lock()
+        self.client_handlers = []
+
+    def run(self):
+        &#34;&#34;&#34;
+        Runs the server. Essentially the server&#39;s main function.
+        Accepts connections and passes them to ClientHandler instances who handle their requests.  
+
+        :return: None
+        &#34;&#34;&#34;
+        self.status = Status.Running
+        while self.status == Status.Running:
+            rl, _, _ = select.select([self.server_sock], [], [], self.Select_Timeout)
+            if self.server_sock in rl:
+                with self.client_handlers_lock:
+                    client_sock, addr = self.server_sock.accept()
+                    self.client_handlers.append(ClientHandler(client_sock, addr,  self.envs_initializer))
+                    self.client_handlers[-1].start()
+        self._shutdown_procedure()
+
+    def _shutdown_procedure(self):
+        &#34;&#34;&#34;
+        Shuts down the server and all of its children ClientHandler instances.  
+
+        :return: None
+        &#34;&#34;&#34;
+        self.server_sock.close()
+        with self.client_handlers_lock:
+            [ch.shutdown() for ch in self.client_handlers]
+            [ch.join() for ch in self.client_handlers]
+        self.status = Status.ShutDown
+
+
+class ClientHandler(Threadable):
+    Select_Timeout = 0.01
+
+    def __init__(self, client_sock, addr, envs_initializer):
+        &#34;&#34;&#34;
+        A class that handles communications with a single client and reply to their requests.  
+
+        :param client_sock: client socket through which communication with the client is conducted (socket.socket
+            object).  
+        :param addr: Client ip address (string).  
+        :param envs_initializer: An instance of the EnvironmentsInitializer class.
+        &#34;&#34;&#34;
+        super(ClientHandler, self).__init__()
+        self.client_sock = client_sock
+        self.envs_iniatlizer = envs_initializer
+        self.environments = {}
+        self.environments_s_size = {}
+        self.addr = addr
+        print(time_stamp(&#34;Client %s has established connection.&#34; % str(self.addr)))
+
+    def run(self):
+        &#34;&#34;&#34;
+        Runs the ClientHandler. Essentially the ClientHandler&#39;s thread main function.
+        Receives requestsfrom the client and act accordingly and replies.  
+
+        :return: None
+        &#34;&#34;&#34;
+        self.status = Status.Running
+        msg_identifier_to_funtion = {ProtocolHandler.Setup_Environment_Msg_Identifier: self.handle_SEEN_msg,
+                                     ProtocolHandler.Close_Environment_Msg_Identifier: self.handle_CLEN_msg,
+                                     ProtocolHandler.Start_New_Episode_Msg_Identifier: self.handle_STNE_msg,
+                                     ProtocolHandler.Send_Action_Make_Msg_Identifier: self.handle_SA2M_msg,
+                                     ProtocolHandler.Get_Post_Terminal_Step_Reward_Msg_Identifier: self.handle_GPTR_msg,
+                                     ProtocolHandler.Request_Available_Environment_Initialization_Strings_Msg_Identifier: self.handle_RAES_msg,
+                                     ProtocolHandler.Get_Unprocessed_Screen_Msg_Identifier: self.handle_GUPS_msg,
+                                     ProtocolHandler.Get_Menu_Msg_Identifier: self.handle_GTMN_msg,
+                                     ProtocolHandler.Ping_Msg_Identifier: self.handle_PING_msg,
+                                     ProtocolHandler.Exit_Msg_Identifier: self.handle_EXIT_msg}
+        while self.status == Status.Running:
+            try:
+                rl, _, xl = select.select([self.client_sock], [], [], self.Select_Timeout)
+                if self.client_sock in rl:
+                    msg = self.receive_by_size()
+                    msg_identifier_to_funtion[msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]](msg)
+            except SocketClosedRemotelyError:
+                print(time_stamp(&#34;Client %s disconnected unexpectedly!&#34; % str(self.addr)))
+                self.shutdown()
+        self._shutdown_procedure()
+
+    def handle_GPTR_msg(self, msg):
+        &#34;&#34;&#34;
+        Handles a GPTR message (See Shared_Code.ProtocolHandler class documentation).
+        Responds with a PTSR message.  
+
+        :param msg: A GPTR message (string)  
+        :return: None
+        &#34;&#34;&#34;
+        env_id = ProtocolHandler.parse_GPTR_msg(msg)
+        terminal_reward = self.environments[env_id].get_post_terminal_step_reward()
+
+        # Send a PTSR message
+        PTSR_msg = ProtocolHandler.format_PTSR_msg(env_id, terminal_reward)
+        self.send_by_size(PTSR_msg)
+
+    def handle_GUPS_msg(self, msg):
+        &#34;&#34;&#34;
+        Handles a GUPS message (See Shared_Code.ProtocolHandler class documentation).
+        Responds with a UPSC message.  
+
+        :param msg: A GUPS message (string)  
+        :return: None
+        &#34;&#34;&#34;
+        msg_dict = ProtocolHandler.parse_GUPS_msg(msg)
+        env_id = msg_dict[&#39;environment_id&#39;]
+        unprocessed_screen = self.environments[env_id].get_unprocessed_state_screen_buffer(img_size_to_return=msg_dict[&#39;requested_screen_size&#39;])
+
+        # Send a UPSC message
+        UPSC_msg = ProtocolHandler.format_UPSC_msg(env_id, unprocessed_screen)
+        self.send_by_size(UPSC_msg)
+
+    def handle_SEEN_msg(self, msg):
+        &#34;&#34;&#34;
+        Handles a SEEN message (See Shared_Code.ProtocolHandler class documentation).
+        Responds with a NEIN message.  
+
+        :param msg: A SEEN message (string)  
+        :return: None
+        &#34;&#34;&#34;
+        msg_dict = ProtocolHandler.parse_SEEN_msg(msg)
+        self.environments[msg_dict[&#39;environment_id&#39;]] = self.envs_iniatlizer.get_env(msg_dict[&#39;environment_initialization_string&#39;])
+        self.environments_s_size[msg_dict[&#39;environment_id&#39;]] = msg_dict[&#39;s_size&#39;]
+
+        # Send a NEIN message
+        a_size = self.environments[msg_dict[&#39;environment_id&#39;]].a_size
+        NEIN_msg = ProtocolHandler.format_NEIN_msg(msg_dict[&#39;environment_id&#39;], a_size)
+        self.send_by_size(NEIN_msg)
+
+    def handle_STNE_msg(self, msg):
+        &#34;&#34;&#34;
+        Handles a STNE message (See Shared_Code.ProtocolHandler class documentation).
+        Responds with a NEST message.  
+
+        :param msg: A STNE message (string)  
+        :return: None
+        &#34;&#34;&#34;
+        env_id = ProtocolHandler.parse_STNE_msg(msg)
+        if env_id in self.environments:
+            self.environments[env_id].start_new_episode()
+
+            # Send a New Episode Started msg
+            init_state = self.environments[env_id].get_state_screen_buffer(img_size_to_return=
+                                                                           self.environments_s_size[env_id])
+            is_terminal = self.environments[env_id].is_episode_finished()
+            NEST_msg = ProtocolHandler.format_NEST_msg(env_id, init_state, is_terminal)
+            self.send_by_size(NEST_msg)
+        else:
+            EROR_msg = ProtocolHandler.format_EROR_msg(&#34;Unknown env_id was given.&#34;)
+            self.send_by_size(EROR_msg)
+            raise UnknownEnvIDWasSentByClient()
+
+    def handle_CLEN_msg(self, msg):
+        &#34;&#34;&#34;
+        Handles a CLEN message (See Shared_Code.ProtocolHandler class documentation).  
+
+        :param msg: A CLEN message (string)  
+        :return: None
+        &#34;&#34;&#34;
+        env_id = ProtocolHandler.parse_CLEN_msg(msg)
+        if env_id in self.environments:
+            self.environments[env_id].close()
+            self.environments.pop(env_id)
+        else:
+            EROR_msg = ProtocolHandler.format_EROR_msg(&#34;Unknown env_id was given.&#34;)
+            self.send_by_size(EROR_msg)
+            raise UnknownEnvIDWasSentByClient()
+
+    def handle_SA2M_msg(self, msg):
+        &#34;&#34;&#34;
+        Handles a SA2M message (See Shared_Code.ProtocolHandler class documentation).
+        Responds with a STAT message.  
+
+        :param msg: A SA2M message (string)  
+        :return: None
+        &#34;&#34;&#34;
+        msg_dict = ProtocolHandler.parse_SA2M_msg(msg)
+        env_id = msg_dict[&#39;environment_id&#39;]
+        if env_id in self.environments:
+            reward = self.environments[env_id].step(msg_dict[&#39;action2make&#39;])  # if it crashes here, it may be that
+            #                                                                   client tried to make an action after the
+            #                                                                   episode ended.
+
+            # Sending a STAT message
+            is_terminal = self.environments[env_id].is_episode_finished()
+            if not is_terminal:
+                state = self.environments[env_id].get_state_screen_buffer(img_size_to_return=self.environments_s_size[env_id])
+            else:
+                state = np.zeros(self.environments_s_size[env_id], dtype=np.int32)
+            STAT_msg = ProtocolHandler.format_STAT_msg(env_id, state, reward, is_terminal)
+            self.send_by_size(STAT_msg)
+        else:
+            EROR_msg = ProtocolHandler.format_EROR_msg(&#34;Unknown env_id was given.&#34;)
+            self.send_by_size(EROR_msg)
+            raise UnknownEnvIDWasSentByClient()
+
+    def handle_RAES_msg(self, msg):
+        &#34;&#34;&#34;
+        Handles a RAES message (See Shared_Code.ProtocolHandler class documentation).
+        Responds with a AEIS message.  
+
+        :param msg: A RAES message (string)  
+        :return: None
+        &#34;&#34;&#34;
+        ProtocolHandler.parse_RAES_msg(msg)  # does nothing, here for fun (and consistency)
+
+        # Send an AEIS message
+        AEIS_msg = ProtocolHandler.format_AEIS_msg(self.envs_iniatlizer.get_available_envs())
+        self.send_by_size(AEIS_msg)
+
+    def handle_GTMN_msg(self, msg):
+        &#34;&#34;&#34;
+        Handles a GTMN message (See Shared_Code.ProtocolHandler class documentation).
+        Responds with a MENU message.  
+
+        :param msg: A GTMN message (string)  
+        :return: None
+        &#34;&#34;&#34;
+        icon_display_size = ProtocolHandler.parse_GTMN_msg(msg)
+        env_init_str_to_icon_dict = self.envs_iniatlizer.env_init_str_to_env_icon_dict(icon_display_size)
+
+        # Send an MENU message
+        MENU_msg = ProtocolHandler.format_MENU_msg(env_init_str_to_icon_dict)
+        self.send_by_size(MENU_msg)
+
+    def handle_PING_msg(self, msg):
+        &#34;&#34;&#34;
+        Handles a PING message (See Shared_Code.ProtocolHandler class documentation).
+        Responds with a PING message.  
+
+        :param msg: A PING message (string)  
+        :return: None
+        &#34;&#34;&#34;
+        if ProtocolHandler.parse_PING_msg(msg):
+            self.send_by_size(ProtocolHandler.format_PING_msg())  # return a PING message
+            print(time_stamp(&#34;Client %s pinged!&#34; % str(self.addr)))
+
+    def handle_EXIT_msg(self, msg):
+        &#34;&#34;&#34;
+        Handles a EXIT message (See Shared_Code.ProtocolHandler class documentation).
+        Initiates a shutdown of the ClientHandler instance.  
+
+        :param msg: A EXIT message (string)  
+        :return: None
+        &#34;&#34;&#34;
+        ProtocolHandler.parse_EXIT_msg(msg)  # does nothing, here for fun (and consistency)
+        print(time_stamp(&#34;Client %s disconnected.&#34; % str(self.addr)))
+        self.shutdown()
+
+    def send_by_size(self, data):
+        &#34;&#34;&#34;
+        Wrapper for the send_by_size() func made for ease of use.
+        Uses the self.client_socket socket.  
+
+        :param data: Data to send (bytes object)  
+        :return: None
+        &#34;&#34;&#34;
+        send_by_size(self.client_sock, data)
+
+    def receive_by_size(self):
+        &#34;&#34;&#34;
+        Wrapper for the receive_by_size() func made for ease of use.
+        Uses the self.client_socket socket.  
+
+        :return: Data received (bytes object)
+        &#34;&#34;&#34;
+        return receive_by_size(self.client_sock)
+
+    def _shutdown_procedure(self):
+        &#34;&#34;&#34;
+        Handle the shut down procedure for the clientHandler instance.
+        Closes all open environments before exit.  
+
+        :return: None
+        &#34;&#34;&#34;
+        self.client_sock.close()
+        [env.close() for env in self.environments.values()]
+        self.status = Status.ShutDown
+
+
+def time_stamp(str_to_stamp):
+    &#34;&#34;&#34;
+    Adds at the begining of the str an str time of the format set in TimeStampFormat.  
+
+    :param str_to_stamp: string to be stamped (string)  
+    :return: stamped string (string)
+    &#34;&#34;&#34;
+    ts = time.time()
+    return &#34;%s %s&#34; % (datetime.datetime.fromtimestamp(ts).strftime(TimeStampFormat), str_to_stamp)
+
+
+class UnknownEnvIDWasSentByClient(Exception):
+    pass
+
+
+def main():
+    &#34;&#34;&#34;Run Server&#34;&#34;&#34;
+    import time
+    import settings
+    s = Server(settings.Server_IP, settings.Server_Port)
+    s.start()
+    try:
+        time.sleep(100000)
+    except KeyboardInterrupt:
+        print(&#34;Keyboard Interrupt! Exiting...&#34;)
+    s.shutdown()
+    s.join()
+
+
+if __name__ == &#39;__main__&#39;:
+    main()</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="Beta.Server.Environments_Server.main"><code class="name flex">
+<span>def <span class="ident">main</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Run Server</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def main():
+    &#34;&#34;&#34;Run Server&#34;&#34;&#34;
+    import time
+    import settings
+    s = Server(settings.Server_IP, settings.Server_Port)
+    s.start()
+    try:
+        time.sleep(100000)
+    except KeyboardInterrupt:
+        print(&#34;Keyboard Interrupt! Exiting...&#34;)
+    s.shutdown()
+    s.join()</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Environments_Server.time_stamp"><code class="name flex">
+<span>def <span class="ident">time_stamp</span></span>(<span>str_to_stamp)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Adds at the begining of the str an str time of the format set in TimeStampFormat.
+</p>
+<p>:param str_to_stamp: string to be stamped (string)<br>
+:return: stamped string (string)</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def time_stamp(str_to_stamp):
+    &#34;&#34;&#34;
+    Adds at the begining of the str an str time of the format set in TimeStampFormat.  
+
+    :param str_to_stamp: string to be stamped (string)  
+    :return: stamped string (string)
+    &#34;&#34;&#34;
+    ts = time.time()
+    return &#34;%s %s&#34; % (datetime.datetime.fromtimestamp(ts).strftime(TimeStampFormat), str_to_stamp)</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="Beta.Server.Environments_Server.ClientHandler"><code class="flex name class">
+<span>class <span class="ident">ClientHandler</span></span>
+<span>(</span><span>client_sock, addr, envs_initializer)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>A class that represents a thread of control.</p>
+<p>This class can be safely subclassed in a limited fashion. There are two ways
+to specify the activity: by passing a callable object to the constructor, or
+by overriding the run() method in a subclass.</p>
+<p>A class that handles communications with a single client and reply to their requests.
+</p>
+<p>:param client_sock: client socket through which communication with the client is conducted (socket.socket
+object).<br>
+:param addr: Client ip address (string).<br>
+:param envs_initializer: An instance of the EnvironmentsInitializer class.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class ClientHandler(Threadable):
+    Select_Timeout = 0.01
+
+    def __init__(self, client_sock, addr, envs_initializer):
+        &#34;&#34;&#34;
+        A class that handles communications with a single client and reply to their requests.  
+
+        :param client_sock: client socket through which communication with the client is conducted (socket.socket
+            object).  
+        :param addr: Client ip address (string).  
+        :param envs_initializer: An instance of the EnvironmentsInitializer class.
+        &#34;&#34;&#34;
+        super(ClientHandler, self).__init__()
+        self.client_sock = client_sock
+        self.envs_iniatlizer = envs_initializer
+        self.environments = {}
+        self.environments_s_size = {}
+        self.addr = addr
+        print(time_stamp(&#34;Client %s has established connection.&#34; % str(self.addr)))
+
+    def run(self):
+        &#34;&#34;&#34;
+        Runs the ClientHandler. Essentially the ClientHandler&#39;s thread main function.
+        Receives requestsfrom the client and act accordingly and replies.  
+
+        :return: None
+        &#34;&#34;&#34;
+        self.status = Status.Running
+        msg_identifier_to_funtion = {ProtocolHandler.Setup_Environment_Msg_Identifier: self.handle_SEEN_msg,
+                                     ProtocolHandler.Close_Environment_Msg_Identifier: self.handle_CLEN_msg,
+                                     ProtocolHandler.Start_New_Episode_Msg_Identifier: self.handle_STNE_msg,
+                                     ProtocolHandler.Send_Action_Make_Msg_Identifier: self.handle_SA2M_msg,
+                                     ProtocolHandler.Get_Post_Terminal_Step_Reward_Msg_Identifier: self.handle_GPTR_msg,
+                                     ProtocolHandler.Request_Available_Environment_Initialization_Strings_Msg_Identifier: self.handle_RAES_msg,
+                                     ProtocolHandler.Get_Unprocessed_Screen_Msg_Identifier: self.handle_GUPS_msg,
+                                     ProtocolHandler.Get_Menu_Msg_Identifier: self.handle_GTMN_msg,
+                                     ProtocolHandler.Ping_Msg_Identifier: self.handle_PING_msg,
+                                     ProtocolHandler.Exit_Msg_Identifier: self.handle_EXIT_msg}
+        while self.status == Status.Running:
+            try:
+                rl, _, xl = select.select([self.client_sock], [], [], self.Select_Timeout)
+                if self.client_sock in rl:
+                    msg = self.receive_by_size()
+                    msg_identifier_to_funtion[msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]](msg)
+            except SocketClosedRemotelyError:
+                print(time_stamp(&#34;Client %s disconnected unexpectedly!&#34; % str(self.addr)))
+                self.shutdown()
+        self._shutdown_procedure()
+
+    def handle_GPTR_msg(self, msg):
+        &#34;&#34;&#34;
+        Handles a GPTR message (See Shared_Code.ProtocolHandler class documentation).
+        Responds with a PTSR message.  
+
+        :param msg: A GPTR message (string)  
+        :return: None
+        &#34;&#34;&#34;
+        env_id = ProtocolHandler.parse_GPTR_msg(msg)
+        terminal_reward = self.environments[env_id].get_post_terminal_step_reward()
+
+        # Send a PTSR message
+        PTSR_msg = ProtocolHandler.format_PTSR_msg(env_id, terminal_reward)
+        self.send_by_size(PTSR_msg)
+
+    def handle_GUPS_msg(self, msg):
+        &#34;&#34;&#34;
+        Handles a GUPS message (See Shared_Code.ProtocolHandler class documentation).
+        Responds with a UPSC message.  
+
+        :param msg: A GUPS message (string)  
+        :return: None
+        &#34;&#34;&#34;
+        msg_dict = ProtocolHandler.parse_GUPS_msg(msg)
+        env_id = msg_dict[&#39;environment_id&#39;]
+        unprocessed_screen = self.environments[env_id].get_unprocessed_state_screen_buffer(img_size_to_return=msg_dict[&#39;requested_screen_size&#39;])
+
+        # Send a UPSC message
+        UPSC_msg = ProtocolHandler.format_UPSC_msg(env_id, unprocessed_screen)
+        self.send_by_size(UPSC_msg)
+
+    def handle_SEEN_msg(self, msg):
+        &#34;&#34;&#34;
+        Handles a SEEN message (See Shared_Code.ProtocolHandler class documentation).
+        Responds with a NEIN message.  
+
+        :param msg: A SEEN message (string)  
+        :return: None
+        &#34;&#34;&#34;
+        msg_dict = ProtocolHandler.parse_SEEN_msg(msg)
+        self.environments[msg_dict[&#39;environment_id&#39;]] = self.envs_iniatlizer.get_env(msg_dict[&#39;environment_initialization_string&#39;])
+        self.environments_s_size[msg_dict[&#39;environment_id&#39;]] = msg_dict[&#39;s_size&#39;]
+
+        # Send a NEIN message
+        a_size = self.environments[msg_dict[&#39;environment_id&#39;]].a_size
+        NEIN_msg = ProtocolHandler.format_NEIN_msg(msg_dict[&#39;environment_id&#39;], a_size)
+        self.send_by_size(NEIN_msg)
+
+    def handle_STNE_msg(self, msg):
+        &#34;&#34;&#34;
+        Handles a STNE message (See Shared_Code.ProtocolHandler class documentation).
+        Responds with a NEST message.  
+
+        :param msg: A STNE message (string)  
+        :return: None
+        &#34;&#34;&#34;
+        env_id = ProtocolHandler.parse_STNE_msg(msg)
+        if env_id in self.environments:
+            self.environments[env_id].start_new_episode()
+
+            # Send a New Episode Started msg
+            init_state = self.environments[env_id].get_state_screen_buffer(img_size_to_return=
+                                                                           self.environments_s_size[env_id])
+            is_terminal = self.environments[env_id].is_episode_finished()
+            NEST_msg = ProtocolHandler.format_NEST_msg(env_id, init_state, is_terminal)
+            self.send_by_size(NEST_msg)
+        else:
+            EROR_msg = ProtocolHandler.format_EROR_msg(&#34;Unknown env_id was given.&#34;)
+            self.send_by_size(EROR_msg)
+            raise UnknownEnvIDWasSentByClient()
+
+    def handle_CLEN_msg(self, msg):
+        &#34;&#34;&#34;
+        Handles a CLEN message (See Shared_Code.ProtocolHandler class documentation).  
+
+        :param msg: A CLEN message (string)  
+        :return: None
+        &#34;&#34;&#34;
+        env_id = ProtocolHandler.parse_CLEN_msg(msg)
+        if env_id in self.environments:
+            self.environments[env_id].close()
+            self.environments.pop(env_id)
+        else:
+            EROR_msg = ProtocolHandler.format_EROR_msg(&#34;Unknown env_id was given.&#34;)
+            self.send_by_size(EROR_msg)
+            raise UnknownEnvIDWasSentByClient()
+
+    def handle_SA2M_msg(self, msg):
+        &#34;&#34;&#34;
+        Handles a SA2M message (See Shared_Code.ProtocolHandler class documentation).
+        Responds with a STAT message.  
+
+        :param msg: A SA2M message (string)  
+        :return: None
+        &#34;&#34;&#34;
+        msg_dict = ProtocolHandler.parse_SA2M_msg(msg)
+        env_id = msg_dict[&#39;environment_id&#39;]
+        if env_id in self.environments:
+            reward = self.environments[env_id].step(msg_dict[&#39;action2make&#39;])  # if it crashes here, it may be that
+            #                                                                   client tried to make an action after the
+            #                                                                   episode ended.
+
+            # Sending a STAT message
+            is_terminal = self.environments[env_id].is_episode_finished()
+            if not is_terminal:
+                state = self.environments[env_id].get_state_screen_buffer(img_size_to_return=self.environments_s_size[env_id])
+            else:
+                state = np.zeros(self.environments_s_size[env_id], dtype=np.int32)
+            STAT_msg = ProtocolHandler.format_STAT_msg(env_id, state, reward, is_terminal)
+            self.send_by_size(STAT_msg)
+        else:
+            EROR_msg = ProtocolHandler.format_EROR_msg(&#34;Unknown env_id was given.&#34;)
+            self.send_by_size(EROR_msg)
+            raise UnknownEnvIDWasSentByClient()
+
+    def handle_RAES_msg(self, msg):
+        &#34;&#34;&#34;
+        Handles a RAES message (See Shared_Code.ProtocolHandler class documentation).
+        Responds with a AEIS message.  
+
+        :param msg: A RAES message (string)  
+        :return: None
+        &#34;&#34;&#34;
+        ProtocolHandler.parse_RAES_msg(msg)  # does nothing, here for fun (and consistency)
+
+        # Send an AEIS message
+        AEIS_msg = ProtocolHandler.format_AEIS_msg(self.envs_iniatlizer.get_available_envs())
+        self.send_by_size(AEIS_msg)
+
+    def handle_GTMN_msg(self, msg):
+        &#34;&#34;&#34;
+        Handles a GTMN message (See Shared_Code.ProtocolHandler class documentation).
+        Responds with a MENU message.  
+
+        :param msg: A GTMN message (string)  
+        :return: None
+        &#34;&#34;&#34;
+        icon_display_size = ProtocolHandler.parse_GTMN_msg(msg)
+        env_init_str_to_icon_dict = self.envs_iniatlizer.env_init_str_to_env_icon_dict(icon_display_size)
+
+        # Send an MENU message
+        MENU_msg = ProtocolHandler.format_MENU_msg(env_init_str_to_icon_dict)
+        self.send_by_size(MENU_msg)
+
+    def handle_PING_msg(self, msg):
+        &#34;&#34;&#34;
+        Handles a PING message (See Shared_Code.ProtocolHandler class documentation).
+        Responds with a PING message.  
+
+        :param msg: A PING message (string)  
+        :return: None
+        &#34;&#34;&#34;
+        if ProtocolHandler.parse_PING_msg(msg):
+            self.send_by_size(ProtocolHandler.format_PING_msg())  # return a PING message
+            print(time_stamp(&#34;Client %s pinged!&#34; % str(self.addr)))
+
+    def handle_EXIT_msg(self, msg):
+        &#34;&#34;&#34;
+        Handles a EXIT message (See Shared_Code.ProtocolHandler class documentation).
+        Initiates a shutdown of the ClientHandler instance.  
+
+        :param msg: A EXIT message (string)  
+        :return: None
+        &#34;&#34;&#34;
+        ProtocolHandler.parse_EXIT_msg(msg)  # does nothing, here for fun (and consistency)
+        print(time_stamp(&#34;Client %s disconnected.&#34; % str(self.addr)))
+        self.shutdown()
+
+    def send_by_size(self, data):
+        &#34;&#34;&#34;
+        Wrapper for the send_by_size() func made for ease of use.
+        Uses the self.client_socket socket.  
+
+        :param data: Data to send (bytes object)  
+        :return: None
+        &#34;&#34;&#34;
+        send_by_size(self.client_sock, data)
+
+    def receive_by_size(self):
+        &#34;&#34;&#34;
+        Wrapper for the receive_by_size() func made for ease of use.
+        Uses the self.client_socket socket.  
+
+        :return: Data received (bytes object)
+        &#34;&#34;&#34;
+        return receive_by_size(self.client_sock)
+
+    def _shutdown_procedure(self):
+        &#34;&#34;&#34;
+        Handle the shut down procedure for the clientHandler instance.
+        Closes all open environments before exit.  
+
+        :return: None
+        &#34;&#34;&#34;
+        self.client_sock.close()
+        [env.close() for env in self.environments.values()]
+        self.status = Status.ShutDown</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>Shared_Code.Threadable</li>
+<li>threading.Thread</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="Beta.Server.Environments_Server.ClientHandler.Select_Timeout"><code class="name">var <span class="ident">Select_Timeout</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="Beta.Server.Environments_Server.ClientHandler.handle_CLEN_msg"><code class="name flex">
+<span>def <span class="ident">handle_CLEN_msg</span></span>(<span>self, msg)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Handles a CLEN message (See Shared_Code.ProtocolHandler class documentation).
+</p>
+<p>:param msg: A CLEN message (string)<br>
+:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def handle_CLEN_msg(self, msg):
+    &#34;&#34;&#34;
+    Handles a CLEN message (See Shared_Code.ProtocolHandler class documentation).  
+
+    :param msg: A CLEN message (string)  
+    :return: None
+    &#34;&#34;&#34;
+    env_id = ProtocolHandler.parse_CLEN_msg(msg)
+    if env_id in self.environments:
+        self.environments[env_id].close()
+        self.environments.pop(env_id)
+    else:
+        EROR_msg = ProtocolHandler.format_EROR_msg(&#34;Unknown env_id was given.&#34;)
+        self.send_by_size(EROR_msg)
+        raise UnknownEnvIDWasSentByClient()</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Environments_Server.ClientHandler.handle_EXIT_msg"><code class="name flex">
+<span>def <span class="ident">handle_EXIT_msg</span></span>(<span>self, msg)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Handles a EXIT message (See Shared_Code.ProtocolHandler class documentation).
+Initiates a shutdown of the ClientHandler instance.
+</p>
+<p>:param msg: A EXIT message (string)<br>
+:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def handle_EXIT_msg(self, msg):
+    &#34;&#34;&#34;
+    Handles a EXIT message (See Shared_Code.ProtocolHandler class documentation).
+    Initiates a shutdown of the ClientHandler instance.  
+
+    :param msg: A EXIT message (string)  
+    :return: None
+    &#34;&#34;&#34;
+    ProtocolHandler.parse_EXIT_msg(msg)  # does nothing, here for fun (and consistency)
+    print(time_stamp(&#34;Client %s disconnected.&#34; % str(self.addr)))
+    self.shutdown()</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Environments_Server.ClientHandler.handle_GPTR_msg"><code class="name flex">
+<span>def <span class="ident">handle_GPTR_msg</span></span>(<span>self, msg)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Handles a GPTR message (See Shared_Code.ProtocolHandler class documentation).
+Responds with a PTSR message.
+</p>
+<p>:param msg: A GPTR message (string)<br>
+:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def handle_GPTR_msg(self, msg):
+    &#34;&#34;&#34;
+    Handles a GPTR message (See Shared_Code.ProtocolHandler class documentation).
+    Responds with a PTSR message.  
+
+    :param msg: A GPTR message (string)  
+    :return: None
+    &#34;&#34;&#34;
+    env_id = ProtocolHandler.parse_GPTR_msg(msg)
+    terminal_reward = self.environments[env_id].get_post_terminal_step_reward()
+
+    # Send a PTSR message
+    PTSR_msg = ProtocolHandler.format_PTSR_msg(env_id, terminal_reward)
+    self.send_by_size(PTSR_msg)</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Environments_Server.ClientHandler.handle_GTMN_msg"><code class="name flex">
+<span>def <span class="ident">handle_GTMN_msg</span></span>(<span>self, msg)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Handles a GTMN message (See Shared_Code.ProtocolHandler class documentation).
+Responds with a MENU message.
+</p>
+<p>:param msg: A GTMN message (string)<br>
+:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def handle_GTMN_msg(self, msg):
+    &#34;&#34;&#34;
+    Handles a GTMN message (See Shared_Code.ProtocolHandler class documentation).
+    Responds with a MENU message.  
+
+    :param msg: A GTMN message (string)  
+    :return: None
+    &#34;&#34;&#34;
+    icon_display_size = ProtocolHandler.parse_GTMN_msg(msg)
+    env_init_str_to_icon_dict = self.envs_iniatlizer.env_init_str_to_env_icon_dict(icon_display_size)
+
+    # Send an MENU message
+    MENU_msg = ProtocolHandler.format_MENU_msg(env_init_str_to_icon_dict)
+    self.send_by_size(MENU_msg)</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Environments_Server.ClientHandler.handle_GUPS_msg"><code class="name flex">
+<span>def <span class="ident">handle_GUPS_msg</span></span>(<span>self, msg)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Handles a GUPS message (See Shared_Code.ProtocolHandler class documentation).
+Responds with a UPSC message.
+</p>
+<p>:param msg: A GUPS message (string)<br>
+:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def handle_GUPS_msg(self, msg):
+    &#34;&#34;&#34;
+    Handles a GUPS message (See Shared_Code.ProtocolHandler class documentation).
+    Responds with a UPSC message.  
+
+    :param msg: A GUPS message (string)  
+    :return: None
+    &#34;&#34;&#34;
+    msg_dict = ProtocolHandler.parse_GUPS_msg(msg)
+    env_id = msg_dict[&#39;environment_id&#39;]
+    unprocessed_screen = self.environments[env_id].get_unprocessed_state_screen_buffer(img_size_to_return=msg_dict[&#39;requested_screen_size&#39;])
+
+    # Send a UPSC message
+    UPSC_msg = ProtocolHandler.format_UPSC_msg(env_id, unprocessed_screen)
+    self.send_by_size(UPSC_msg)</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Environments_Server.ClientHandler.handle_PING_msg"><code class="name flex">
+<span>def <span class="ident">handle_PING_msg</span></span>(<span>self, msg)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Handles a PING message (See Shared_Code.ProtocolHandler class documentation).
+Responds with a PING message.
+</p>
+<p>:param msg: A PING message (string)<br>
+:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def handle_PING_msg(self, msg):
+    &#34;&#34;&#34;
+    Handles a PING message (See Shared_Code.ProtocolHandler class documentation).
+    Responds with a PING message.  
+
+    :param msg: A PING message (string)  
+    :return: None
+    &#34;&#34;&#34;
+    if ProtocolHandler.parse_PING_msg(msg):
+        self.send_by_size(ProtocolHandler.format_PING_msg())  # return a PING message
+        print(time_stamp(&#34;Client %s pinged!&#34; % str(self.addr)))</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Environments_Server.ClientHandler.handle_RAES_msg"><code class="name flex">
+<span>def <span class="ident">handle_RAES_msg</span></span>(<span>self, msg)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Handles a RAES message (See Shared_Code.ProtocolHandler class documentation).
+Responds with a AEIS message.
+</p>
+<p>:param msg: A RAES message (string)<br>
+:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def handle_RAES_msg(self, msg):
+    &#34;&#34;&#34;
+    Handles a RAES message (See Shared_Code.ProtocolHandler class documentation).
+    Responds with a AEIS message.  
+
+    :param msg: A RAES message (string)  
+    :return: None
+    &#34;&#34;&#34;
+    ProtocolHandler.parse_RAES_msg(msg)  # does nothing, here for fun (and consistency)
+
+    # Send an AEIS message
+    AEIS_msg = ProtocolHandler.format_AEIS_msg(self.envs_iniatlizer.get_available_envs())
+    self.send_by_size(AEIS_msg)</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Environments_Server.ClientHandler.handle_SA2M_msg"><code class="name flex">
+<span>def <span class="ident">handle_SA2M_msg</span></span>(<span>self, msg)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Handles a SA2M message (See Shared_Code.ProtocolHandler class documentation).
+Responds with a STAT message.
+</p>
+<p>:param msg: A SA2M message (string)<br>
+:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def handle_SA2M_msg(self, msg):
+    &#34;&#34;&#34;
+    Handles a SA2M message (See Shared_Code.ProtocolHandler class documentation).
+    Responds with a STAT message.  
+
+    :param msg: A SA2M message (string)  
+    :return: None
+    &#34;&#34;&#34;
+    msg_dict = ProtocolHandler.parse_SA2M_msg(msg)
+    env_id = msg_dict[&#39;environment_id&#39;]
+    if env_id in self.environments:
+        reward = self.environments[env_id].step(msg_dict[&#39;action2make&#39;])  # if it crashes here, it may be that
+        #                                                                   client tried to make an action after the
+        #                                                                   episode ended.
+
+        # Sending a STAT message
+        is_terminal = self.environments[env_id].is_episode_finished()
+        if not is_terminal:
+            state = self.environments[env_id].get_state_screen_buffer(img_size_to_return=self.environments_s_size[env_id])
+        else:
+            state = np.zeros(self.environments_s_size[env_id], dtype=np.int32)
+        STAT_msg = ProtocolHandler.format_STAT_msg(env_id, state, reward, is_terminal)
+        self.send_by_size(STAT_msg)
+    else:
+        EROR_msg = ProtocolHandler.format_EROR_msg(&#34;Unknown env_id was given.&#34;)
+        self.send_by_size(EROR_msg)
+        raise UnknownEnvIDWasSentByClient()</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Environments_Server.ClientHandler.handle_SEEN_msg"><code class="name flex">
+<span>def <span class="ident">handle_SEEN_msg</span></span>(<span>self, msg)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Handles a SEEN message (See Shared_Code.ProtocolHandler class documentation).
+Responds with a NEIN message.
+</p>
+<p>:param msg: A SEEN message (string)<br>
+:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def handle_SEEN_msg(self, msg):
+    &#34;&#34;&#34;
+    Handles a SEEN message (See Shared_Code.ProtocolHandler class documentation).
+    Responds with a NEIN message.  
+
+    :param msg: A SEEN message (string)  
+    :return: None
+    &#34;&#34;&#34;
+    msg_dict = ProtocolHandler.parse_SEEN_msg(msg)
+    self.environments[msg_dict[&#39;environment_id&#39;]] = self.envs_iniatlizer.get_env(msg_dict[&#39;environment_initialization_string&#39;])
+    self.environments_s_size[msg_dict[&#39;environment_id&#39;]] = msg_dict[&#39;s_size&#39;]
+
+    # Send a NEIN message
+    a_size = self.environments[msg_dict[&#39;environment_id&#39;]].a_size
+    NEIN_msg = ProtocolHandler.format_NEIN_msg(msg_dict[&#39;environment_id&#39;], a_size)
+    self.send_by_size(NEIN_msg)</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Environments_Server.ClientHandler.handle_STNE_msg"><code class="name flex">
+<span>def <span class="ident">handle_STNE_msg</span></span>(<span>self, msg)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Handles a STNE message (See Shared_Code.ProtocolHandler class documentation).
+Responds with a NEST message.
+</p>
+<p>:param msg: A STNE message (string)<br>
+:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def handle_STNE_msg(self, msg):
+    &#34;&#34;&#34;
+    Handles a STNE message (See Shared_Code.ProtocolHandler class documentation).
+    Responds with a NEST message.  
+
+    :param msg: A STNE message (string)  
+    :return: None
+    &#34;&#34;&#34;
+    env_id = ProtocolHandler.parse_STNE_msg(msg)
+    if env_id in self.environments:
+        self.environments[env_id].start_new_episode()
+
+        # Send a New Episode Started msg
+        init_state = self.environments[env_id].get_state_screen_buffer(img_size_to_return=
+                                                                       self.environments_s_size[env_id])
+        is_terminal = self.environments[env_id].is_episode_finished()
+        NEST_msg = ProtocolHandler.format_NEST_msg(env_id, init_state, is_terminal)
+        self.send_by_size(NEST_msg)
+    else:
+        EROR_msg = ProtocolHandler.format_EROR_msg(&#34;Unknown env_id was given.&#34;)
+        self.send_by_size(EROR_msg)
+        raise UnknownEnvIDWasSentByClient()</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Environments_Server.ClientHandler.receive_by_size"><code class="name flex">
+<span>def <span class="ident">receive_by_size</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Wrapper for the receive_by_size() func made for ease of use.
+Uses the self.client_socket socket.
+</p>
+<p>:return: Data received (bytes object)</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def receive_by_size(self):
+    &#34;&#34;&#34;
+    Wrapper for the receive_by_size() func made for ease of use.
+    Uses the self.client_socket socket.  
+
+    :return: Data received (bytes object)
+    &#34;&#34;&#34;
+    return receive_by_size(self.client_sock)</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Environments_Server.ClientHandler.run"><code class="name flex">
+<span>def <span class="ident">run</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Runs the ClientHandler. Essentially the ClientHandler's thread main function.
+Receives requestsfrom the client and act accordingly and replies.
+</p>
+<p>:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def run(self):
+    &#34;&#34;&#34;
+    Runs the ClientHandler. Essentially the ClientHandler&#39;s thread main function.
+    Receives requestsfrom the client and act accordingly and replies.  
+
+    :return: None
+    &#34;&#34;&#34;
+    self.status = Status.Running
+    msg_identifier_to_funtion = {ProtocolHandler.Setup_Environment_Msg_Identifier: self.handle_SEEN_msg,
+                                 ProtocolHandler.Close_Environment_Msg_Identifier: self.handle_CLEN_msg,
+                                 ProtocolHandler.Start_New_Episode_Msg_Identifier: self.handle_STNE_msg,
+                                 ProtocolHandler.Send_Action_Make_Msg_Identifier: self.handle_SA2M_msg,
+                                 ProtocolHandler.Get_Post_Terminal_Step_Reward_Msg_Identifier: self.handle_GPTR_msg,
+                                 ProtocolHandler.Request_Available_Environment_Initialization_Strings_Msg_Identifier: self.handle_RAES_msg,
+                                 ProtocolHandler.Get_Unprocessed_Screen_Msg_Identifier: self.handle_GUPS_msg,
+                                 ProtocolHandler.Get_Menu_Msg_Identifier: self.handle_GTMN_msg,
+                                 ProtocolHandler.Ping_Msg_Identifier: self.handle_PING_msg,
+                                 ProtocolHandler.Exit_Msg_Identifier: self.handle_EXIT_msg}
+    while self.status == Status.Running:
+        try:
+            rl, _, xl = select.select([self.client_sock], [], [], self.Select_Timeout)
+            if self.client_sock in rl:
+                msg = self.receive_by_size()
+                msg_identifier_to_funtion[msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]](msg)
+        except SocketClosedRemotelyError:
+            print(time_stamp(&#34;Client %s disconnected unexpectedly!&#34; % str(self.addr)))
+            self.shutdown()
+    self._shutdown_procedure()</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Environments_Server.ClientHandler.send_by_size"><code class="name flex">
+<span>def <span class="ident">send_by_size</span></span>(<span>self, data)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Wrapper for the send_by_size() func made for ease of use.
+Uses the self.client_socket socket.
+</p>
+<p>:param data: Data to send (bytes object)<br>
+:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def send_by_size(self, data):
+    &#34;&#34;&#34;
+    Wrapper for the send_by_size() func made for ease of use.
+    Uses the self.client_socket socket.  
+
+    :param data: Data to send (bytes object)  
+    :return: None
+    &#34;&#34;&#34;
+    send_by_size(self.client_sock, data)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="Beta.Server.Environments_Server.Server"><code class="flex name class">
+<span>class <span class="ident">Server</span></span>
+<span>(</span><span>ip, port)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>A class that represents a thread of control.</p>
+<p>This class can be safely subclassed in a limited fashion. There are two ways
+to specify the activity: by passing a callable object to the constructor, or
+by overriding the run() method in a subclass.</p>
+<p>A class that handles the set up and operation of an environments server.
+</p>
+<p>:param ip: Server ip to bind the server socket to (string). (usually "0.0.0.0")<br>
+:param port: Server port to bind the server socket to (int).</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class Server(Threadable):
+    Listen_Queue_Size = 10
+    Select_Timeout = 0.01
+
+    def __init__(self, ip, port):
+        &#34;&#34;&#34;
+        A class that handles the set up and operation of an environments server.  
+
+        :param ip: Server ip to bind the server socket to (string). (usually &#34;0.0.0.0&#34;)  
+        :param port: Server port to bind the server socket to (int).
+        &#34;&#34;&#34;
+        super(Server, self).__init__()
+        self.server_sock = socket.socket()
+        self.server_sock.bind((ip, port))
+        self.server_sock.listen(self.Listen_Queue_Size)
+        self.envs_initializer = EnvironmentsInitializer(environments_settings_folder=
+                                                        settings.environments_settings_folder_path)
+
+        self.client_handlers_lock = threading.Lock()
+        self.client_handlers = []
+
+    def run(self):
+        &#34;&#34;&#34;
+        Runs the server. Essentially the server&#39;s main function.
+        Accepts connections and passes them to ClientHandler instances who handle their requests.  
+
+        :return: None
+        &#34;&#34;&#34;
+        self.status = Status.Running
+        while self.status == Status.Running:
+            rl, _, _ = select.select([self.server_sock], [], [], self.Select_Timeout)
+            if self.server_sock in rl:
+                with self.client_handlers_lock:
+                    client_sock, addr = self.server_sock.accept()
+                    self.client_handlers.append(ClientHandler(client_sock, addr,  self.envs_initializer))
+                    self.client_handlers[-1].start()
+        self._shutdown_procedure()
+
+    def _shutdown_procedure(self):
+        &#34;&#34;&#34;
+        Shuts down the server and all of its children ClientHandler instances.  
+
+        :return: None
+        &#34;&#34;&#34;
+        self.server_sock.close()
+        with self.client_handlers_lock:
+            [ch.shutdown() for ch in self.client_handlers]
+            [ch.join() for ch in self.client_handlers]
+        self.status = Status.ShutDown</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>Shared_Code.Threadable</li>
+<li>threading.Thread</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="Beta.Server.Environments_Server.Server.Listen_Queue_Size"><code class="name">var <span class="ident">Listen_Queue_Size</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="Beta.Server.Environments_Server.Server.Select_Timeout"><code class="name">var <span class="ident">Select_Timeout</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="Beta.Server.Environments_Server.Server.run"><code class="name flex">
+<span>def <span class="ident">run</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Runs the server. Essentially the server's main function.
+Accepts connections and passes them to ClientHandler instances who handle their requests.
+</p>
+<p>:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def run(self):
+    &#34;&#34;&#34;
+    Runs the server. Essentially the server&#39;s main function.
+    Accepts connections and passes them to ClientHandler instances who handle their requests.  
+
+    :return: None
+    &#34;&#34;&#34;
+    self.status = Status.Running
+    while self.status == Status.Running:
+        rl, _, _ = select.select([self.server_sock], [], [], self.Select_Timeout)
+        if self.server_sock in rl:
+            with self.client_handlers_lock:
+                client_sock, addr = self.server_sock.accept()
+                self.client_handlers.append(ClientHandler(client_sock, addr,  self.envs_initializer))
+                self.client_handlers[-1].start()
+    self._shutdown_procedure()</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="Beta.Server.Environments_Server.UnknownEnvIDWasSentByClient"><code class="flex name class">
+<span>class <span class="ident">UnknownEnvIDWasSentByClient</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Common base class for all non-exit exceptions.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class UnknownEnvIDWasSentByClient(Exception):
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="Beta.Server" href="index.html">Beta.Server</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="Beta.Server.Environments_Server.main" href="#Beta.Server.Environments_Server.main">main</a></code></li>
+<li><code><a title="Beta.Server.Environments_Server.time_stamp" href="#Beta.Server.Environments_Server.time_stamp">time_stamp</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="Beta.Server.Environments_Server.ClientHandler" href="#Beta.Server.Environments_Server.ClientHandler">ClientHandler</a></code></h4>
+<ul class="two-column">
+<li><code><a title="Beta.Server.Environments_Server.ClientHandler.Select_Timeout" href="#Beta.Server.Environments_Server.ClientHandler.Select_Timeout">Select_Timeout</a></code></li>
+<li><code><a title="Beta.Server.Environments_Server.ClientHandler.handle_CLEN_msg" href="#Beta.Server.Environments_Server.ClientHandler.handle_CLEN_msg">handle_CLEN_msg</a></code></li>
+<li><code><a title="Beta.Server.Environments_Server.ClientHandler.handle_EXIT_msg" href="#Beta.Server.Environments_Server.ClientHandler.handle_EXIT_msg">handle_EXIT_msg</a></code></li>
+<li><code><a title="Beta.Server.Environments_Server.ClientHandler.handle_GPTR_msg" href="#Beta.Server.Environments_Server.ClientHandler.handle_GPTR_msg">handle_GPTR_msg</a></code></li>
+<li><code><a title="Beta.Server.Environments_Server.ClientHandler.handle_GTMN_msg" href="#Beta.Server.Environments_Server.ClientHandler.handle_GTMN_msg">handle_GTMN_msg</a></code></li>
+<li><code><a title="Beta.Server.Environments_Server.ClientHandler.handle_GUPS_msg" href="#Beta.Server.Environments_Server.ClientHandler.handle_GUPS_msg">handle_GUPS_msg</a></code></li>
+<li><code><a title="Beta.Server.Environments_Server.ClientHandler.handle_PING_msg" href="#Beta.Server.Environments_Server.ClientHandler.handle_PING_msg">handle_PING_msg</a></code></li>
+<li><code><a title="Beta.Server.Environments_Server.ClientHandler.handle_RAES_msg" href="#Beta.Server.Environments_Server.ClientHandler.handle_RAES_msg">handle_RAES_msg</a></code></li>
+<li><code><a title="Beta.Server.Environments_Server.ClientHandler.handle_SA2M_msg" href="#Beta.Server.Environments_Server.ClientHandler.handle_SA2M_msg">handle_SA2M_msg</a></code></li>
+<li><code><a title="Beta.Server.Environments_Server.ClientHandler.handle_SEEN_msg" href="#Beta.Server.Environments_Server.ClientHandler.handle_SEEN_msg">handle_SEEN_msg</a></code></li>
+<li><code><a title="Beta.Server.Environments_Server.ClientHandler.handle_STNE_msg" href="#Beta.Server.Environments_Server.ClientHandler.handle_STNE_msg">handle_STNE_msg</a></code></li>
+<li><code><a title="Beta.Server.Environments_Server.ClientHandler.receive_by_size" href="#Beta.Server.Environments_Server.ClientHandler.receive_by_size">receive_by_size</a></code></li>
+<li><code><a title="Beta.Server.Environments_Server.ClientHandler.run" href="#Beta.Server.Environments_Server.ClientHandler.run">run</a></code></li>
+<li><code><a title="Beta.Server.Environments_Server.ClientHandler.send_by_size" href="#Beta.Server.Environments_Server.ClientHandler.send_by_size">send_by_size</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="Beta.Server.Environments_Server.Server" href="#Beta.Server.Environments_Server.Server">Server</a></code></h4>
+<ul class="">
+<li><code><a title="Beta.Server.Environments_Server.Server.Listen_Queue_Size" href="#Beta.Server.Environments_Server.Server.Listen_Queue_Size">Listen_Queue_Size</a></code></li>
+<li><code><a title="Beta.Server.Environments_Server.Server.Select_Timeout" href="#Beta.Server.Environments_Server.Server.Select_Timeout">Select_Timeout</a></code></li>
+<li><code><a title="Beta.Server.Environments_Server.Server.run" href="#Beta.Server.Environments_Server.Server.run">run</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="Beta.Server.Environments_Server.UnknownEnvIDWasSentByClient" href="#Beta.Server.Environments_Server.UnknownEnvIDWasSentByClient">UnknownEnvIDWasSentByClient</a></code></h4>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.6.2</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

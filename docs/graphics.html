@@ -1,0 +1,2845 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.6.2" />
+<title>Beta.graphics API documentation</title>
+<meta name="description" content="" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase;cursor:pointer}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>Beta.graphics</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">import tkinter as tk
+from tkinter import filedialog, messagebox
+import tkinter.scrolledtext as tkst
+from tkinter import ttk
+from A3C import A3C_Algorithm, RemoteEnvironmentsManager, EnvironmentsInitializer
+import os
+import time
+import shutil
+import threading
+import tensorflow as tf
+from Utils import SavesManager
+from PIL import ImageTk, Image
+import socket
+import subprocess
+import queue
+from Remote_Environment import RemoteEnvironmentsManager, TimeoutExceededTryingToGetMsgError, Status,\
+                               ManagerUsedIsNotRunningError, SocketClosedRemotelyError
+from decimal import Decimal
+
+
+Default_IP, Default_Port = &#34;10.0.0.3&#34;, 5381
+env_init_str = &#34;Defend_the_Line&#34;
+SAVE_PLAY = False  # if true will save the frames of episode fcrom play to &#39;.\frames&#39;
+
+def main():
+    envs_manager = RemoteEnvironmentsManager(Default_IP, Default_Port)
+    try:
+        start = time.time()
+
+        root = tk.Tk()
+        game_screen = GameScreen(root, envs_manager, env_init_str, env_name=&#34;Game&#34;)
+        #game_screen = GameSelectionScreen(root)
+        try:
+            game_screen.pack(side=&#34;top&#34;, fill=&#34;both&#34;, expand=True)
+        except tk.TclError:
+            pass
+        root.mainloop()
+        game_screen.shutdown()
+        print(&#34;Time: %d seconds.&#34; % (time.time() - start))
+    except KeyboardInterrupt:
+        print(&#34;Keyboard Interrupt! Exiting...&#34;)
+
+
+
+def GamesScreen_threader_decorator(function):
+    &#34;&#34;&#34;
+    Designed to make synchronous methods in the GamesScreen class run on threads.  
+
+    :param function: any GamesScreen instance bound method.  
+    :return: a functions that will run on a thread.
+    &#34;&#34;&#34;
+    def wrapper(self, *args, **kwargs):
+        def prepare_work(func2thread):
+            def work(self, *work_args, **work_kwargs):
+                res = func2thread(self, *work_args, **work_kwargs)
+                self.working = False
+                return res
+            return work
+        if self.working:
+            self.print_to_gui_console(&#34;Busy handling a previous request. &#34;
+                                      &#34;Please wait for it to finish before making any new ones.&#34;)
+            return
+
+        self.working = True
+        self.stop_flag = False
+        thread = threading.Thread(target=prepare_work(function), args=(self, *args), kwargs=kwargs)
+        self.append_thread_to_threads_activated(thread)
+        thread.start()
+    return wrapper
+
+
+class GameScreen(tk.Frame):
+    Max_Episode_To_Train_In_One_Go = 10000
+    Max_Episode_To_Play_In_One_Go = 100
+    Display_Update_Intervals = 1000//60  # in mili seconds, must be int
+    Display_Update_Queue_Put_Timeout = 2
+    Max_Worker_Memory_Buffer_Size = 1000
+
+    def __init__(self, parent, envs_manager, env_init_str, display_size=(320, 180), env_name=&#34;&#34;):
+        &#34;&#34;&#34;
+        A class that handles the creation and operation of the GUI that interfaces with A3C_Algorithm.  
+
+        :param parent: A tk.Tk instance.  
+        :param envs_manager: An instance of the RemoteEnvironmentsManager class.  
+        :param env_init_str: An environment initialization string. (get list of available environment initialization
+            string from the envs_manager.get_available_environments_initialization_strings() func).  
+        :param display_size: The size of the display box in which we will show the screen images of the environment
+            (tuple of ints (width, height).
+            Note that it is not the size of the GameScreen window, only the size of the display box.  
+        :param env_name: Used in the windows title and in the label at the top of the window. (string)
+        &#34;&#34;&#34;
+        self.parent = parent
+        self.parent.protocol(&#34;WM_DELETE_WINDOW&#34;, self.exit)
+        self.env_init_str = env_init_str
+        self.envs_manager = envs_manager
+        self.env_name = env_name
+        self.__display_size = display_size
+
+        # the model&#39;s hyper parameters
+        self.alpha_learning_rate = A3C_Algorithm.DefaultAlphaLearningRate
+        self.worker_memory_buffer_size = A3C_Algorithm.DefaultWorkerMemoryBufferSize
+
+        # handle graphics
+        tk.Frame.__init__(self, parent)
+        self.parent.title(self.env_name)
+        self.init_widgets(display_size)
+
+        self.threads_activated_lock = threading.Lock()
+        self.threads_activated = []
+        self._working_lock = threading.Lock()
+        self._working = False
+        self._stop_flag_lock = threading.Lock()
+        self._stop_flag = False
+
+        self.tensorboard_process = None
+
+        self._display_frames_queue = None
+        self._curr_frame = None  # for it&#39;s purpose see documentation in ._update_display_screen() func.
+        self._streaming_lock = threading.Lock()
+        self._streaming = False
+
+        # handle initial prompt (new/load)
+        self.a3c_model = None
+        initial_prompt = &#34;Do you want to load a save? (yes - load save, no - create a new one)&#34;
+        should_load_save = messagebox.askyesno(&#34;Load?&#34;, initial_prompt)
+        if should_load_save:
+            self.load_command()
+        else:
+            self.new_command()
+
+    @property
+    def save_folder_path(self):
+        &#34;&#34;&#34;
+        save_folder_path Property getter. Safely returns the value of self.a3c_model.save_manger.saves_folder_path.  
+
+        :return: The value of self.a3c_model.save_manger.saves_folder_path.
+        &#34;&#34;&#34;
+        if self.a3c_model != None:
+            return self.a3c_model.save_manger.saves_folder_path
+        return None
+
+    @property
+    def working(self):
+        &#34;&#34;&#34;
+        working Property getter. Safely returns the value of self._working  
+
+        :return: The value of self._working
+        &#34;&#34;&#34;
+        with self._working_lock:
+            return self._working
+
+    @working.setter
+    def working(self, value):
+        &#34;&#34;&#34;
+        working Property setter. Safely sets the value of self._working.  
+
+        :param value: The value to which we set self._working  
+        :return: None
+        &#34;&#34;&#34;
+        with self._working_lock:
+            self._working = value
+
+    @property
+    def stop_flag(self):
+        &#34;&#34;&#34;
+        stop_flag Property getter. Safely returns the value of self._stop_flag  
+
+        :return: The value of self._stop_flag
+        &#34;&#34;&#34;
+        with self._stop_flag_lock:
+            return self._stop_flag
+
+    @stop_flag.setter
+    def stop_flag(self, value):
+        &#34;&#34;&#34;
+        stop_flag Property setter. Safely sets the value of self._stop_flag  
+
+        :param value: The value to which we set self._stop_flag  
+        :return: None
+        &#34;&#34;&#34;
+        with self._stop_flag_lock:
+            self._stop_flag = value
+
+    def get_stop_flag(self):
+        return self.stop_flag
+
+    @property
+    def streaming(self):
+        &#34;&#34;&#34;
+        streaming Property getter. Safely returns the value of self._streaming  
+
+        :return: The value of self._streaming
+        &#34;&#34;&#34;
+        with self._streaming_lock:
+            return self._streaming
+
+    @streaming.setter
+    def streaming(self, value):
+        &#34;&#34;&#34;
+        streaming Property setter. Safely sets the value of self._streaming  
+
+        :param value: The value to which we set self._streaming  
+        :return: None
+        &#34;&#34;&#34;
+        with self._streaming_lock:
+            self._streaming = value
+
+    def append_thread_to_threads_activated(self, thread):
+        &#34;&#34;&#34;
+        Safely appends the thread to the self.threads_activated list.  
+
+        :param thread: An instance that inherits from thread.  
+        :return: None
+        &#34;&#34;&#34;
+        with self.threads_activated_lock:
+            self.threads_activated.append(thread)
+
+    def init_widgets(self, display_size):
+        &#34;&#34;&#34;
+        Handles the initialization of all tk widgets.  
+
+        :param display_size: The size of the display box in which we will show the screen images of the environment
+            (tuple of ints (width, height).  
+        :return: None
+        &#34;&#34;&#34;
+        # creating a root menu to insert all the sub menus
+        self.root_menu = tk.Menu(self.parent)
+        self.parent.config(menu=self.root_menu)
+
+        # creating sub menus in the root menu
+        self.file_menu = tk.Menu(self.root_menu)  # it intializes a new su menu in the root menu
+        self.root_menu.add_cascade(label=&#34;File&#34;, menu=self.file_menu)  # it creates the name of the sub menu
+        self.file_menu.add_command(label=&#34;New&#34;, command=self.file_new_command)
+        self.file_menu.add_command(label=&#34;Load&#34;, command=self.file_load_command)
+        self.file_menu.add_command(label=&#34;Stop&#34;, command=self.file_stop_command)
+        self.file_menu.add_separator()
+        self.file_menu.add_command(label=&#34;Exit&#34;, command=self.exit)
+
+        self.tensorboard_menu = tk.Menu(self.root_menu)  # it intializes a new su menu in the root menu
+        self.root_menu.add_cascade(label=&#34;TensorBoard&#34;, menu=self.tensorboard_menu)  # it creates the name of the sub menu
+        self.tensorboard_menu.add_command(label=&#34;Launch Server...&#34;, command=self.tensorboard_start_command)
+        self.tensorboard_menu.add_command(label=&#34;Stop Server&#34;, command=self.tensorboard_stop_command)
+
+        self.lable = tk.Label(master=self, text=self.env_name)
+        self.lable.grid(row=0, column=0)  # , columnspan=6)
+
+        self.display = tk.Canvas(master=self, width=display_size[0], height=display_size[1])  # canvas
+        self.display.grid(column=0, row=1, rowspan=3)
+
+        self.play_button = tk.Button(master=self, text=&#34;Play&#34;, command=self.play_button_command)
+        self.play_button.grid(column=1, row=1)
+
+        self.play_episodes_spinbox = tk.Spinbox(master=self, from_=1, to=self.Max_Episode_To_Play_In_One_Go,
+                                                 width=5)
+        self.play_episodes_spinbox.grid(column=2, row=1, sticky=&#39;w&#39;)
+
+        self.train_button = tk.Button(master=self, text=&#34;Train&#34;, command=self.train_button_command)
+        self.train_button.grid(column=1, row=2)
+
+        self.train_episodes_spinbox = tk.Spinbox(master=self, from_=1, to=self.Max_Episode_To_Train_In_One_Go,
+                                                 width=5)
+        self.train_episodes_spinbox.grid(column=2, row=2, sticky=&#39;w&#39;)
+
+        self.update_hyper_parameters_button = tk.Button(master=self, text=&#34;Update Hyper Parameters&#34;,
+                                                      command=self.update_hyper_parameters_button_command)
+        self.update_hyper_parameters_button.grid(column=3, row=1, rowspan=2)
+
+        self.alpha_learning_rate_lable = tk.Label(master=self, text=&#34;Alpha Learning Rate&#34;)
+        self.alpha_learning_rate_lable.grid(column=4, row=1)
+
+        self.alpha_learning_rate_entry = tk.Entry(master=self)
+        self.alpha_learning_rate_entry.insert(tk.END, &#39;%.E&#39; % Decimal(self.alpha_learning_rate))
+        self.alpha_learning_rate_entry.grid(column=5, row=1)
+
+        self.memory_buffer_size_lable = tk.Label(master=self, text=&#34;Memory Buffer Size&#34;)
+        self.memory_buffer_size_lable.grid(column=4, row=2)
+
+        self.memory_buffer_size_entry = tk.Entry(master=self)
+        self.memory_buffer_size_entry.insert(tk.END, str(self.worker_memory_buffer_size))
+        self.memory_buffer_size_entry.grid(column=5, row=2)
+
+        self.gui_console = tkst.ScrolledText(master=self, width=70, height=10, state=tk.DISABLED)
+        self.gui_console.grid(column=1, row=3, columnspan=5)
+
+    @GamesScreen_threader_decorator
+    def update_hyper_parameters_button_command(self):
+        &#34;&#34;&#34;
+        Updates the model&#39;s hyper parameters.
+        Decorated with the @GamesScreen_threader_decorator.  
+
+        :return: None
+        &#34;&#34;&#34;
+        try:
+            alpha_learning_rate = float(self.alpha_learning_rate_entry.get())
+            if alpha_learning_rate &lt;= 0:
+                raise ValueError()
+        except ValueError:
+            self.print_to_gui_console(&#34;Please enter a valid alpha learning rate. (must be greater than 0 and big enough&#34;
+                                      &#34;that python doesn&#39;t treat it as 0)\r\nUpdate Aborted.&#34;)
+            return
+        try:
+            memory_buffer_size = int(self.memory_buffer_size_entry.get())
+            if not (0 &lt; memory_buffer_size &lt;= self.Max_Worker_Memory_Buffer_Size):
+                raise ValueError()
+        except ValueError:
+            self.print_to_gui_console(&#34;Please enter a valid alpha learning rate. (must be an integer greater than 0 and&#34;
+                                      &#34; smaller or equal to %d)\r\nUpdate Aborted.&#34; %
+                                      self.Max_Worker_Memory_Buffer_Size)
+            return
+        self.print_to_gui_console(&#34;Updating Hyper Parameters...\r\n(Note that this action can not be stopped by the &#34;
+                                  &#34;&#39;Stop&#39; command in the &#39;File&#39; menu) &#34;)
+        self.alpha_learning_rate, self.worker_memory_buffer_size = alpha_learning_rate, memory_buffer_size
+        self.init_a3c_algorithm()
+        self.print_to_gui_console(&#34;Hyper Parameters Updated.&#34;)
+
+    def reset_graphics(self):
+        &#34;&#34;&#34;
+        Resets the widgets.  
+
+        :return: None
+        &#34;&#34;&#34;
+        self.gui_console.edit_reset()
+
+    def init_a3c_algorithm(self, save_folder_path=None):
+        &#34;&#34;&#34;
+        Use after every use of the .train() func and at first when initiating.  
+
+        :param save_folder_path: if None retain the previous save_folder_path.  
+        :return: fresh instance of A3C_Algorithm class
+        &#34;&#34;&#34;
+        if save_folder_path is None:
+            save_folder_path = self.save_folder_path
+
+        tf.reset_default_graph()
+        if self.a3c_model != None:
+            self.a3c_model.shutdown()
+        self.a3c_model = A3C_Algorithm(self.envs_manager, self.env_init_str, Play_Display_Size=self.__display_size,
+                                       save_folder_path=save_folder_path,
+                                       Worker_Memory_Buffer_Size=self.worker_memory_buffer_size,
+                                       AlphaLearningRate=self.alpha_learning_rate)
+
+    @GamesScreen_threader_decorator
+    def file_new_command(self):
+        &#34;&#34;&#34;
+        Calls the self.new_command() func.
+        Decorated with the @GamesScreen_threader_decorator.  
+
+        :return: None
+        &#34;&#34;&#34;
+        self.new_command()
+
+    def new_command(self):
+        &#34;&#34;&#34;
+        Handles the process of creating a new save.  
+
+        :return: None
+        &#34;&#34;&#34;
+        folder_path = self.ask4folder(window_title=&#34;Choose a directory to create a new save in...&#34;)
+
+        # if the user presses &#39;cancel&#39; (If the user presses &#39;cancel&#39;, self.ask4folder() returns &#39;&#39;)
+        if folder_path == &#39;&#39;:
+            prompt = &#34;Do you want to exit then? (yes - exit, no - create a new save)&#34;
+            should_exit = messagebox.askyesno(&#34;Exit?&#34;, prompt)
+            if should_exit:
+                self.after(1, func=self.exit)   # I don&#39;t call it directly because if the exit() func is called before
+                                                # the tk mainloop is started (can happan in the initial promp), it will
+                                                # have no effect. By using the .after() I insure that the mainloop was
+                                                # started.
+            else:
+                self.new_command()
+            return
+
+        if len(os.listdir(folder_path)) &gt; 0:
+            warning_msg = &#34;You have cosen a folder that contains file. Should you proceed all said files will be &#34; \
+                          &#34;deleted. Proceed?&#34;
+            if messagebox.askyesno(&#34;Python&#34;, warning_msg):
+                delete_dir_contents(folder_path)
+        self.reset_graphics()
+        self.init_a3c_algorithm(folder_path)
+        self.print_to_gui_console(&#34;New Model initiated.&#34;)
+
+    @GamesScreen_threader_decorator
+    def file_load_command(self):
+        &#34;&#34;&#34;
+        Calls the self.load_command() func.
+        Decorated with the @GamesScreen_threader_decorator.  
+
+        :return: None
+        &#34;&#34;&#34;
+        self.load_command()
+    
+    def load_command(self):
+        &#34;&#34;&#34;
+        Handles the process of loading a save.  
+
+        :return: None
+        &#34;&#34;&#34;
+        folder_path = self.ask4folder(window_title=&#34;Choose a directory to load a save from...&#34;)
+
+        if SavesManager.check_for_save(folder_path):
+            self.reset_graphics()
+            self.init_a3c_algorithm(folder_path)
+            self.print_to_gui_console(&#34;Model Loaded.&#34;)
+        else:
+            initial_prompt = &#34;No Save Found! Do you want to try and load a differnt save? &#34; \
+                             &#34;(yes - load a different save, no - create a new save)&#34;
+            should_load_save = messagebox.askyesno(&#34;Load?&#34;, initial_prompt)
+            if should_load_save:
+                self.load_command()
+            else:
+                self.new_command()
+
+    def file_stop_command(self, verbose=True):
+        &#34;&#34;&#34;
+        Stops all current operations. Cannot stop the self.update_hyper_parameters_button_command() func.  
+
+        :param verbose: Should or should not print textual report to GUI Console (bool).  
+        :return: None
+        &#34;&#34;&#34;
+        self.tensorboard_stop_command(verbose=False)
+        self.stop_flag = True
+        if verbose:
+            self.print_to_gui_console(&#34;Stopping operations...&#34;)
+
+    def exit(self):
+        &#34;&#34;&#34;
+        Exit tk.mainloop(). (see main)  
+
+        :return: None
+        &#34;&#34;&#34;
+        self.parent.quit()
+
+    def shutdown(self):
+        &#34;&#34;&#34;
+        Shutdown this instance and all of it&#39;s components.  
+
+        :return: None
+        &#34;&#34;&#34;
+        self.file_stop_command(verbose=False)
+        self.tensorboard_stop_command(verbose=False)
+        with self.threads_activated_lock:
+            for t in self.threads_activated:
+                if t.is_alive():
+                    t.join()
+        if self.a3c_model != None:
+            self.a3c_model.shutdown()
+        if self.envs_manager != None and self.envs_manager.status == Status.Running:
+            self.envs_manager.shutdown()
+            self.envs_manager.join()
+
+    def tensorboard_start_command(self):
+        &#34;&#34;&#34;
+        Starts a process that runs a tensorboard server allowing to view the logs data.  
+
+        :return: None
+        &#34;&#34;&#34;
+        with self._working_lock:
+            if self._working:
+                self.print_to_gui_console(&#34;Busy handling a previous request. &#34;
+                                          &#34;Please wait for it to finish before making any new ones.&#34;)
+                return
+            self._working = True
+
+        if self.tensorboard_process == None:
+            if not is_port_taken(6006):  # checks that port 6006 isn&#39;t taken.
+                cmd_line = &#34;tensorboard --logdir \&#34;%s\&#34;&#34; % os.path.join(self.save_folder_path,
+                                                                        self.a3c_model.LogsFolder)
+                self.tensorboard_process = subprocess.Popen(cmd_line)
+                self.print_to_gui_console(&#34;TensorBoard server active. Available at &#39;localhost:6006&#39;&#34;)
+            else:
+                self.print_to_gui_console(&#34;It seems that some program is already using port 6006. &#34;
+                                          &#34;Aborting TensorBoard activation.&#34;)
+        else:
+            self.print_to_gui_console(&#34;TensorBoard is already active.&#34;)
+
+    def tensorboard_stop_command(self, verbose=True):
+        &#34;&#34;&#34;
+        Terminates the process that runs a tensorboard server allowing to view the logs data.  
+
+        :param verbose: Should or should not print textual report to GUI Console (bool).  
+        :return: None
+        &#34;&#34;&#34;
+        if self.tensorboard_process != None:
+            self.tensorboard_process.terminate()
+            self.tensorboard_process = None
+            self.working = False
+            if verbose:
+                self.print_to_gui_console(&#34;TensorBoard server Terminated.&#34;)
+        else:
+            if verbose:
+                self.print_to_gui_console(&#34;It seems that TensorBoard isn&#39;t active. Termination aborted.&#34;)
+
+
+    @GamesScreen_threader_decorator
+    def play_button_command(self):
+        &#34;&#34;&#34;
+        Handles playing and displaying of the episodes played by the A3C_Algorithm.
+        Decorated with the @GamesScreen_threader_decorator.  
+
+        :return: None
+        &#34;&#34;&#34;
+        if not self.streaming:
+            try:
+                eps2play = int(self.play_episodes_spinbox.get())
+                if eps2play &lt;= 0:
+                    raise ValueError()
+            except ValueError:
+                self.print_to_gui_console(&#34;Please enter a valid number of episodes to play.&#34;)
+                return
+            else:
+                self.print_to_gui_console(&#34;Preparing model to play...&#34;)
+
+            self._display_frames_queue = queue.Queue(maxsize=1)
+
+            self.streaming = True
+
+            self.display.after(self.Display_Update_Intervals, func=self._update_display_screen)
+            try:
+                self.make_sure_envs_manager_is_active()
+                self.a3c_model.play(n_episodes=eps2play, print_func=self.print_to_gui_console,
+                                    frame_update_func=self._update_display_frames_queue,
+                                    get_stop_flag=self.get_stop_flag)
+            except (TypeError, RuntimeError, TimeoutExceededTryingToGetMsgError, tf.errors.CancelledError):
+                pass  # Might happen when the client disconnects
+            except ManagerUsedIsNotRunningError:
+                self.print_to_gui_console(&#34;It seems that the environment manager shut down.\r\n&#34;
+                                          &#34;Please try again.&#34;)
+            except SocketClosedRemotelyError:
+                self.print_to_gui_console(
+                    &#34;It seems that connection with the server has been lost.\r\nPlease try again.&#34;)
+            self.streaming = False
+            self.stop_flag = False
+
+        else:
+            self.print_to_gui_console(&#34;Wait for the current play to end.&#34;)
+
+    def _update_display_frames_queue(self, frame):
+        &#34;&#34;&#34;
+        A function that takes an image and puts to the  self._display_frames_queue so that the self.display will show it.  
+
+        :param frame: An instance of PIL.Image.Image class.  
+        :return: None
+        &#34;&#34;&#34;
+        try:
+            self._display_frames_queue.put(frame, block=True, timeout=self.Display_Update_Queue_Put_Timeout)
+        except queue.Full:
+            pass
+
+    def _update_display_screen(self):
+        &#34;&#34;&#34;
+        Safely takes an image from self._display_frames_queue and diplay it in self.display.  
+
+        :return: None
+        &#34;&#34;&#34;
+        if self.streaming:
+            if not self._display_frames_queue.empty():
+                img = self._display_frames_queue.get()
+
+                # ---DEBUG START---
+                if SAVE_PLAY:
+                    if not os.path.exists(&#34;.\\frames\\&#34;):
+                        os.mkdir(&#34;.\\frames\\&#34;)
+                    img.save(&#34;.\\frames\\%s.jpg&#34; % time.time())
+                # ---DEBUG END---
+
+                frame_image = ImageTk.PhotoImage(image=img)
+                self._curr_frame = frame_image  # There seems to a bug with ImageTk and the create_image func where if
+                #                                 we don&#39;t deliberately save the ImageTk.PhotoImage() to some variable,
+                #                                 the garbage collector collects and deletes it before the image is
+                #                                 loaded to the canvas and the image the create_image() func loads is
+                #                                 garbage data. That is why we assign it to a variable.
+                #                                 For more details see:
+                #                                 https://effbot.org/pyfaq/why-do-my-tkinter-images-not-appear.htm
+                self.display.create_image((0, 0), image=frame_image, anchor=tk.NW)
+            self.display.after(self.Display_Update_Intervals, func=self._update_display_screen)
+
+    @GamesScreen_threader_decorator
+    def train_button_command(self):
+        &#34;&#34;&#34;
+        Handles the training of the model.
+        Decorated with the @GamesScreen_threader_decorator.  
+
+        :return: None
+        &#34;&#34;&#34;
+        try:
+            eps2train = int(self.train_episodes_spinbox.get())
+            if eps2train &lt;= 0:
+                raise ValueError()
+        except ValueError:
+            self.print_to_gui_console(&#34;Please enter a valid number of episodes to train.&#34;)
+            return
+        else:
+            self.print_to_gui_console(&#34;Preparing model for training... \r\nThe following Hyper Parameters&#39; values will &#34;
+                                      &#34;be used:\r\nAlpha Learning Rate: &#34; &#34;%f\r\nMemory Buffer Size: %d&#34; %
+                                      (self.alpha_learning_rate, self.worker_memory_buffer_size))
+        try:
+            self.make_sure_envs_manager_is_active()
+            self.a3c_model.train(eps2train, print_func=self.print_to_gui_console, get_stop_flag=self.get_stop_flag)
+        except (TypeError, RuntimeError, TimeoutExceededTryingToGetMsgError, tf.errors.CancelledError):
+            pass  # Might happen when the client disconnects
+        except ManagerUsedIsNotRunningError:
+            self.print_to_gui_console(&#34;It seems that the environment manager shut down.\r\n&#34;
+                                      &#34;Please try again.&#34;)
+        except SocketClosedRemotelyError:
+            self.print_to_gui_console(&#34;It seems that connection with the server has been lost.\r\nPlease try again.&#34;)
+        self.stop_flag = False
+
+    def make_sure_envs_manager_is_active(self):
+        &#34;&#34;&#34;
+        Makes sure that self.envs_manager is active and we can use it. Will fix it if self.envs_manager isn&#39;t active.  
+
+        :return: None
+        &#34;&#34;&#34;
+        if self.envs_manager.status != Status.Running:
+            self.envs_manager = RemoteEnvironmentsManager(*self.envs_manager.get_server_ip_and_port())
+            self.init_a3c_algorithm()
+    
+    def print_to_gui_console(self, data):
+        &#34;&#34;&#34;
+        Print text to the self.gui_console widget.  
+
+        :param data: Text to print to the self.gui_console widget.  
+        :return: None
+        &#34;&#34;&#34;
+        try:
+            self.gui_console.config(state=tk.NORMAL)
+            self.gui_console.insert(&#39;end&#39;, &#39;\n&gt;&gt; &#39; + data)
+            self.gui_console.see(tk.END)
+            self.gui_console.update()
+            self.gui_console.config(state=tk.DISABLED)
+        except RuntimeError:  # might happens when functions try to write after the window closed.
+            pass              # (while the client closes)
+
+    @staticmethod
+    def ask4folder(window_title=&#34;&#34;):
+        &#34;&#34;&#34;
+        Ask for a path to a folder graphically.  
+
+        :param window_title: The title of the browse window that will open. (string)  
+        :return: path chosen by the user. (string)
+        &#34;&#34;&#34;
+        file_path_string = filedialog.askdirectory(title=window_title)
+        return file_path_string
+
+
+def is_port_taken(port):
+    &#34;&#34;&#34;
+    Returns True if the port is already in use, False otherwise.  
+
+    :param port: port index (int)  
+    :return: True if the port is already in use, False otherwise.
+    &#34;&#34;&#34;
+    try:
+        s = socket.socket()
+        s.bind((&#34;0.0.0.0&#34;, port))
+        s.close()
+        return False
+    except OSError:
+        return True
+
+
+def delete_dir_contents(folder_path):
+    &#34;&#34;&#34;
+    Delete the contents of the given folder.  
+
+    :param folder_path: The path of the folder to be deleted.  
+    :return: None
+    &#34;&#34;&#34;
+    for name in os.listdir(folder_path):
+        path = os.path.join(folder_path, name)
+        if os.path.isdir(path):
+            shutil.rmtree(path)
+        else:
+            os.remove(path)
+
+
+class GameSelectionScreen(tk.Frame):
+    Icon_Display_Size = [250, 250]
+
+    def __init__(self, parent):
+        &#34;&#34;&#34;
+        A class that handles the creation and operation of the GUI window that sets up connection with the server and
+        choose an environment to play/train on.  
+
+        :param parent: A tk.Tk instance.
+        &#34;&#34;&#34;
+        self.parent = parent
+
+        # handle graphics
+        tk.Frame.__init__(self, parent)
+        self.parent.title(&#34;Setup&#34;)
+
+        self.envs_manager = None
+        self.env_init_str_to_icons_dict = None
+
+        self.chosen_env_init_str_tk_var = tk.StringVar(master=self)
+        self.chosen_env_init_str_tk_var.trace(&#39;w&#39;, self._update_icon_display_screen)  # Will call _update_icon_display
+        #                                                                               _screen() func every time the
+        #                                                                               value of self.env_init_str
+        #                                                                               changes. Note to self: check
+        #                                                                               what the &#39;w&#39; means.
+
+        self._curr_icon = None  # for it&#39;s purpose see documentation in ._update_display_screen() func.
+        
+        self.select_and_launch_button_was_pressesd = False
+
+        self.init_widgets()
+
+    @property
+    def chosen_env_init_str(self):
+        &#34;&#34;&#34;
+        chosen_env_init_str Property getter. Returns the value of the initialization string chosen by the user.
+        (stored in self.chosen_env_init_str_tk_var)  
+
+        :return: The value of the initialization string chosen by the user.
+        &#34;&#34;&#34;
+        return self.chosen_env_init_str_tk_var.get()
+
+    def init_widgets(self):
+        &#34;&#34;&#34;
+        Handles the initialization of all tk widgets.  
+
+        :return: None
+        &#34;&#34;&#34;
+        # creating a root menu to insert all the sub menus
+
+        self.lable = tk.Label(master=self, text=&#34;Please connect to the server and then proceed to choose a game.&#34;)
+        self.lable.grid(column=0, row=0, columnspan=3, sticky=tk.NW)
+
+        self.ip_entry = tk.Entry(master=self)
+        self.ip_entry.insert(tk.END, Default_IP)
+        self.ip_entry.grid(column=0, row=1)
+
+        self.port_entry = tk.Entry(master=self)
+        self.port_entry.insert(tk.END, Default_Port)
+        self.port_entry.grid(column=1, row=1)
+
+        self.connect_button = tk.Button(master=self, text=&#34;Connect&#34;, command=self.connect_button_command)
+        self.connect_button.grid(column=2, row=1)
+
+        self.games_option_menu = ttk.Combobox(self, textvariable=self.chosen_env_init_str_tk_var, state=tk.DISABLED)
+        self.games_option_menu.grid(column=0, row=2)
+
+        self.select_and_launch_button = tk.Button(master=self, text=&#34;Launch&#34;,
+                                                  command=self.select_and_launch_button_command, state=tk.DISABLED)
+        self.select_and_launch_button.grid(column=1, row=2)
+
+        self.icon_display = tk.Canvas(master=self, width=self.Icon_Display_Size[0], height=self.Icon_Display_Size[1])
+        self.icon_display.grid(column=2, row=2, rowspan=3)
+
+    def connect_button_command(self):
+        &#34;&#34;&#34;
+        Attempts connection with the server.
+        First tries to ping the server, if the server returns a ping:
+        Establishes connection and enables interaction with the environment selection related widgets.  
+
+        :return: None
+        &#34;&#34;&#34;
+        ip = self.ip_entry.get()
+        if not is_valid_ipv4_address(ip):
+            print(&#34;Please enter a valid ip address.&#34;)
+            return
+
+        try:
+            port = int(self.port_entry.get())
+            if not (0 &lt;= port &lt; 2 ** 16):
+                raise ValueError()
+        except ValueError:
+            print(&#34;Please enter a valid port number.&#34;)
+            return
+
+        if RemoteEnvironmentsManager.check_for_server(ip, port):
+            self.connect2server(ip, port)
+            self.ip_entry.config(state=tk.DISABLED)
+            self.port_entry.config(state=tk.DISABLED)
+            self.connect_button.config(text=&#34;Connected&#34;, state=tk.DISABLED)
+            self.select_and_launch_button.config(state=tk.NORMAL)
+            self.games_option_menu.config(state=&#39;readonly&#39;)
+            self.games_option_menu[&#39;values&#39;] = list(self.env_init_str_to_icons_dict.keys())
+            self.games_option_menu.set(list(self.env_init_str_to_icons_dict.keys())[0])
+        else:
+            print(&#34;Failed to ping the server.&#34;)
+
+    def connect2server(self, ip, port):
+        &#34;&#34;&#34;
+        Establishes connection with the server, creates an instance of the RemoteEnvironmentsManager class and gets the
+        available environments initialization strings as well their icons.  
+
+        :param ip: Server&#39;s ip (string)  
+        :param port: Server&#39;s port (int)  
+        :return: None
+        &#34;&#34;&#34;
+        self.envs_manager = RemoteEnvironmentsManager(ip, port, icon_display_size=self.Icon_Display_Size)
+        self.env_init_str_to_icons_dict = self.envs_manager.get_environments_initialization_strings_to_icons_dict()
+
+    def select_and_launch_button_command(self):
+        &#34;&#34;&#34;
+        Selects the environment currently chosen by the user. Exits tk.mainloop() so that the GameScreen will be
+        launched.  
+
+        :return: None
+        &#34;&#34;&#34;
+        self.select_and_launch_button_was_pressesd = True
+        self.shutdown(shutdown_envs_manager=False)
+        self.exit()
+        
+    def get_envs_mmanager_and_chosen_init_str(self):
+        &#34;&#34;&#34;
+        Returns the envs_mmanager and the environment initialization string chosen.  
+
+        :return: Returns (self.envs_manager, self.chosen_env_init_str) if the user pressed the select button,
+            returns (None, None) otherwise.
+        &#34;&#34;&#34;
+        if self.select_and_launch_button_was_pressesd:
+            return self.envs_manager, self.chosen_env_init_str
+        else:
+            return self.envs_manager, None
+
+    def exit(self):
+        &#34;&#34;&#34;
+        Exit the tk.mainloop(). See main.py.  
+
+        :return:
+        &#34;&#34;&#34;
+        self.parent.quit()
+
+    def shutdown(self, shutdown_envs_manager=False):
+        &#34;&#34;&#34;
+        Terminates operation of instance and it&#39;s components.  
+
+        :param shutdown_envs_manager: If True, shuts down self.envs_manager. Doesn&#39;t shut is down if False.  
+        :return: None
+        &#34;&#34;&#34;
+        if shutdown_envs_manager and self.envs_manager is not None and self.envs_manager.status == Status.Running:
+            self.envs_manager.shutdown()
+            self.envs_manager.join()
+
+    def _update_icon_display_screen(self, *args):
+        &#34;&#34;&#34;
+        Updates the icon display screen.  
+
+        :param args: Irrelevant. Here so it could be used as a function to be called with widget.trace() func.  
+        :return: None
+        &#34;&#34;&#34;
+        img = Image.fromarray(self.env_init_str_to_icons_dict[self.chosen_env_init_str], mode=&#39;RGB&#39;)
+        frame_image = ImageTk.PhotoImage(image=img)
+        self._curr_icon = frame_image  # There seems to a bug with ImageTk and the create_image func where if
+        #                                 we don&#39;t deliberately save the ImageTk.PhotoImage() to some variable,
+        #                                 the garbage collector collects and deletes it before the image is
+        #                                 loaded to the canvas and the image the create_image() func loads is
+        #                                 garbage data. That is why we assign it to a variable.
+        #                                 For more details see:
+        #                                 https://effbot.org/pyfaq/why-do-my-tkinter-images-not-appear.htm
+        self.icon_display.create_image((0, 0), image=frame_image, anchor=tk.NW)
+
+
+def is_valid_ipv4_address(address):
+    &#34;&#34;&#34;
+    Returns True if the adrress is a valid IP address, False otherwise.  
+
+    :param address: ip address. (string)  
+    :return: True if addres is valid, False otherwise.
+    &#34;&#34;&#34;
+    address = address.split(&#39;.&#39;)
+    if len(address) != 4:
+        return False
+    try:
+        for num in address:
+            num = int(num)
+            if not (0 &lt;= num &lt;= 255):
+                return False
+    except ValueError:
+        return False
+    return True
+
+
+
+
+if __name__ == &#34;__main__&#34;:
+    main()</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="Beta.graphics.GamesScreen_threader_decorator"><code class="name flex">
+<span>def <span class="ident">GamesScreen_threader_decorator</span></span>(<span>function)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Designed to make synchronous methods in the GamesScreen class run on threads.
+</p>
+<p>:param function: any GamesScreen instance bound method.<br>
+:return: a functions that will run on a thread.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def GamesScreen_threader_decorator(function):
+    &#34;&#34;&#34;
+    Designed to make synchronous methods in the GamesScreen class run on threads.  
+
+    :param function: any GamesScreen instance bound method.  
+    :return: a functions that will run on a thread.
+    &#34;&#34;&#34;
+    def wrapper(self, *args, **kwargs):
+        def prepare_work(func2thread):
+            def work(self, *work_args, **work_kwargs):
+                res = func2thread(self, *work_args, **work_kwargs)
+                self.working = False
+                return res
+            return work
+        if self.working:
+            self.print_to_gui_console(&#34;Busy handling a previous request. &#34;
+                                      &#34;Please wait for it to finish before making any new ones.&#34;)
+            return
+
+        self.working = True
+        self.stop_flag = False
+        thread = threading.Thread(target=prepare_work(function), args=(self, *args), kwargs=kwargs)
+        self.append_thread_to_threads_activated(thread)
+        thread.start()
+    return wrapper</code></pre>
+</details>
+</dd>
+<dt id="Beta.graphics.delete_dir_contents"><code class="name flex">
+<span>def <span class="ident">delete_dir_contents</span></span>(<span>folder_path)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Delete the contents of the given folder.
+</p>
+<p>:param folder_path: The path of the folder to be deleted.<br>
+:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def delete_dir_contents(folder_path):
+    &#34;&#34;&#34;
+    Delete the contents of the given folder.  
+
+    :param folder_path: The path of the folder to be deleted.  
+    :return: None
+    &#34;&#34;&#34;
+    for name in os.listdir(folder_path):
+        path = os.path.join(folder_path, name)
+        if os.path.isdir(path):
+            shutil.rmtree(path)
+        else:
+            os.remove(path)</code></pre>
+</details>
+</dd>
+<dt id="Beta.graphics.is_port_taken"><code class="name flex">
+<span>def <span class="ident">is_port_taken</span></span>(<span>port)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Returns True if the port is already in use, False otherwise.
+</p>
+<p>:param port: port index (int)<br>
+:return: True if the port is already in use, False otherwise.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def is_port_taken(port):
+    &#34;&#34;&#34;
+    Returns True if the port is already in use, False otherwise.  
+
+    :param port: port index (int)  
+    :return: True if the port is already in use, False otherwise.
+    &#34;&#34;&#34;
+    try:
+        s = socket.socket()
+        s.bind((&#34;0.0.0.0&#34;, port))
+        s.close()
+        return False
+    except OSError:
+        return True</code></pre>
+</details>
+</dd>
+<dt id="Beta.graphics.is_valid_ipv4_address"><code class="name flex">
+<span>def <span class="ident">is_valid_ipv4_address</span></span>(<span>address)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Returns True if the adrress is a valid IP address, False otherwise.
+</p>
+<p>:param address: ip address. (string)<br>
+:return: True if addres is valid, False otherwise.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def is_valid_ipv4_address(address):
+    &#34;&#34;&#34;
+    Returns True if the adrress is a valid IP address, False otherwise.  
+
+    :param address: ip address. (string)  
+    :return: True if addres is valid, False otherwise.
+    &#34;&#34;&#34;
+    address = address.split(&#39;.&#39;)
+    if len(address) != 4:
+        return False
+    try:
+        for num in address:
+            num = int(num)
+            if not (0 &lt;= num &lt;= 255):
+                return False
+    except ValueError:
+        return False
+    return True</code></pre>
+</details>
+</dd>
+<dt id="Beta.graphics.main"><code class="name flex">
+<span>def <span class="ident">main</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def main():
+    envs_manager = RemoteEnvironmentsManager(Default_IP, Default_Port)
+    try:
+        start = time.time()
+
+        root = tk.Tk()
+        game_screen = GameScreen(root, envs_manager, env_init_str, env_name=&#34;Game&#34;)
+        #game_screen = GameSelectionScreen(root)
+        try:
+            game_screen.pack(side=&#34;top&#34;, fill=&#34;both&#34;, expand=True)
+        except tk.TclError:
+            pass
+        root.mainloop()
+        game_screen.shutdown()
+        print(&#34;Time: %d seconds.&#34; % (time.time() - start))
+    except KeyboardInterrupt:
+        print(&#34;Keyboard Interrupt! Exiting...&#34;)</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="Beta.graphics.GameScreen"><code class="flex name class">
+<span>class <span class="ident">GameScreen</span></span>
+<span>(</span><span>parent, envs_manager, env_init_str, display_size=(320, 180), env_name='')</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Frame widget which may contain other widgets and can have a 3D border.</p>
+<p>A class that handles the creation and operation of the GUI that interfaces with A3C_Algorithm.
+</p>
+<p>:param parent: A tk.Tk instance.<br>
+:param envs_manager: An instance of the RemoteEnvironmentsManager class.<br>
+:param env_init_str: An environment initialization string. (get list of available environment initialization
+string from the envs_manager.get_available_environments_initialization_strings() func).<br>
+:param display_size: The size of the display box in which we will show the screen images of the environment
+(tuple of ints (width, height).
+Note that it is not the size of the GameScreen window, only the size of the display box.<br>
+:param env_name: Used in the windows title and in the label at the top of the window. (string)</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class GameScreen(tk.Frame):
+    Max_Episode_To_Train_In_One_Go = 10000
+    Max_Episode_To_Play_In_One_Go = 100
+    Display_Update_Intervals = 1000//60  # in mili seconds, must be int
+    Display_Update_Queue_Put_Timeout = 2
+    Max_Worker_Memory_Buffer_Size = 1000
+
+    def __init__(self, parent, envs_manager, env_init_str, display_size=(320, 180), env_name=&#34;&#34;):
+        &#34;&#34;&#34;
+        A class that handles the creation and operation of the GUI that interfaces with A3C_Algorithm.  
+
+        :param parent: A tk.Tk instance.  
+        :param envs_manager: An instance of the RemoteEnvironmentsManager class.  
+        :param env_init_str: An environment initialization string. (get list of available environment initialization
+            string from the envs_manager.get_available_environments_initialization_strings() func).  
+        :param display_size: The size of the display box in which we will show the screen images of the environment
+            (tuple of ints (width, height).
+            Note that it is not the size of the GameScreen window, only the size of the display box.  
+        :param env_name: Used in the windows title and in the label at the top of the window. (string)
+        &#34;&#34;&#34;
+        self.parent = parent
+        self.parent.protocol(&#34;WM_DELETE_WINDOW&#34;, self.exit)
+        self.env_init_str = env_init_str
+        self.envs_manager = envs_manager
+        self.env_name = env_name
+        self.__display_size = display_size
+
+        # the model&#39;s hyper parameters
+        self.alpha_learning_rate = A3C_Algorithm.DefaultAlphaLearningRate
+        self.worker_memory_buffer_size = A3C_Algorithm.DefaultWorkerMemoryBufferSize
+
+        # handle graphics
+        tk.Frame.__init__(self, parent)
+        self.parent.title(self.env_name)
+        self.init_widgets(display_size)
+
+        self.threads_activated_lock = threading.Lock()
+        self.threads_activated = []
+        self._working_lock = threading.Lock()
+        self._working = False
+        self._stop_flag_lock = threading.Lock()
+        self._stop_flag = False
+
+        self.tensorboard_process = None
+
+        self._display_frames_queue = None
+        self._curr_frame = None  # for it&#39;s purpose see documentation in ._update_display_screen() func.
+        self._streaming_lock = threading.Lock()
+        self._streaming = False
+
+        # handle initial prompt (new/load)
+        self.a3c_model = None
+        initial_prompt = &#34;Do you want to load a save? (yes - load save, no - create a new one)&#34;
+        should_load_save = messagebox.askyesno(&#34;Load?&#34;, initial_prompt)
+        if should_load_save:
+            self.load_command()
+        else:
+            self.new_command()
+
+    @property
+    def save_folder_path(self):
+        &#34;&#34;&#34;
+        save_folder_path Property getter. Safely returns the value of self.a3c_model.save_manger.saves_folder_path.  
+
+        :return: The value of self.a3c_model.save_manger.saves_folder_path.
+        &#34;&#34;&#34;
+        if self.a3c_model != None:
+            return self.a3c_model.save_manger.saves_folder_path
+        return None
+
+    @property
+    def working(self):
+        &#34;&#34;&#34;
+        working Property getter. Safely returns the value of self._working  
+
+        :return: The value of self._working
+        &#34;&#34;&#34;
+        with self._working_lock:
+            return self._working
+
+    @working.setter
+    def working(self, value):
+        &#34;&#34;&#34;
+        working Property setter. Safely sets the value of self._working.  
+
+        :param value: The value to which we set self._working  
+        :return: None
+        &#34;&#34;&#34;
+        with self._working_lock:
+            self._working = value
+
+    @property
+    def stop_flag(self):
+        &#34;&#34;&#34;
+        stop_flag Property getter. Safely returns the value of self._stop_flag  
+
+        :return: The value of self._stop_flag
+        &#34;&#34;&#34;
+        with self._stop_flag_lock:
+            return self._stop_flag
+
+    @stop_flag.setter
+    def stop_flag(self, value):
+        &#34;&#34;&#34;
+        stop_flag Property setter. Safely sets the value of self._stop_flag  
+
+        :param value: The value to which we set self._stop_flag  
+        :return: None
+        &#34;&#34;&#34;
+        with self._stop_flag_lock:
+            self._stop_flag = value
+
+    def get_stop_flag(self):
+        return self.stop_flag
+
+    @property
+    def streaming(self):
+        &#34;&#34;&#34;
+        streaming Property getter. Safely returns the value of self._streaming  
+
+        :return: The value of self._streaming
+        &#34;&#34;&#34;
+        with self._streaming_lock:
+            return self._streaming
+
+    @streaming.setter
+    def streaming(self, value):
+        &#34;&#34;&#34;
+        streaming Property setter. Safely sets the value of self._streaming  
+
+        :param value: The value to which we set self._streaming  
+        :return: None
+        &#34;&#34;&#34;
+        with self._streaming_lock:
+            self._streaming = value
+
+    def append_thread_to_threads_activated(self, thread):
+        &#34;&#34;&#34;
+        Safely appends the thread to the self.threads_activated list.  
+
+        :param thread: An instance that inherits from thread.  
+        :return: None
+        &#34;&#34;&#34;
+        with self.threads_activated_lock:
+            self.threads_activated.append(thread)
+
+    def init_widgets(self, display_size):
+        &#34;&#34;&#34;
+        Handles the initialization of all tk widgets.  
+
+        :param display_size: The size of the display box in which we will show the screen images of the environment
+            (tuple of ints (width, height).  
+        :return: None
+        &#34;&#34;&#34;
+        # creating a root menu to insert all the sub menus
+        self.root_menu = tk.Menu(self.parent)
+        self.parent.config(menu=self.root_menu)
+
+        # creating sub menus in the root menu
+        self.file_menu = tk.Menu(self.root_menu)  # it intializes a new su menu in the root menu
+        self.root_menu.add_cascade(label=&#34;File&#34;, menu=self.file_menu)  # it creates the name of the sub menu
+        self.file_menu.add_command(label=&#34;New&#34;, command=self.file_new_command)
+        self.file_menu.add_command(label=&#34;Load&#34;, command=self.file_load_command)
+        self.file_menu.add_command(label=&#34;Stop&#34;, command=self.file_stop_command)
+        self.file_menu.add_separator()
+        self.file_menu.add_command(label=&#34;Exit&#34;, command=self.exit)
+
+        self.tensorboard_menu = tk.Menu(self.root_menu)  # it intializes a new su menu in the root menu
+        self.root_menu.add_cascade(label=&#34;TensorBoard&#34;, menu=self.tensorboard_menu)  # it creates the name of the sub menu
+        self.tensorboard_menu.add_command(label=&#34;Launch Server...&#34;, command=self.tensorboard_start_command)
+        self.tensorboard_menu.add_command(label=&#34;Stop Server&#34;, command=self.tensorboard_stop_command)
+
+        self.lable = tk.Label(master=self, text=self.env_name)
+        self.lable.grid(row=0, column=0)  # , columnspan=6)
+
+        self.display = tk.Canvas(master=self, width=display_size[0], height=display_size[1])  # canvas
+        self.display.grid(column=0, row=1, rowspan=3)
+
+        self.play_button = tk.Button(master=self, text=&#34;Play&#34;, command=self.play_button_command)
+        self.play_button.grid(column=1, row=1)
+
+        self.play_episodes_spinbox = tk.Spinbox(master=self, from_=1, to=self.Max_Episode_To_Play_In_One_Go,
+                                                 width=5)
+        self.play_episodes_spinbox.grid(column=2, row=1, sticky=&#39;w&#39;)
+
+        self.train_button = tk.Button(master=self, text=&#34;Train&#34;, command=self.train_button_command)
+        self.train_button.grid(column=1, row=2)
+
+        self.train_episodes_spinbox = tk.Spinbox(master=self, from_=1, to=self.Max_Episode_To_Train_In_One_Go,
+                                                 width=5)
+        self.train_episodes_spinbox.grid(column=2, row=2, sticky=&#39;w&#39;)
+
+        self.update_hyper_parameters_button = tk.Button(master=self, text=&#34;Update Hyper Parameters&#34;,
+                                                      command=self.update_hyper_parameters_button_command)
+        self.update_hyper_parameters_button.grid(column=3, row=1, rowspan=2)
+
+        self.alpha_learning_rate_lable = tk.Label(master=self, text=&#34;Alpha Learning Rate&#34;)
+        self.alpha_learning_rate_lable.grid(column=4, row=1)
+
+        self.alpha_learning_rate_entry = tk.Entry(master=self)
+        self.alpha_learning_rate_entry.insert(tk.END, &#39;%.E&#39; % Decimal(self.alpha_learning_rate))
+        self.alpha_learning_rate_entry.grid(column=5, row=1)
+
+        self.memory_buffer_size_lable = tk.Label(master=self, text=&#34;Memory Buffer Size&#34;)
+        self.memory_buffer_size_lable.grid(column=4, row=2)
+
+        self.memory_buffer_size_entry = tk.Entry(master=self)
+        self.memory_buffer_size_entry.insert(tk.END, str(self.worker_memory_buffer_size))
+        self.memory_buffer_size_entry.grid(column=5, row=2)
+
+        self.gui_console = tkst.ScrolledText(master=self, width=70, height=10, state=tk.DISABLED)
+        self.gui_console.grid(column=1, row=3, columnspan=5)
+
+    @GamesScreen_threader_decorator
+    def update_hyper_parameters_button_command(self):
+        &#34;&#34;&#34;
+        Updates the model&#39;s hyper parameters.
+        Decorated with the @GamesScreen_threader_decorator.  
+
+        :return: None
+        &#34;&#34;&#34;
+        try:
+            alpha_learning_rate = float(self.alpha_learning_rate_entry.get())
+            if alpha_learning_rate &lt;= 0:
+                raise ValueError()
+        except ValueError:
+            self.print_to_gui_console(&#34;Please enter a valid alpha learning rate. (must be greater than 0 and big enough&#34;
+                                      &#34;that python doesn&#39;t treat it as 0)\r\nUpdate Aborted.&#34;)
+            return
+        try:
+            memory_buffer_size = int(self.memory_buffer_size_entry.get())
+            if not (0 &lt; memory_buffer_size &lt;= self.Max_Worker_Memory_Buffer_Size):
+                raise ValueError()
+        except ValueError:
+            self.print_to_gui_console(&#34;Please enter a valid alpha learning rate. (must be an integer greater than 0 and&#34;
+                                      &#34; smaller or equal to %d)\r\nUpdate Aborted.&#34; %
+                                      self.Max_Worker_Memory_Buffer_Size)
+            return
+        self.print_to_gui_console(&#34;Updating Hyper Parameters...\r\n(Note that this action can not be stopped by the &#34;
+                                  &#34;&#39;Stop&#39; command in the &#39;File&#39; menu) &#34;)
+        self.alpha_learning_rate, self.worker_memory_buffer_size = alpha_learning_rate, memory_buffer_size
+        self.init_a3c_algorithm()
+        self.print_to_gui_console(&#34;Hyper Parameters Updated.&#34;)
+
+    def reset_graphics(self):
+        &#34;&#34;&#34;
+        Resets the widgets.  
+
+        :return: None
+        &#34;&#34;&#34;
+        self.gui_console.edit_reset()
+
+    def init_a3c_algorithm(self, save_folder_path=None):
+        &#34;&#34;&#34;
+        Use after every use of the .train() func and at first when initiating.  
+
+        :param save_folder_path: if None retain the previous save_folder_path.  
+        :return: fresh instance of A3C_Algorithm class
+        &#34;&#34;&#34;
+        if save_folder_path is None:
+            save_folder_path = self.save_folder_path
+
+        tf.reset_default_graph()
+        if self.a3c_model != None:
+            self.a3c_model.shutdown()
+        self.a3c_model = A3C_Algorithm(self.envs_manager, self.env_init_str, Play_Display_Size=self.__display_size,
+                                       save_folder_path=save_folder_path,
+                                       Worker_Memory_Buffer_Size=self.worker_memory_buffer_size,
+                                       AlphaLearningRate=self.alpha_learning_rate)
+
+    @GamesScreen_threader_decorator
+    def file_new_command(self):
+        &#34;&#34;&#34;
+        Calls the self.new_command() func.
+        Decorated with the @GamesScreen_threader_decorator.  
+
+        :return: None
+        &#34;&#34;&#34;
+        self.new_command()
+
+    def new_command(self):
+        &#34;&#34;&#34;
+        Handles the process of creating a new save.  
+
+        :return: None
+        &#34;&#34;&#34;
+        folder_path = self.ask4folder(window_title=&#34;Choose a directory to create a new save in...&#34;)
+
+        # if the user presses &#39;cancel&#39; (If the user presses &#39;cancel&#39;, self.ask4folder() returns &#39;&#39;)
+        if folder_path == &#39;&#39;:
+            prompt = &#34;Do you want to exit then? (yes - exit, no - create a new save)&#34;
+            should_exit = messagebox.askyesno(&#34;Exit?&#34;, prompt)
+            if should_exit:
+                self.after(1, func=self.exit)   # I don&#39;t call it directly because if the exit() func is called before
+                                                # the tk mainloop is started (can happan in the initial promp), it will
+                                                # have no effect. By using the .after() I insure that the mainloop was
+                                                # started.
+            else:
+                self.new_command()
+            return
+
+        if len(os.listdir(folder_path)) &gt; 0:
+            warning_msg = &#34;You have cosen a folder that contains file. Should you proceed all said files will be &#34; \
+                          &#34;deleted. Proceed?&#34;
+            if messagebox.askyesno(&#34;Python&#34;, warning_msg):
+                delete_dir_contents(folder_path)
+        self.reset_graphics()
+        self.init_a3c_algorithm(folder_path)
+        self.print_to_gui_console(&#34;New Model initiated.&#34;)
+
+    @GamesScreen_threader_decorator
+    def file_load_command(self):
+        &#34;&#34;&#34;
+        Calls the self.load_command() func.
+        Decorated with the @GamesScreen_threader_decorator.  
+
+        :return: None
+        &#34;&#34;&#34;
+        self.load_command()
+    
+    def load_command(self):
+        &#34;&#34;&#34;
+        Handles the process of loading a save.  
+
+        :return: None
+        &#34;&#34;&#34;
+        folder_path = self.ask4folder(window_title=&#34;Choose a directory to load a save from...&#34;)
+
+        if SavesManager.check_for_save(folder_path):
+            self.reset_graphics()
+            self.init_a3c_algorithm(folder_path)
+            self.print_to_gui_console(&#34;Model Loaded.&#34;)
+        else:
+            initial_prompt = &#34;No Save Found! Do you want to try and load a differnt save? &#34; \
+                             &#34;(yes - load a different save, no - create a new save)&#34;
+            should_load_save = messagebox.askyesno(&#34;Load?&#34;, initial_prompt)
+            if should_load_save:
+                self.load_command()
+            else:
+                self.new_command()
+
+    def file_stop_command(self, verbose=True):
+        &#34;&#34;&#34;
+        Stops all current operations. Cannot stop the self.update_hyper_parameters_button_command() func.  
+
+        :param verbose: Should or should not print textual report to GUI Console (bool).  
+        :return: None
+        &#34;&#34;&#34;
+        self.tensorboard_stop_command(verbose=False)
+        self.stop_flag = True
+        if verbose:
+            self.print_to_gui_console(&#34;Stopping operations...&#34;)
+
+    def exit(self):
+        &#34;&#34;&#34;
+        Exit tk.mainloop(). (see main)  
+
+        :return: None
+        &#34;&#34;&#34;
+        self.parent.quit()
+
+    def shutdown(self):
+        &#34;&#34;&#34;
+        Shutdown this instance and all of it&#39;s components.  
+
+        :return: None
+        &#34;&#34;&#34;
+        self.file_stop_command(verbose=False)
+        self.tensorboard_stop_command(verbose=False)
+        with self.threads_activated_lock:
+            for t in self.threads_activated:
+                if t.is_alive():
+                    t.join()
+        if self.a3c_model != None:
+            self.a3c_model.shutdown()
+        if self.envs_manager != None and self.envs_manager.status == Status.Running:
+            self.envs_manager.shutdown()
+            self.envs_manager.join()
+
+    def tensorboard_start_command(self):
+        &#34;&#34;&#34;
+        Starts a process that runs a tensorboard server allowing to view the logs data.  
+
+        :return: None
+        &#34;&#34;&#34;
+        with self._working_lock:
+            if self._working:
+                self.print_to_gui_console(&#34;Busy handling a previous request. &#34;
+                                          &#34;Please wait for it to finish before making any new ones.&#34;)
+                return
+            self._working = True
+
+        if self.tensorboard_process == None:
+            if not is_port_taken(6006):  # checks that port 6006 isn&#39;t taken.
+                cmd_line = &#34;tensorboard --logdir \&#34;%s\&#34;&#34; % os.path.join(self.save_folder_path,
+                                                                        self.a3c_model.LogsFolder)
+                self.tensorboard_process = subprocess.Popen(cmd_line)
+                self.print_to_gui_console(&#34;TensorBoard server active. Available at &#39;localhost:6006&#39;&#34;)
+            else:
+                self.print_to_gui_console(&#34;It seems that some program is already using port 6006. &#34;
+                                          &#34;Aborting TensorBoard activation.&#34;)
+        else:
+            self.print_to_gui_console(&#34;TensorBoard is already active.&#34;)
+
+    def tensorboard_stop_command(self, verbose=True):
+        &#34;&#34;&#34;
+        Terminates the process that runs a tensorboard server allowing to view the logs data.  
+
+        :param verbose: Should or should not print textual report to GUI Console (bool).  
+        :return: None
+        &#34;&#34;&#34;
+        if self.tensorboard_process != None:
+            self.tensorboard_process.terminate()
+            self.tensorboard_process = None
+            self.working = False
+            if verbose:
+                self.print_to_gui_console(&#34;TensorBoard server Terminated.&#34;)
+        else:
+            if verbose:
+                self.print_to_gui_console(&#34;It seems that TensorBoard isn&#39;t active. Termination aborted.&#34;)
+
+
+    @GamesScreen_threader_decorator
+    def play_button_command(self):
+        &#34;&#34;&#34;
+        Handles playing and displaying of the episodes played by the A3C_Algorithm.
+        Decorated with the @GamesScreen_threader_decorator.  
+
+        :return: None
+        &#34;&#34;&#34;
+        if not self.streaming:
+            try:
+                eps2play = int(self.play_episodes_spinbox.get())
+                if eps2play &lt;= 0:
+                    raise ValueError()
+            except ValueError:
+                self.print_to_gui_console(&#34;Please enter a valid number of episodes to play.&#34;)
+                return
+            else:
+                self.print_to_gui_console(&#34;Preparing model to play...&#34;)
+
+            self._display_frames_queue = queue.Queue(maxsize=1)
+
+            self.streaming = True
+
+            self.display.after(self.Display_Update_Intervals, func=self._update_display_screen)
+            try:
+                self.make_sure_envs_manager_is_active()
+                self.a3c_model.play(n_episodes=eps2play, print_func=self.print_to_gui_console,
+                                    frame_update_func=self._update_display_frames_queue,
+                                    get_stop_flag=self.get_stop_flag)
+            except (TypeError, RuntimeError, TimeoutExceededTryingToGetMsgError, tf.errors.CancelledError):
+                pass  # Might happen when the client disconnects
+            except ManagerUsedIsNotRunningError:
+                self.print_to_gui_console(&#34;It seems that the environment manager shut down.\r\n&#34;
+                                          &#34;Please try again.&#34;)
+            except SocketClosedRemotelyError:
+                self.print_to_gui_console(
+                    &#34;It seems that connection with the server has been lost.\r\nPlease try again.&#34;)
+            self.streaming = False
+            self.stop_flag = False
+
+        else:
+            self.print_to_gui_console(&#34;Wait for the current play to end.&#34;)
+
+    def _update_display_frames_queue(self, frame):
+        &#34;&#34;&#34;
+        A function that takes an image and puts to the  self._display_frames_queue so that the self.display will show it.  
+
+        :param frame: An instance of PIL.Image.Image class.  
+        :return: None
+        &#34;&#34;&#34;
+        try:
+            self._display_frames_queue.put(frame, block=True, timeout=self.Display_Update_Queue_Put_Timeout)
+        except queue.Full:
+            pass
+
+    def _update_display_screen(self):
+        &#34;&#34;&#34;
+        Safely takes an image from self._display_frames_queue and diplay it in self.display.  
+
+        :return: None
+        &#34;&#34;&#34;
+        if self.streaming:
+            if not self._display_frames_queue.empty():
+                img = self._display_frames_queue.get()
+
+                # ---DEBUG START---
+                if SAVE_PLAY:
+                    if not os.path.exists(&#34;.\\frames\\&#34;):
+                        os.mkdir(&#34;.\\frames\\&#34;)
+                    img.save(&#34;.\\frames\\%s.jpg&#34; % time.time())
+                # ---DEBUG END---
+
+                frame_image = ImageTk.PhotoImage(image=img)
+                self._curr_frame = frame_image  # There seems to a bug with ImageTk and the create_image func where if
+                #                                 we don&#39;t deliberately save the ImageTk.PhotoImage() to some variable,
+                #                                 the garbage collector collects and deletes it before the image is
+                #                                 loaded to the canvas and the image the create_image() func loads is
+                #                                 garbage data. That is why we assign it to a variable.
+                #                                 For more details see:
+                #                                 https://effbot.org/pyfaq/why-do-my-tkinter-images-not-appear.htm
+                self.display.create_image((0, 0), image=frame_image, anchor=tk.NW)
+            self.display.after(self.Display_Update_Intervals, func=self._update_display_screen)
+
+    @GamesScreen_threader_decorator
+    def train_button_command(self):
+        &#34;&#34;&#34;
+        Handles the training of the model.
+        Decorated with the @GamesScreen_threader_decorator.  
+
+        :return: None
+        &#34;&#34;&#34;
+        try:
+            eps2train = int(self.train_episodes_spinbox.get())
+            if eps2train &lt;= 0:
+                raise ValueError()
+        except ValueError:
+            self.print_to_gui_console(&#34;Please enter a valid number of episodes to train.&#34;)
+            return
+        else:
+            self.print_to_gui_console(&#34;Preparing model for training... \r\nThe following Hyper Parameters&#39; values will &#34;
+                                      &#34;be used:\r\nAlpha Learning Rate: &#34; &#34;%f\r\nMemory Buffer Size: %d&#34; %
+                                      (self.alpha_learning_rate, self.worker_memory_buffer_size))
+        try:
+            self.make_sure_envs_manager_is_active()
+            self.a3c_model.train(eps2train, print_func=self.print_to_gui_console, get_stop_flag=self.get_stop_flag)
+        except (TypeError, RuntimeError, TimeoutExceededTryingToGetMsgError, tf.errors.CancelledError):
+            pass  # Might happen when the client disconnects
+        except ManagerUsedIsNotRunningError:
+            self.print_to_gui_console(&#34;It seems that the environment manager shut down.\r\n&#34;
+                                      &#34;Please try again.&#34;)
+        except SocketClosedRemotelyError:
+            self.print_to_gui_console(&#34;It seems that connection with the server has been lost.\r\nPlease try again.&#34;)
+        self.stop_flag = False
+
+    def make_sure_envs_manager_is_active(self):
+        &#34;&#34;&#34;
+        Makes sure that self.envs_manager is active and we can use it. Will fix it if self.envs_manager isn&#39;t active.  
+
+        :return: None
+        &#34;&#34;&#34;
+        if self.envs_manager.status != Status.Running:
+            self.envs_manager = RemoteEnvironmentsManager(*self.envs_manager.get_server_ip_and_port())
+            self.init_a3c_algorithm()
+    
+    def print_to_gui_console(self, data):
+        &#34;&#34;&#34;
+        Print text to the self.gui_console widget.  
+
+        :param data: Text to print to the self.gui_console widget.  
+        :return: None
+        &#34;&#34;&#34;
+        try:
+            self.gui_console.config(state=tk.NORMAL)
+            self.gui_console.insert(&#39;end&#39;, &#39;\n&gt;&gt; &#39; + data)
+            self.gui_console.see(tk.END)
+            self.gui_console.update()
+            self.gui_console.config(state=tk.DISABLED)
+        except RuntimeError:  # might happens when functions try to write after the window closed.
+            pass              # (while the client closes)
+
+    @staticmethod
+    def ask4folder(window_title=&#34;&#34;):
+        &#34;&#34;&#34;
+        Ask for a path to a folder graphically.  
+
+        :param window_title: The title of the browse window that will open. (string)  
+        :return: path chosen by the user. (string)
+        &#34;&#34;&#34;
+        file_path_string = filedialog.askdirectory(title=window_title)
+        return file_path_string</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>tkinter.Frame</li>
+<li>tkinter.Widget</li>
+<li>tkinter.BaseWidget</li>
+<li>tkinter.Misc</li>
+<li>tkinter.Pack</li>
+<li>tkinter.Place</li>
+<li>tkinter.Grid</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="Beta.graphics.GameScreen.Display_Update_Intervals"><code class="name">var <span class="ident">Display_Update_Intervals</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="Beta.graphics.GameScreen.Display_Update_Queue_Put_Timeout"><code class="name">var <span class="ident">Display_Update_Queue_Put_Timeout</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="Beta.graphics.GameScreen.Max_Episode_To_Play_In_One_Go"><code class="name">var <span class="ident">Max_Episode_To_Play_In_One_Go</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="Beta.graphics.GameScreen.Max_Episode_To_Train_In_One_Go"><code class="name">var <span class="ident">Max_Episode_To_Train_In_One_Go</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="Beta.graphics.GameScreen.Max_Worker_Memory_Buffer_Size"><code class="name">var <span class="ident">Max_Worker_Memory_Buffer_Size</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+</dl>
+<h3>Static methods</h3>
+<dl>
+<dt id="Beta.graphics.GameScreen.ask4folder"><code class="name flex">
+<span>def <span class="ident">ask4folder</span></span>(<span>window_title='')</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Ask for a path to a folder graphically.
+</p>
+<p>:param window_title: The title of the browse window that will open. (string)<br>
+:return: path chosen by the user. (string)</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@staticmethod
+def ask4folder(window_title=&#34;&#34;):
+    &#34;&#34;&#34;
+    Ask for a path to a folder graphically.  
+
+    :param window_title: The title of the browse window that will open. (string)  
+    :return: path chosen by the user. (string)
+    &#34;&#34;&#34;
+    file_path_string = filedialog.askdirectory(title=window_title)
+    return file_path_string</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Instance variables</h3>
+<dl>
+<dt id="Beta.graphics.GameScreen.save_folder_path"><code class="name">var <span class="ident">save_folder_path</span></code></dt>
+<dd>
+<section class="desc"><p>save_folder_path Property getter. Safely returns the value of self.a3c_model.save_manger.saves_folder_path.
+</p>
+<p>:return: The value of self.a3c_model.save_manger.saves_folder_path.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@property
+def save_folder_path(self):
+    &#34;&#34;&#34;
+    save_folder_path Property getter. Safely returns the value of self.a3c_model.save_manger.saves_folder_path.  
+
+    :return: The value of self.a3c_model.save_manger.saves_folder_path.
+    &#34;&#34;&#34;
+    if self.a3c_model != None:
+        return self.a3c_model.save_manger.saves_folder_path
+    return None</code></pre>
+</details>
+</dd>
+<dt id="Beta.graphics.GameScreen.stop_flag"><code class="name">var <span class="ident">stop_flag</span></code></dt>
+<dd>
+<section class="desc"><p>stop_flag Property getter. Safely returns the value of self._stop_flag
+</p>
+<p>:return: The value of self._stop_flag</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@property
+def stop_flag(self):
+    &#34;&#34;&#34;
+    stop_flag Property getter. Safely returns the value of self._stop_flag  
+
+    :return: The value of self._stop_flag
+    &#34;&#34;&#34;
+    with self._stop_flag_lock:
+        return self._stop_flag</code></pre>
+</details>
+</dd>
+<dt id="Beta.graphics.GameScreen.streaming"><code class="name">var <span class="ident">streaming</span></code></dt>
+<dd>
+<section class="desc"><p>streaming Property getter. Safely returns the value of self._streaming
+</p>
+<p>:return: The value of self._streaming</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@property
+def streaming(self):
+    &#34;&#34;&#34;
+    streaming Property getter. Safely returns the value of self._streaming  
+
+    :return: The value of self._streaming
+    &#34;&#34;&#34;
+    with self._streaming_lock:
+        return self._streaming</code></pre>
+</details>
+</dd>
+<dt id="Beta.graphics.GameScreen.working"><code class="name">var <span class="ident">working</span></code></dt>
+<dd>
+<section class="desc"><p>working Property getter. Safely returns the value of self._working
+</p>
+<p>:return: The value of self._working</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@property
+def working(self):
+    &#34;&#34;&#34;
+    working Property getter. Safely returns the value of self._working  
+
+    :return: The value of self._working
+    &#34;&#34;&#34;
+    with self._working_lock:
+        return self._working</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="Beta.graphics.GameScreen.append_thread_to_threads_activated"><code class="name flex">
+<span>def <span class="ident">append_thread_to_threads_activated</span></span>(<span>self, thread)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Safely appends the thread to the self.threads_activated list.
+</p>
+<p>:param thread: An instance that inherits from thread.<br>
+:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def append_thread_to_threads_activated(self, thread):
+    &#34;&#34;&#34;
+    Safely appends the thread to the self.threads_activated list.  
+
+    :param thread: An instance that inherits from thread.  
+    :return: None
+    &#34;&#34;&#34;
+    with self.threads_activated_lock:
+        self.threads_activated.append(thread)</code></pre>
+</details>
+</dd>
+<dt id="Beta.graphics.GameScreen.exit"><code class="name flex">
+<span>def <span class="ident">exit</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Exit tk.mainloop(). (see main)
+</p>
+<p>:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def exit(self):
+    &#34;&#34;&#34;
+    Exit tk.mainloop(). (see main)  
+
+    :return: None
+    &#34;&#34;&#34;
+    self.parent.quit()</code></pre>
+</details>
+</dd>
+<dt id="Beta.graphics.GameScreen.file_load_command"><code class="name flex">
+<span>def <span class="ident">file_load_command</span></span>(<span>self, *args, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def wrapper(self, *args, **kwargs):
+    def prepare_work(func2thread):
+        def work(self, *work_args, **work_kwargs):
+            res = func2thread(self, *work_args, **work_kwargs)
+            self.working = False
+            return res
+        return work
+    if self.working:
+        self.print_to_gui_console(&#34;Busy handling a previous request. &#34;
+                                  &#34;Please wait for it to finish before making any new ones.&#34;)
+        return
+
+    self.working = True
+    self.stop_flag = False
+    thread = threading.Thread(target=prepare_work(function), args=(self, *args), kwargs=kwargs)
+    self.append_thread_to_threads_activated(thread)
+    thread.start()</code></pre>
+</details>
+</dd>
+<dt id="Beta.graphics.GameScreen.file_new_command"><code class="name flex">
+<span>def <span class="ident">file_new_command</span></span>(<span>self, *args, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def wrapper(self, *args, **kwargs):
+    def prepare_work(func2thread):
+        def work(self, *work_args, **work_kwargs):
+            res = func2thread(self, *work_args, **work_kwargs)
+            self.working = False
+            return res
+        return work
+    if self.working:
+        self.print_to_gui_console(&#34;Busy handling a previous request. &#34;
+                                  &#34;Please wait for it to finish before making any new ones.&#34;)
+        return
+
+    self.working = True
+    self.stop_flag = False
+    thread = threading.Thread(target=prepare_work(function), args=(self, *args), kwargs=kwargs)
+    self.append_thread_to_threads_activated(thread)
+    thread.start()</code></pre>
+</details>
+</dd>
+<dt id="Beta.graphics.GameScreen.file_stop_command"><code class="name flex">
+<span>def <span class="ident">file_stop_command</span></span>(<span>self, verbose=True)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Stops all current operations. Cannot stop the self.update_hyper_parameters_button_command() func.
+</p>
+<p>:param verbose: Should or should not print textual report to GUI Console (bool).<br>
+:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def file_stop_command(self, verbose=True):
+    &#34;&#34;&#34;
+    Stops all current operations. Cannot stop the self.update_hyper_parameters_button_command() func.  
+
+    :param verbose: Should or should not print textual report to GUI Console (bool).  
+    :return: None
+    &#34;&#34;&#34;
+    self.tensorboard_stop_command(verbose=False)
+    self.stop_flag = True
+    if verbose:
+        self.print_to_gui_console(&#34;Stopping operations...&#34;)</code></pre>
+</details>
+</dd>
+<dt id="Beta.graphics.GameScreen.get_stop_flag"><code class="name flex">
+<span>def <span class="ident">get_stop_flag</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def get_stop_flag(self):
+    return self.stop_flag</code></pre>
+</details>
+</dd>
+<dt id="Beta.graphics.GameScreen.init_a3c_algorithm"><code class="name flex">
+<span>def <span class="ident">init_a3c_algorithm</span></span>(<span>self, save_folder_path=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Use after every use of the .train() func and at first when initiating.
+</p>
+<p>:param save_folder_path: if None retain the previous save_folder_path.<br>
+:return: fresh instance of A3C_Algorithm class</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def init_a3c_algorithm(self, save_folder_path=None):
+    &#34;&#34;&#34;
+    Use after every use of the .train() func and at first when initiating.  
+
+    :param save_folder_path: if None retain the previous save_folder_path.  
+    :return: fresh instance of A3C_Algorithm class
+    &#34;&#34;&#34;
+    if save_folder_path is None:
+        save_folder_path = self.save_folder_path
+
+    tf.reset_default_graph()
+    if self.a3c_model != None:
+        self.a3c_model.shutdown()
+    self.a3c_model = A3C_Algorithm(self.envs_manager, self.env_init_str, Play_Display_Size=self.__display_size,
+                                   save_folder_path=save_folder_path,
+                                   Worker_Memory_Buffer_Size=self.worker_memory_buffer_size,
+                                   AlphaLearningRate=self.alpha_learning_rate)</code></pre>
+</details>
+</dd>
+<dt id="Beta.graphics.GameScreen.init_widgets"><code class="name flex">
+<span>def <span class="ident">init_widgets</span></span>(<span>self, display_size)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Handles the initialization of all tk widgets.
+</p>
+<p>:param display_size: The size of the display box in which we will show the screen images of the environment
+(tuple of ints (width, height).<br>
+:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def init_widgets(self, display_size):
+    &#34;&#34;&#34;
+    Handles the initialization of all tk widgets.  
+
+    :param display_size: The size of the display box in which we will show the screen images of the environment
+        (tuple of ints (width, height).  
+    :return: None
+    &#34;&#34;&#34;
+    # creating a root menu to insert all the sub menus
+    self.root_menu = tk.Menu(self.parent)
+    self.parent.config(menu=self.root_menu)
+
+    # creating sub menus in the root menu
+    self.file_menu = tk.Menu(self.root_menu)  # it intializes a new su menu in the root menu
+    self.root_menu.add_cascade(label=&#34;File&#34;, menu=self.file_menu)  # it creates the name of the sub menu
+    self.file_menu.add_command(label=&#34;New&#34;, command=self.file_new_command)
+    self.file_menu.add_command(label=&#34;Load&#34;, command=self.file_load_command)
+    self.file_menu.add_command(label=&#34;Stop&#34;, command=self.file_stop_command)
+    self.file_menu.add_separator()
+    self.file_menu.add_command(label=&#34;Exit&#34;, command=self.exit)
+
+    self.tensorboard_menu = tk.Menu(self.root_menu)  # it intializes a new su menu in the root menu
+    self.root_menu.add_cascade(label=&#34;TensorBoard&#34;, menu=self.tensorboard_menu)  # it creates the name of the sub menu
+    self.tensorboard_menu.add_command(label=&#34;Launch Server...&#34;, command=self.tensorboard_start_command)
+    self.tensorboard_menu.add_command(label=&#34;Stop Server&#34;, command=self.tensorboard_stop_command)
+
+    self.lable = tk.Label(master=self, text=self.env_name)
+    self.lable.grid(row=0, column=0)  # , columnspan=6)
+
+    self.display = tk.Canvas(master=self, width=display_size[0], height=display_size[1])  # canvas
+    self.display.grid(column=0, row=1, rowspan=3)
+
+    self.play_button = tk.Button(master=self, text=&#34;Play&#34;, command=self.play_button_command)
+    self.play_button.grid(column=1, row=1)
+
+    self.play_episodes_spinbox = tk.Spinbox(master=self, from_=1, to=self.Max_Episode_To_Play_In_One_Go,
+                                             width=5)
+    self.play_episodes_spinbox.grid(column=2, row=1, sticky=&#39;w&#39;)
+
+    self.train_button = tk.Button(master=self, text=&#34;Train&#34;, command=self.train_button_command)
+    self.train_button.grid(column=1, row=2)
+
+    self.train_episodes_spinbox = tk.Spinbox(master=self, from_=1, to=self.Max_Episode_To_Train_In_One_Go,
+                                             width=5)
+    self.train_episodes_spinbox.grid(column=2, row=2, sticky=&#39;w&#39;)
+
+    self.update_hyper_parameters_button = tk.Button(master=self, text=&#34;Update Hyper Parameters&#34;,
+                                                  command=self.update_hyper_parameters_button_command)
+    self.update_hyper_parameters_button.grid(column=3, row=1, rowspan=2)
+
+    self.alpha_learning_rate_lable = tk.Label(master=self, text=&#34;Alpha Learning Rate&#34;)
+    self.alpha_learning_rate_lable.grid(column=4, row=1)
+
+    self.alpha_learning_rate_entry = tk.Entry(master=self)
+    self.alpha_learning_rate_entry.insert(tk.END, &#39;%.E&#39; % Decimal(self.alpha_learning_rate))
+    self.alpha_learning_rate_entry.grid(column=5, row=1)
+
+    self.memory_buffer_size_lable = tk.Label(master=self, text=&#34;Memory Buffer Size&#34;)
+    self.memory_buffer_size_lable.grid(column=4, row=2)
+
+    self.memory_buffer_size_entry = tk.Entry(master=self)
+    self.memory_buffer_size_entry.insert(tk.END, str(self.worker_memory_buffer_size))
+    self.memory_buffer_size_entry.grid(column=5, row=2)
+
+    self.gui_console = tkst.ScrolledText(master=self, width=70, height=10, state=tk.DISABLED)
+    self.gui_console.grid(column=1, row=3, columnspan=5)</code></pre>
+</details>
+</dd>
+<dt id="Beta.graphics.GameScreen.load_command"><code class="name flex">
+<span>def <span class="ident">load_command</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Handles the process of loading a save.
+</p>
+<p>:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def load_command(self):
+    &#34;&#34;&#34;
+    Handles the process of loading a save.  
+
+    :return: None
+    &#34;&#34;&#34;
+    folder_path = self.ask4folder(window_title=&#34;Choose a directory to load a save from...&#34;)
+
+    if SavesManager.check_for_save(folder_path):
+        self.reset_graphics()
+        self.init_a3c_algorithm(folder_path)
+        self.print_to_gui_console(&#34;Model Loaded.&#34;)
+    else:
+        initial_prompt = &#34;No Save Found! Do you want to try and load a differnt save? &#34; \
+                         &#34;(yes - load a different save, no - create a new save)&#34;
+        should_load_save = messagebox.askyesno(&#34;Load?&#34;, initial_prompt)
+        if should_load_save:
+            self.load_command()
+        else:
+            self.new_command()</code></pre>
+</details>
+</dd>
+<dt id="Beta.graphics.GameScreen.make_sure_envs_manager_is_active"><code class="name flex">
+<span>def <span class="ident">make_sure_envs_manager_is_active</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Makes sure that self.envs_manager is active and we can use it. Will fix it if self.envs_manager isn't active.
+</p>
+<p>:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def make_sure_envs_manager_is_active(self):
+    &#34;&#34;&#34;
+    Makes sure that self.envs_manager is active and we can use it. Will fix it if self.envs_manager isn&#39;t active.  
+
+    :return: None
+    &#34;&#34;&#34;
+    if self.envs_manager.status != Status.Running:
+        self.envs_manager = RemoteEnvironmentsManager(*self.envs_manager.get_server_ip_and_port())
+        self.init_a3c_algorithm()</code></pre>
+</details>
+</dd>
+<dt id="Beta.graphics.GameScreen.new_command"><code class="name flex">
+<span>def <span class="ident">new_command</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Handles the process of creating a new save.
+</p>
+<p>:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def new_command(self):
+    &#34;&#34;&#34;
+    Handles the process of creating a new save.  
+
+    :return: None
+    &#34;&#34;&#34;
+    folder_path = self.ask4folder(window_title=&#34;Choose a directory to create a new save in...&#34;)
+
+    # if the user presses &#39;cancel&#39; (If the user presses &#39;cancel&#39;, self.ask4folder() returns &#39;&#39;)
+    if folder_path == &#39;&#39;:
+        prompt = &#34;Do you want to exit then? (yes - exit, no - create a new save)&#34;
+        should_exit = messagebox.askyesno(&#34;Exit?&#34;, prompt)
+        if should_exit:
+            self.after(1, func=self.exit)   # I don&#39;t call it directly because if the exit() func is called before
+                                            # the tk mainloop is started (can happan in the initial promp), it will
+                                            # have no effect. By using the .after() I insure that the mainloop was
+                                            # started.
+        else:
+            self.new_command()
+        return
+
+    if len(os.listdir(folder_path)) &gt; 0:
+        warning_msg = &#34;You have cosen a folder that contains file. Should you proceed all said files will be &#34; \
+                      &#34;deleted. Proceed?&#34;
+        if messagebox.askyesno(&#34;Python&#34;, warning_msg):
+            delete_dir_contents(folder_path)
+    self.reset_graphics()
+    self.init_a3c_algorithm(folder_path)
+    self.print_to_gui_console(&#34;New Model initiated.&#34;)</code></pre>
+</details>
+</dd>
+<dt id="Beta.graphics.GameScreen.play_button_command"><code class="name flex">
+<span>def <span class="ident">play_button_command</span></span>(<span>self, *args, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def wrapper(self, *args, **kwargs):
+    def prepare_work(func2thread):
+        def work(self, *work_args, **work_kwargs):
+            res = func2thread(self, *work_args, **work_kwargs)
+            self.working = False
+            return res
+        return work
+    if self.working:
+        self.print_to_gui_console(&#34;Busy handling a previous request. &#34;
+                                  &#34;Please wait for it to finish before making any new ones.&#34;)
+        return
+
+    self.working = True
+    self.stop_flag = False
+    thread = threading.Thread(target=prepare_work(function), args=(self, *args), kwargs=kwargs)
+    self.append_thread_to_threads_activated(thread)
+    thread.start()</code></pre>
+</details>
+</dd>
+<dt id="Beta.graphics.GameScreen.print_to_gui_console"><code class="name flex">
+<span>def <span class="ident">print_to_gui_console</span></span>(<span>self, data)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Print text to the self.gui_console widget.
+</p>
+<p>:param data: Text to print to the self.gui_console widget.<br>
+:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def print_to_gui_console(self, data):
+    &#34;&#34;&#34;
+    Print text to the self.gui_console widget.  
+
+    :param data: Text to print to the self.gui_console widget.  
+    :return: None
+    &#34;&#34;&#34;
+    try:
+        self.gui_console.config(state=tk.NORMAL)
+        self.gui_console.insert(&#39;end&#39;, &#39;\n&gt;&gt; &#39; + data)
+        self.gui_console.see(tk.END)
+        self.gui_console.update()
+        self.gui_console.config(state=tk.DISABLED)
+    except RuntimeError:  # might happens when functions try to write after the window closed.
+        pass              # (while the client closes)</code></pre>
+</details>
+</dd>
+<dt id="Beta.graphics.GameScreen.reset_graphics"><code class="name flex">
+<span>def <span class="ident">reset_graphics</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Resets the widgets.
+</p>
+<p>:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def reset_graphics(self):
+    &#34;&#34;&#34;
+    Resets the widgets.  
+
+    :return: None
+    &#34;&#34;&#34;
+    self.gui_console.edit_reset()</code></pre>
+</details>
+</dd>
+<dt id="Beta.graphics.GameScreen.shutdown"><code class="name flex">
+<span>def <span class="ident">shutdown</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Shutdown this instance and all of it's components.
+</p>
+<p>:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def shutdown(self):
+    &#34;&#34;&#34;
+    Shutdown this instance and all of it&#39;s components.  
+
+    :return: None
+    &#34;&#34;&#34;
+    self.file_stop_command(verbose=False)
+    self.tensorboard_stop_command(verbose=False)
+    with self.threads_activated_lock:
+        for t in self.threads_activated:
+            if t.is_alive():
+                t.join()
+    if self.a3c_model != None:
+        self.a3c_model.shutdown()
+    if self.envs_manager != None and self.envs_manager.status == Status.Running:
+        self.envs_manager.shutdown()
+        self.envs_manager.join()</code></pre>
+</details>
+</dd>
+<dt id="Beta.graphics.GameScreen.tensorboard_start_command"><code class="name flex">
+<span>def <span class="ident">tensorboard_start_command</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Starts a process that runs a tensorboard server allowing to view the logs data.
+</p>
+<p>:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def tensorboard_start_command(self):
+    &#34;&#34;&#34;
+    Starts a process that runs a tensorboard server allowing to view the logs data.  
+
+    :return: None
+    &#34;&#34;&#34;
+    with self._working_lock:
+        if self._working:
+            self.print_to_gui_console(&#34;Busy handling a previous request. &#34;
+                                      &#34;Please wait for it to finish before making any new ones.&#34;)
+            return
+        self._working = True
+
+    if self.tensorboard_process == None:
+        if not is_port_taken(6006):  # checks that port 6006 isn&#39;t taken.
+            cmd_line = &#34;tensorboard --logdir \&#34;%s\&#34;&#34; % os.path.join(self.save_folder_path,
+                                                                    self.a3c_model.LogsFolder)
+            self.tensorboard_process = subprocess.Popen(cmd_line)
+            self.print_to_gui_console(&#34;TensorBoard server active. Available at &#39;localhost:6006&#39;&#34;)
+        else:
+            self.print_to_gui_console(&#34;It seems that some program is already using port 6006. &#34;
+                                      &#34;Aborting TensorBoard activation.&#34;)
+    else:
+        self.print_to_gui_console(&#34;TensorBoard is already active.&#34;)</code></pre>
+</details>
+</dd>
+<dt id="Beta.graphics.GameScreen.tensorboard_stop_command"><code class="name flex">
+<span>def <span class="ident">tensorboard_stop_command</span></span>(<span>self, verbose=True)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Terminates the process that runs a tensorboard server allowing to view the logs data.
+</p>
+<p>:param verbose: Should or should not print textual report to GUI Console (bool).<br>
+:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def tensorboard_stop_command(self, verbose=True):
+    &#34;&#34;&#34;
+    Terminates the process that runs a tensorboard server allowing to view the logs data.  
+
+    :param verbose: Should or should not print textual report to GUI Console (bool).  
+    :return: None
+    &#34;&#34;&#34;
+    if self.tensorboard_process != None:
+        self.tensorboard_process.terminate()
+        self.tensorboard_process = None
+        self.working = False
+        if verbose:
+            self.print_to_gui_console(&#34;TensorBoard server Terminated.&#34;)
+    else:
+        if verbose:
+            self.print_to_gui_console(&#34;It seems that TensorBoard isn&#39;t active. Termination aborted.&#34;)</code></pre>
+</details>
+</dd>
+<dt id="Beta.graphics.GameScreen.train_button_command"><code class="name flex">
+<span>def <span class="ident">train_button_command</span></span>(<span>self, *args, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def wrapper(self, *args, **kwargs):
+    def prepare_work(func2thread):
+        def work(self, *work_args, **work_kwargs):
+            res = func2thread(self, *work_args, **work_kwargs)
+            self.working = False
+            return res
+        return work
+    if self.working:
+        self.print_to_gui_console(&#34;Busy handling a previous request. &#34;
+                                  &#34;Please wait for it to finish before making any new ones.&#34;)
+        return
+
+    self.working = True
+    self.stop_flag = False
+    thread = threading.Thread(target=prepare_work(function), args=(self, *args), kwargs=kwargs)
+    self.append_thread_to_threads_activated(thread)
+    thread.start()</code></pre>
+</details>
+</dd>
+<dt id="Beta.graphics.GameScreen.update_hyper_parameters_button_command"><code class="name flex">
+<span>def <span class="ident">update_hyper_parameters_button_command</span></span>(<span>self, *args, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def wrapper(self, *args, **kwargs):
+    def prepare_work(func2thread):
+        def work(self, *work_args, **work_kwargs):
+            res = func2thread(self, *work_args, **work_kwargs)
+            self.working = False
+            return res
+        return work
+    if self.working:
+        self.print_to_gui_console(&#34;Busy handling a previous request. &#34;
+                                  &#34;Please wait for it to finish before making any new ones.&#34;)
+        return
+
+    self.working = True
+    self.stop_flag = False
+    thread = threading.Thread(target=prepare_work(function), args=(self, *args), kwargs=kwargs)
+    self.append_thread_to_threads_activated(thread)
+    thread.start()</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="Beta.graphics.GameSelectionScreen"><code class="flex name class">
+<span>class <span class="ident">GameSelectionScreen</span></span>
+<span>(</span><span>parent)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Frame widget which may contain other widgets and can have a 3D border.</p>
+<p>A class that handles the creation and operation of the GUI window that sets up connection with the server and
+choose an environment to play/train on.
+</p>
+<p>:param parent: A tk.Tk instance.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class GameSelectionScreen(tk.Frame):
+    Icon_Display_Size = [250, 250]
+
+    def __init__(self, parent):
+        &#34;&#34;&#34;
+        A class that handles the creation and operation of the GUI window that sets up connection with the server and
+        choose an environment to play/train on.  
+
+        :param parent: A tk.Tk instance.
+        &#34;&#34;&#34;
+        self.parent = parent
+
+        # handle graphics
+        tk.Frame.__init__(self, parent)
+        self.parent.title(&#34;Setup&#34;)
+
+        self.envs_manager = None
+        self.env_init_str_to_icons_dict = None
+
+        self.chosen_env_init_str_tk_var = tk.StringVar(master=self)
+        self.chosen_env_init_str_tk_var.trace(&#39;w&#39;, self._update_icon_display_screen)  # Will call _update_icon_display
+        #                                                                               _screen() func every time the
+        #                                                                               value of self.env_init_str
+        #                                                                               changes. Note to self: check
+        #                                                                               what the &#39;w&#39; means.
+
+        self._curr_icon = None  # for it&#39;s purpose see documentation in ._update_display_screen() func.
+        
+        self.select_and_launch_button_was_pressesd = False
+
+        self.init_widgets()
+
+    @property
+    def chosen_env_init_str(self):
+        &#34;&#34;&#34;
+        chosen_env_init_str Property getter. Returns the value of the initialization string chosen by the user.
+        (stored in self.chosen_env_init_str_tk_var)  
+
+        :return: The value of the initialization string chosen by the user.
+        &#34;&#34;&#34;
+        return self.chosen_env_init_str_tk_var.get()
+
+    def init_widgets(self):
+        &#34;&#34;&#34;
+        Handles the initialization of all tk widgets.  
+
+        :return: None
+        &#34;&#34;&#34;
+        # creating a root menu to insert all the sub menus
+
+        self.lable = tk.Label(master=self, text=&#34;Please connect to the server and then proceed to choose a game.&#34;)
+        self.lable.grid(column=0, row=0, columnspan=3, sticky=tk.NW)
+
+        self.ip_entry = tk.Entry(master=self)
+        self.ip_entry.insert(tk.END, Default_IP)
+        self.ip_entry.grid(column=0, row=1)
+
+        self.port_entry = tk.Entry(master=self)
+        self.port_entry.insert(tk.END, Default_Port)
+        self.port_entry.grid(column=1, row=1)
+
+        self.connect_button = tk.Button(master=self, text=&#34;Connect&#34;, command=self.connect_button_command)
+        self.connect_button.grid(column=2, row=1)
+
+        self.games_option_menu = ttk.Combobox(self, textvariable=self.chosen_env_init_str_tk_var, state=tk.DISABLED)
+        self.games_option_menu.grid(column=0, row=2)
+
+        self.select_and_launch_button = tk.Button(master=self, text=&#34;Launch&#34;,
+                                                  command=self.select_and_launch_button_command, state=tk.DISABLED)
+        self.select_and_launch_button.grid(column=1, row=2)
+
+        self.icon_display = tk.Canvas(master=self, width=self.Icon_Display_Size[0], height=self.Icon_Display_Size[1])
+        self.icon_display.grid(column=2, row=2, rowspan=3)
+
+    def connect_button_command(self):
+        &#34;&#34;&#34;
+        Attempts connection with the server.
+        First tries to ping the server, if the server returns a ping:
+        Establishes connection and enables interaction with the environment selection related widgets.  
+
+        :return: None
+        &#34;&#34;&#34;
+        ip = self.ip_entry.get()
+        if not is_valid_ipv4_address(ip):
+            print(&#34;Please enter a valid ip address.&#34;)
+            return
+
+        try:
+            port = int(self.port_entry.get())
+            if not (0 &lt;= port &lt; 2 ** 16):
+                raise ValueError()
+        except ValueError:
+            print(&#34;Please enter a valid port number.&#34;)
+            return
+
+        if RemoteEnvironmentsManager.check_for_server(ip, port):
+            self.connect2server(ip, port)
+            self.ip_entry.config(state=tk.DISABLED)
+            self.port_entry.config(state=tk.DISABLED)
+            self.connect_button.config(text=&#34;Connected&#34;, state=tk.DISABLED)
+            self.select_and_launch_button.config(state=tk.NORMAL)
+            self.games_option_menu.config(state=&#39;readonly&#39;)
+            self.games_option_menu[&#39;values&#39;] = list(self.env_init_str_to_icons_dict.keys())
+            self.games_option_menu.set(list(self.env_init_str_to_icons_dict.keys())[0])
+        else:
+            print(&#34;Failed to ping the server.&#34;)
+
+    def connect2server(self, ip, port):
+        &#34;&#34;&#34;
+        Establishes connection with the server, creates an instance of the RemoteEnvironmentsManager class and gets the
+        available environments initialization strings as well their icons.  
+
+        :param ip: Server&#39;s ip (string)  
+        :param port: Server&#39;s port (int)  
+        :return: None
+        &#34;&#34;&#34;
+        self.envs_manager = RemoteEnvironmentsManager(ip, port, icon_display_size=self.Icon_Display_Size)
+        self.env_init_str_to_icons_dict = self.envs_manager.get_environments_initialization_strings_to_icons_dict()
+
+    def select_and_launch_button_command(self):
+        &#34;&#34;&#34;
+        Selects the environment currently chosen by the user. Exits tk.mainloop() so that the GameScreen will be
+        launched.  
+
+        :return: None
+        &#34;&#34;&#34;
+        self.select_and_launch_button_was_pressesd = True
+        self.shutdown(shutdown_envs_manager=False)
+        self.exit()
+        
+    def get_envs_mmanager_and_chosen_init_str(self):
+        &#34;&#34;&#34;
+        Returns the envs_mmanager and the environment initialization string chosen.  
+
+        :return: Returns (self.envs_manager, self.chosen_env_init_str) if the user pressed the select button,
+            returns (None, None) otherwise.
+        &#34;&#34;&#34;
+        if self.select_and_launch_button_was_pressesd:
+            return self.envs_manager, self.chosen_env_init_str
+        else:
+            return self.envs_manager, None
+
+    def exit(self):
+        &#34;&#34;&#34;
+        Exit the tk.mainloop(). See main.py.  
+
+        :return:
+        &#34;&#34;&#34;
+        self.parent.quit()
+
+    def shutdown(self, shutdown_envs_manager=False):
+        &#34;&#34;&#34;
+        Terminates operation of instance and it&#39;s components.  
+
+        :param shutdown_envs_manager: If True, shuts down self.envs_manager. Doesn&#39;t shut is down if False.  
+        :return: None
+        &#34;&#34;&#34;
+        if shutdown_envs_manager and self.envs_manager is not None and self.envs_manager.status == Status.Running:
+            self.envs_manager.shutdown()
+            self.envs_manager.join()
+
+    def _update_icon_display_screen(self, *args):
+        &#34;&#34;&#34;
+        Updates the icon display screen.  
+
+        :param args: Irrelevant. Here so it could be used as a function to be called with widget.trace() func.  
+        :return: None
+        &#34;&#34;&#34;
+        img = Image.fromarray(self.env_init_str_to_icons_dict[self.chosen_env_init_str], mode=&#39;RGB&#39;)
+        frame_image = ImageTk.PhotoImage(image=img)
+        self._curr_icon = frame_image  # There seems to a bug with ImageTk and the create_image func where if
+        #                                 we don&#39;t deliberately save the ImageTk.PhotoImage() to some variable,
+        #                                 the garbage collector collects and deletes it before the image is
+        #                                 loaded to the canvas and the image the create_image() func loads is
+        #                                 garbage data. That is why we assign it to a variable.
+        #                                 For more details see:
+        #                                 https://effbot.org/pyfaq/why-do-my-tkinter-images-not-appear.htm
+        self.icon_display.create_image((0, 0), image=frame_image, anchor=tk.NW)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>tkinter.Frame</li>
+<li>tkinter.Widget</li>
+<li>tkinter.BaseWidget</li>
+<li>tkinter.Misc</li>
+<li>tkinter.Pack</li>
+<li>tkinter.Place</li>
+<li>tkinter.Grid</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="Beta.graphics.GameSelectionScreen.Icon_Display_Size"><code class="name">var <span class="ident">Icon_Display_Size</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+</dl>
+<h3>Instance variables</h3>
+<dl>
+<dt id="Beta.graphics.GameSelectionScreen.chosen_env_init_str"><code class="name">var <span class="ident">chosen_env_init_str</span></code></dt>
+<dd>
+<section class="desc"><p>chosen_env_init_str Property getter. Returns the value of the initialization string chosen by the user.
+(stored in self.chosen_env_init_str_tk_var)
+</p>
+<p>:return: The value of the initialization string chosen by the user.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@property
+def chosen_env_init_str(self):
+    &#34;&#34;&#34;
+    chosen_env_init_str Property getter. Returns the value of the initialization string chosen by the user.
+    (stored in self.chosen_env_init_str_tk_var)  
+
+    :return: The value of the initialization string chosen by the user.
+    &#34;&#34;&#34;
+    return self.chosen_env_init_str_tk_var.get()</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="Beta.graphics.GameSelectionScreen.connect2server"><code class="name flex">
+<span>def <span class="ident">connect2server</span></span>(<span>self, ip, port)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Establishes connection with the server, creates an instance of the RemoteEnvironmentsManager class and gets the
+available environments initialization strings as well their icons.
+</p>
+<p>:param ip: Server's ip (string)<br>
+:param port: Server's port (int)<br>
+:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def connect2server(self, ip, port):
+    &#34;&#34;&#34;
+    Establishes connection with the server, creates an instance of the RemoteEnvironmentsManager class and gets the
+    available environments initialization strings as well their icons.  
+
+    :param ip: Server&#39;s ip (string)  
+    :param port: Server&#39;s port (int)  
+    :return: None
+    &#34;&#34;&#34;
+    self.envs_manager = RemoteEnvironmentsManager(ip, port, icon_display_size=self.Icon_Display_Size)
+    self.env_init_str_to_icons_dict = self.envs_manager.get_environments_initialization_strings_to_icons_dict()</code></pre>
+</details>
+</dd>
+<dt id="Beta.graphics.GameSelectionScreen.connect_button_command"><code class="name flex">
+<span>def <span class="ident">connect_button_command</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Attempts connection with the server.
+First tries to ping the server, if the server returns a ping:
+Establishes connection and enables interaction with the environment selection related widgets.
+</p>
+<p>:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def connect_button_command(self):
+    &#34;&#34;&#34;
+    Attempts connection with the server.
+    First tries to ping the server, if the server returns a ping:
+    Establishes connection and enables interaction with the environment selection related widgets.  
+
+    :return: None
+    &#34;&#34;&#34;
+    ip = self.ip_entry.get()
+    if not is_valid_ipv4_address(ip):
+        print(&#34;Please enter a valid ip address.&#34;)
+        return
+
+    try:
+        port = int(self.port_entry.get())
+        if not (0 &lt;= port &lt; 2 ** 16):
+            raise ValueError()
+    except ValueError:
+        print(&#34;Please enter a valid port number.&#34;)
+        return
+
+    if RemoteEnvironmentsManager.check_for_server(ip, port):
+        self.connect2server(ip, port)
+        self.ip_entry.config(state=tk.DISABLED)
+        self.port_entry.config(state=tk.DISABLED)
+        self.connect_button.config(text=&#34;Connected&#34;, state=tk.DISABLED)
+        self.select_and_launch_button.config(state=tk.NORMAL)
+        self.games_option_menu.config(state=&#39;readonly&#39;)
+        self.games_option_menu[&#39;values&#39;] = list(self.env_init_str_to_icons_dict.keys())
+        self.games_option_menu.set(list(self.env_init_str_to_icons_dict.keys())[0])
+    else:
+        print(&#34;Failed to ping the server.&#34;)</code></pre>
+</details>
+</dd>
+<dt id="Beta.graphics.GameSelectionScreen.exit"><code class="name flex">
+<span>def <span class="ident">exit</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Exit the tk.mainloop(). See main.py.
+</p>
+<p>:return:</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def exit(self):
+    &#34;&#34;&#34;
+    Exit the tk.mainloop(). See main.py.  
+
+    :return:
+    &#34;&#34;&#34;
+    self.parent.quit()</code></pre>
+</details>
+</dd>
+<dt id="Beta.graphics.GameSelectionScreen.get_envs_mmanager_and_chosen_init_str"><code class="name flex">
+<span>def <span class="ident">get_envs_mmanager_and_chosen_init_str</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Returns the envs_mmanager and the environment initialization string chosen.
+</p>
+<p>:return: Returns (self.envs_manager, self.chosen_env_init_str) if the user pressed the select button,
+returns (None, None) otherwise.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def get_envs_mmanager_and_chosen_init_str(self):
+    &#34;&#34;&#34;
+    Returns the envs_mmanager and the environment initialization string chosen.  
+
+    :return: Returns (self.envs_manager, self.chosen_env_init_str) if the user pressed the select button,
+        returns (None, None) otherwise.
+    &#34;&#34;&#34;
+    if self.select_and_launch_button_was_pressesd:
+        return self.envs_manager, self.chosen_env_init_str
+    else:
+        return self.envs_manager, None</code></pre>
+</details>
+</dd>
+<dt id="Beta.graphics.GameSelectionScreen.init_widgets"><code class="name flex">
+<span>def <span class="ident">init_widgets</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Handles the initialization of all tk widgets.
+</p>
+<p>:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def init_widgets(self):
+    &#34;&#34;&#34;
+    Handles the initialization of all tk widgets.  
+
+    :return: None
+    &#34;&#34;&#34;
+    # creating a root menu to insert all the sub menus
+
+    self.lable = tk.Label(master=self, text=&#34;Please connect to the server and then proceed to choose a game.&#34;)
+    self.lable.grid(column=0, row=0, columnspan=3, sticky=tk.NW)
+
+    self.ip_entry = tk.Entry(master=self)
+    self.ip_entry.insert(tk.END, Default_IP)
+    self.ip_entry.grid(column=0, row=1)
+
+    self.port_entry = tk.Entry(master=self)
+    self.port_entry.insert(tk.END, Default_Port)
+    self.port_entry.grid(column=1, row=1)
+
+    self.connect_button = tk.Button(master=self, text=&#34;Connect&#34;, command=self.connect_button_command)
+    self.connect_button.grid(column=2, row=1)
+
+    self.games_option_menu = ttk.Combobox(self, textvariable=self.chosen_env_init_str_tk_var, state=tk.DISABLED)
+    self.games_option_menu.grid(column=0, row=2)
+
+    self.select_and_launch_button = tk.Button(master=self, text=&#34;Launch&#34;,
+                                              command=self.select_and_launch_button_command, state=tk.DISABLED)
+    self.select_and_launch_button.grid(column=1, row=2)
+
+    self.icon_display = tk.Canvas(master=self, width=self.Icon_Display_Size[0], height=self.Icon_Display_Size[1])
+    self.icon_display.grid(column=2, row=2, rowspan=3)</code></pre>
+</details>
+</dd>
+<dt id="Beta.graphics.GameSelectionScreen.select_and_launch_button_command"><code class="name flex">
+<span>def <span class="ident">select_and_launch_button_command</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Selects the environment currently chosen by the user. Exits tk.mainloop() so that the GameScreen will be
+launched.
+</p>
+<p>:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def select_and_launch_button_command(self):
+    &#34;&#34;&#34;
+    Selects the environment currently chosen by the user. Exits tk.mainloop() so that the GameScreen will be
+    launched.  
+
+    :return: None
+    &#34;&#34;&#34;
+    self.select_and_launch_button_was_pressesd = True
+    self.shutdown(shutdown_envs_manager=False)
+    self.exit()</code></pre>
+</details>
+</dd>
+<dt id="Beta.graphics.GameSelectionScreen.shutdown"><code class="name flex">
+<span>def <span class="ident">shutdown</span></span>(<span>self, shutdown_envs_manager=False)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Terminates operation of instance and it's components.
+</p>
+<p>:param shutdown_envs_manager: If True, shuts down self.envs_manager. Doesn't shut is down if False.<br>
+:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def shutdown(self, shutdown_envs_manager=False):
+    &#34;&#34;&#34;
+    Terminates operation of instance and it&#39;s components.  
+
+    :param shutdown_envs_manager: If True, shuts down self.envs_manager. Doesn&#39;t shut is down if False.  
+    :return: None
+    &#34;&#34;&#34;
+    if shutdown_envs_manager and self.envs_manager is not None and self.envs_manager.status == Status.Running:
+        self.envs_manager.shutdown()
+        self.envs_manager.join()</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="Beta" href="index.html">Beta</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="Beta.graphics.GamesScreen_threader_decorator" href="#Beta.graphics.GamesScreen_threader_decorator">GamesScreen_threader_decorator</a></code></li>
+<li><code><a title="Beta.graphics.delete_dir_contents" href="#Beta.graphics.delete_dir_contents">delete_dir_contents</a></code></li>
+<li><code><a title="Beta.graphics.is_port_taken" href="#Beta.graphics.is_port_taken">is_port_taken</a></code></li>
+<li><code><a title="Beta.graphics.is_valid_ipv4_address" href="#Beta.graphics.is_valid_ipv4_address">is_valid_ipv4_address</a></code></li>
+<li><code><a title="Beta.graphics.main" href="#Beta.graphics.main">main</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="Beta.graphics.GameScreen" href="#Beta.graphics.GameScreen">GameScreen</a></code></h4>
+<ul class="">
+<li><code><a title="Beta.graphics.GameScreen.Display_Update_Intervals" href="#Beta.graphics.GameScreen.Display_Update_Intervals">Display_Update_Intervals</a></code></li>
+<li><code><a title="Beta.graphics.GameScreen.Display_Update_Queue_Put_Timeout" href="#Beta.graphics.GameScreen.Display_Update_Queue_Put_Timeout">Display_Update_Queue_Put_Timeout</a></code></li>
+<li><code><a title="Beta.graphics.GameScreen.Max_Episode_To_Play_In_One_Go" href="#Beta.graphics.GameScreen.Max_Episode_To_Play_In_One_Go">Max_Episode_To_Play_In_One_Go</a></code></li>
+<li><code><a title="Beta.graphics.GameScreen.Max_Episode_To_Train_In_One_Go" href="#Beta.graphics.GameScreen.Max_Episode_To_Train_In_One_Go">Max_Episode_To_Train_In_One_Go</a></code></li>
+<li><code><a title="Beta.graphics.GameScreen.Max_Worker_Memory_Buffer_Size" href="#Beta.graphics.GameScreen.Max_Worker_Memory_Buffer_Size">Max_Worker_Memory_Buffer_Size</a></code></li>
+<li><code><a title="Beta.graphics.GameScreen.append_thread_to_threads_activated" href="#Beta.graphics.GameScreen.append_thread_to_threads_activated">append_thread_to_threads_activated</a></code></li>
+<li><code><a title="Beta.graphics.GameScreen.ask4folder" href="#Beta.graphics.GameScreen.ask4folder">ask4folder</a></code></li>
+<li><code><a title="Beta.graphics.GameScreen.exit" href="#Beta.graphics.GameScreen.exit">exit</a></code></li>
+<li><code><a title="Beta.graphics.GameScreen.file_load_command" href="#Beta.graphics.GameScreen.file_load_command">file_load_command</a></code></li>
+<li><code><a title="Beta.graphics.GameScreen.file_new_command" href="#Beta.graphics.GameScreen.file_new_command">file_new_command</a></code></li>
+<li><code><a title="Beta.graphics.GameScreen.file_stop_command" href="#Beta.graphics.GameScreen.file_stop_command">file_stop_command</a></code></li>
+<li><code><a title="Beta.graphics.GameScreen.get_stop_flag" href="#Beta.graphics.GameScreen.get_stop_flag">get_stop_flag</a></code></li>
+<li><code><a title="Beta.graphics.GameScreen.init_a3c_algorithm" href="#Beta.graphics.GameScreen.init_a3c_algorithm">init_a3c_algorithm</a></code></li>
+<li><code><a title="Beta.graphics.GameScreen.init_widgets" href="#Beta.graphics.GameScreen.init_widgets">init_widgets</a></code></li>
+<li><code><a title="Beta.graphics.GameScreen.load_command" href="#Beta.graphics.GameScreen.load_command">load_command</a></code></li>
+<li><code><a title="Beta.graphics.GameScreen.make_sure_envs_manager_is_active" href="#Beta.graphics.GameScreen.make_sure_envs_manager_is_active">make_sure_envs_manager_is_active</a></code></li>
+<li><code><a title="Beta.graphics.GameScreen.new_command" href="#Beta.graphics.GameScreen.new_command">new_command</a></code></li>
+<li><code><a title="Beta.graphics.GameScreen.play_button_command" href="#Beta.graphics.GameScreen.play_button_command">play_button_command</a></code></li>
+<li><code><a title="Beta.graphics.GameScreen.print_to_gui_console" href="#Beta.graphics.GameScreen.print_to_gui_console">print_to_gui_console</a></code></li>
+<li><code><a title="Beta.graphics.GameScreen.reset_graphics" href="#Beta.graphics.GameScreen.reset_graphics">reset_graphics</a></code></li>
+<li><code><a title="Beta.graphics.GameScreen.save_folder_path" href="#Beta.graphics.GameScreen.save_folder_path">save_folder_path</a></code></li>
+<li><code><a title="Beta.graphics.GameScreen.shutdown" href="#Beta.graphics.GameScreen.shutdown">shutdown</a></code></li>
+<li><code><a title="Beta.graphics.GameScreen.stop_flag" href="#Beta.graphics.GameScreen.stop_flag">stop_flag</a></code></li>
+<li><code><a title="Beta.graphics.GameScreen.streaming" href="#Beta.graphics.GameScreen.streaming">streaming</a></code></li>
+<li><code><a title="Beta.graphics.GameScreen.tensorboard_start_command" href="#Beta.graphics.GameScreen.tensorboard_start_command">tensorboard_start_command</a></code></li>
+<li><code><a title="Beta.graphics.GameScreen.tensorboard_stop_command" href="#Beta.graphics.GameScreen.tensorboard_stop_command">tensorboard_stop_command</a></code></li>
+<li><code><a title="Beta.graphics.GameScreen.train_button_command" href="#Beta.graphics.GameScreen.train_button_command">train_button_command</a></code></li>
+<li><code><a title="Beta.graphics.GameScreen.update_hyper_parameters_button_command" href="#Beta.graphics.GameScreen.update_hyper_parameters_button_command">update_hyper_parameters_button_command</a></code></li>
+<li><code><a title="Beta.graphics.GameScreen.working" href="#Beta.graphics.GameScreen.working">working</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="Beta.graphics.GameSelectionScreen" href="#Beta.graphics.GameSelectionScreen">GameSelectionScreen</a></code></h4>
+<ul class="">
+<li><code><a title="Beta.graphics.GameSelectionScreen.Icon_Display_Size" href="#Beta.graphics.GameSelectionScreen.Icon_Display_Size">Icon_Display_Size</a></code></li>
+<li><code><a title="Beta.graphics.GameSelectionScreen.chosen_env_init_str" href="#Beta.graphics.GameSelectionScreen.chosen_env_init_str">chosen_env_init_str</a></code></li>
+<li><code><a title="Beta.graphics.GameSelectionScreen.connect2server" href="#Beta.graphics.GameSelectionScreen.connect2server">connect2server</a></code></li>
+<li><code><a title="Beta.graphics.GameSelectionScreen.connect_button_command" href="#Beta.graphics.GameSelectionScreen.connect_button_command">connect_button_command</a></code></li>
+<li><code><a title="Beta.graphics.GameSelectionScreen.exit" href="#Beta.graphics.GameSelectionScreen.exit">exit</a></code></li>
+<li><code><a title="Beta.graphics.GameSelectionScreen.get_envs_mmanager_and_chosen_init_str" href="#Beta.graphics.GameSelectionScreen.get_envs_mmanager_and_chosen_init_str">get_envs_mmanager_and_chosen_init_str</a></code></li>
+<li><code><a title="Beta.graphics.GameSelectionScreen.init_widgets" href="#Beta.graphics.GameSelectionScreen.init_widgets">init_widgets</a></code></li>
+<li><code><a title="Beta.graphics.GameSelectionScreen.select_and_launch_button_command" href="#Beta.graphics.GameSelectionScreen.select_and_launch_button_command">select_and_launch_button_command</a></code></li>
+<li><code><a title="Beta.graphics.GameSelectionScreen.shutdown" href="#Beta.graphics.GameSelectionScreen.shutdown">shutdown</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.6.2</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

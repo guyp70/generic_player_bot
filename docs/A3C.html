@@ -1,0 +1,2174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.6.2" />
+<title>Beta.A3C API documentation</title>
+<meta name="description" content="" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase;cursor:pointer}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>Beta.A3C</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">from Utils import Coordinator, Memory, SavesManager, InvalidSavePathException
+from Remote_Environment import RemoteEnvironmentsManager
+from Server.Environments import EnvironmentsInitializer
+from AC_Network import AC_Network
+import multiprocessing
+import tensorflow as tf
+import threading
+import numpy as np
+import time
+import os
+from PIL import Image
+from Server.Shared_Code import Status
+
+
+Log_Weights_Histograms_and_Distributions = False
+
+
+def main():
+    &#34;&#34;&#34;TESTS&#34;&#34;&#34;
+    ip, port = &#34;10.0.0.3&#34;, 5381
+    env_init_str = &#34;Take_Cover&#34;  # &#34;Defend_the_Line&#34;
+    OFFLINE = True
+    if not OFFLINE:
+        env_manager = RemoteEnvironmentsManager(ip, port)
+    else:
+        env_manager = EnvironmentsInitializer()
+    try:
+        start = time.time()
+        if not os.path.exists(A3C_Algorithm.DefaultSavesFolderPath):
+            os.mkdir(A3C_Algorithm.DefaultSavesFolderPath)
+        A3C_Algorithm(env_manager, env_init_str, num_of_workers=8).train(10)
+        A3C_Algorithm(env_manager, env_init_str, num_of_workers=0).play(1)
+        #A3C_Algorithm(env_manager, env_init_str, num_of_workers=8).train(8 * 1000)
+        #A3C_Algorithm(env_manager, env_init_str, num_of_workers=8).train(30000)
+        print(&#34;Time: %d seconds.&#34; % (time.time() - start))
+    except KeyboardInterrupt:
+        print(&#34;Keyboard Interrupt! Exiting...&#34;)
+    if not OFFLINE:
+        env_manager.shutdown()
+        env_manager.join()
+
+
+class A3C_Algorithm(object):
+    Rescale_screen_images_to = [84, 84]
+    s_size = Rescale_screen_images_to[0] * Rescale_screen_images_to[1]
+    train_network_scope = &#39;global&#39;  # This is the global network&#39;s scope. The network we update using the gradients
+    #                                 from all threads.
+    Workers_ACNN_Scope_Template = &#34;Worker%d&#34;
+    DefaultSavesFolderPath = &#34;Saves\\&#34;
+    SleepIntervalLength = 0.5  # in seconds
+    SaveModelEveryNEpisodes = 10  # 100
+    DefaultAlphaLearningRate = 1e-4
+    DefaultWorkerMemoryBufferSize = 30
+    LogsFolder = &#34;Logs&#34;
+    def __init__(self, envs_manager, env_init_str, save_folder_path=DefaultSavesFolderPath,
+                 Play_Display_Size=[84, 84], Worker_Memory_Buffer_Size=DefaultWorkerMemoryBufferSize,
+                 AlphaLearningRate=DefaultAlphaLearningRate, num_of_workers=multiprocessing.cpu_count()):
+        &#34;&#34;&#34;
+        A class capable of learning how to maximize a reward function in an environment.
+        Uses A3c and is basically the API through which the other parts of the project use machine learning.  
+
+        :param env_cls: Environment class from which we will create instances. We use these instances to train and play.  
+        :param num_of_workers: Defines how many worker threads will be raised to train the models.  
+        :param envs_manager: An instance of either the EnvironmentsInitializer or the RemoteEnvironmentsManager classes.  
+        :param env_init_str: An environment initialization string. (get list of available environment initialization
+            string from the envs_manager.get_available_environments_initialization_strings() func).  
+        :param save_folder_path: path to the directory we save our model in.  
+        :param Play_Display_Size: tuple of two int values representing (width, height) in pixels.
+            Determines the size of the images given when the .play() func is called.  
+        :param Worker_Memory_Buffer_Size: The size of the Workers&#39; Memory Buffer in frames (int).  
+        :param AlphaLearningRate: Alpha Learning Rate (double)  
+        :param num_of_workers: num of threads to start in addition to the main thread. (int)
+        &#34;&#34;&#34;
+        self.OFFLINE = (not type(envs_manager) is RemoteEnvironmentsManager)
+        self.Worker_Memory_Buffer_Size = Worker_Memory_Buffer_Size
+        self.AlphaLearningRate = AlphaLearningRate
+        self.env_init_str = env_init_str
+        self.env_manager = envs_manager
+        self.Play_Display_Size = Play_Display_Size
+        self.env = self.get_a_new_environment_instance()
+        with tf.variable_scope(&#34;Optimizer&#34;, reuse=tf.AUTO_REUSE):
+            self.trainer = tf.train.AdamOptimizer(learning_rate=self.AlphaLearningRate)  # tf.train.RMSPropOptimizer(learning_rate=self.AlphaLearningRate)
+        self.train_model = AC_Network(s_size=self.s_size, a_size=self.env.a_size,
+                                      scope=self.train_network_scope, trainer=self.trainer,
+                                      train_network_scope=self.train_network_scope)
+
+        # Prepare the things needed for the initialization fo the workers.
+        self.num_of_workers = num_of_workers
+        self.worker_ACNN_Scopes = [self.Workers_ACNN_Scope_Template % i for i in range(self.num_of_workers)]
+        self.worker_envs = [self.get_a_new_environment_instance() for _ in range(self.num_of_workers)]
+        self.worker_local_AC_networks = [AC_Network(self.s_size, self.env.a_size, self.worker_ACNN_Scopes[i],
+                                                    self.trainer, train_network_scope=self.train_network_scope)
+                                         for i in range(self.num_of_workers)]
+        self.workers = []
+
+        self.save_manger = SavesManager(save_folder_path)  # it&#39;s important to only init the saver after all of the
+        #                                                        tensorflow graph has been declared.
+
+        # Preparation for the shutdown property. (i.e. The signal system that shuts down an instance.)
+        self._shutdown_requested_lock = threading.Lock()
+        self._shutdown_requested = False
+
+    def reset_tf_graph(self):
+        &#34;&#34;&#34;
+        Resets and redefines the tensorflow graph so prevent problems when calling .train() and .play() funcs more
+        than once.  
+
+        :return:  None
+        &#34;&#34;&#34;
+        tf.reset_default_graph()
+        with tf.variable_scope(&#34;Optimizer&#34;, reuse=tf.AUTO_REUSE):
+            self.trainer = tf.train.RMSPropOptimizer(learning_rate=self.AlphaLearningRate)
+        self.train_model = AC_Network(s_size=self.s_size, a_size=self.env.a_size,
+                                      scope=self.train_network_scope, trainer=self.trainer,
+                                      train_network_scope=self.train_network_scope)
+        self.worker_local_AC_networks = [AC_Network(self.s_size, self.env.a_size, self.worker_ACNN_Scopes[i],
+                                                    self.trainer, train_network_scope=self.train_network_scope)
+                                         for i in range(self.num_of_workers)]
+        self.save_manger = SavesManager(self.save_manger.saves_folder_path)  # it&#39;s important to only init the saver
+        #                                                                      after all of the tensorflow graph has
+        #                                                                      been declared.
+
+    @property
+    def shutdown_requested(self):
+        &#34;&#34;&#34;
+        shutdown_requested Property getter. Safely returns the value of self._shutdown_requested.  
+
+        :return: The value of self._shutdown_requested.
+        &#34;&#34;&#34;
+        with self._shutdown_requested_lock:
+            return self._shutdown_requested
+
+    @shutdown_requested.setter
+    def shutdown_requested(self, value):
+        &#34;&#34;&#34;
+        shutdown_requested Property setter. Safely sets the value of self._shutdown_requested.  
+
+        :param value: The value to which we set self._shutdown_requested  
+        :return: None
+        &#34;&#34;&#34;
+        with self._shutdown_requested_lock:
+            self._shutdown_requested = value
+
+    def shutdown(self):
+        &#34;&#34;&#34;
+        Terminates operation of instance  
+
+        :return: None
+        &#34;&#34;&#34;
+        self.shutdown_requested = True
+        for w in self.workers:
+            if w.is_alive():
+                w.join()
+        if self.env_manager.status == Status.Running:
+            self.env.close()
+            for env in self.worker_envs:
+                env.close()
+
+    def change_save_folder_path(self, new_path):
+        &#34;&#34;&#34;
+        Change save folder path.  
+
+        :param new_path: path to the new directory we will save our model to.  
+        :return: None
+        &#34;&#34;&#34;
+        self.save_manger.saves_folder_path = new_path
+
+    def get_a_new_environment_instance(self):
+        &#34;&#34;&#34;
+        Gets a new environment instance from self.env_manager.  
+
+        :return: An object that inherits from the abstract Environment class.
+        &#34;&#34;&#34;
+        if not self.OFFLINE:
+            return self.env_manager.get_new_remote_environment_terminal(self.env_init_str, self.Rescale_screen_images_to)
+        else:
+            return self.env_manager.get_env(self.env_init_str)
+
+    def get_state_screen_buffer(self):
+        &#34;&#34;&#34;
+        Gets a state screen buffer from self.env_manager.  
+
+        :return: A state screen buffer (numpy array)
+        &#34;&#34;&#34;
+        if not self.OFFLINE:
+            return self.env.get_state_screen_buffer()
+        else:
+            return self.env.get_state_screen_buffer(img_size_to_return=self.Rescale_screen_images_to)
+
+    def play(self, n_episodes=1, print_func=print, frame_update_func=None, get_stop_flag=lambda *args: False):
+        &#34;&#34;&#34;
+        Plays n_episodes without learning. No threads are put to work learning. It only allows us to how well our model
+        preforms.  
+
+        :param n_episodes: episodes to play  
+        :param print_func: function with which to print our textual output. (must be able to take a single argument)  
+        :param frame_update_func: function with which to output our frame every turn. (must be able to take a single
+            argument that is an instance of the PIL.Image.Image class)  
+        :param get_stop_flag: A function that will be called every some time. if it returns True the .play() will exit.
+            (Must be able to be called with no arguments given)  
+        :return: None
+        &#34;&#34;&#34;
+        self.reset_tf_graph()
+        with tf.Session() as sess:
+            try:
+                self.init_tensorflow_variables(sess)
+            except (tf.errors.InvalidArgumentError, PermissionError) as e:
+                if type(e) is tf.errors.InvalidArgumentError:
+                    print_func(&#34;It seems like the save you have loaded is incompatible with your current environment. &#34;
+                               &#34;(either the a_size or the s_size are different)\r\nPlaying Aborted.&#34;)
+                else:
+                    print_func(&#34;OS Denied access to save files. Please check that no program is already making use of&#34;
+                               &#34; said files.\r\nPlaying Aborted.&#34;)
+                return
+            start_time = time.time()
+            episode_cnt = 0
+            stop_flag_bool = False
+            for i in range(n_episodes):
+                if get_stop_flag() or stop_flag_bool:
+                    break
+                episode_cnt += 1
+                episode_reward = 0
+                episode_length = 0
+                print_func(&#34;Starting Episode %d&#34; % i)
+                self.env.start_new_episode()
+                context = sess.run(self.train_model.init_context)
+                while (not self.env.is_episode_finished()) and (not self.shutdown_requested):
+                    if get_stop_flag():
+                        stop_flag_bool = True
+                        break
+                    frame = Image.fromarray(self.env.get_unprocessed_state_screen_buffer(self.Play_Display_Size)).convert(&#39;RGB&#39;)
+                    if frame_update_func:
+                        frame_update_func(frame)
+                    state = self.get_state_screen_buffer()
+                    feed_dict = {self.train_model.inputs: np.reshape(state, newshape=[1, -1]),
+                                 self.train_model.context_in: context}
+                    policy, context = sess.run([self.train_model.policy, self.train_model.context_out],
+                                                feed_dict=feed_dict)
+                    policy = policy.flatten()
+                    action2take = (np.random.choice(policy, p=policy) == policy).astype(dtype=np.int32).flatten()
+                    # print(policy, action2take)
+                    episode_reward += self.env.step(list(action2take))
+                    episode_length += 1
+                    time.sleep(1.0/60)
+                if self.env.is_episode_finished():
+                    episode_reward += self.env.get_post_terminal_step_reward()
+                print_func(&#34;Episode %d Ended. Episode reward: %f. Episode Length: %d&#34; % (i, episode_reward,
+                                                                                         episode_length))
+            end_time = time.time()
+            print_func(&#34;Finished Playing.\r\n&#34;
+                       &#34;Overall Time: %f (secs)\r\nEpisodes run: %s\r\nAvg Time per Episode: %f (secs)&#34; %
+                       (end_time - start_time, episode_cnt,
+                        float(end_time - start_time) / episode_cnt))
+
+    def train(self, n_episodes=10,  print_func=print, get_stop_flag=lambda *args: False):
+        &#34;&#34;&#34;
+        Trains for n_episodes.  
+
+        :param n_episodes: episodes to play  
+        :param print_func: function with which to print our textual output. (must be able to take a single argument)  
+        :param get_stop_flag: A function that will be called every some time. if it returns True the .play() will exit.
+            (Must be able to be called with no arguments given)  
+        :return: None
+        &#34;&#34;&#34;
+        self.reset_tf_graph()
+        self.workers = [Worker(self.worker_envs[i], self.worker_local_AC_networks[i], self.s_size, self.env.a_size,
+                               self.worker_ACNN_Scopes[i], self.Worker_Memory_Buffer_Size,
+                               train_network_scope=self.train_network_scope, OFFLINE=self.OFFLINE)
+                        for i in range(self.num_of_workers)]
+        with tf.Session(graph=tf.get_default_graph()) as sess:
+            try:
+                # coord is an object of the Coordinator class and is used to keep rack of the global step count and
+                # over how many episodes we&#39;ve trained through.
+                coord = self.init_tensorflow_variables_and_coord(sess, n_episodes)
+            except (tf.errors.InvalidArgumentError, PermissionError) as e:
+                if type(e) is tf.errors.InvalidArgumentError:
+                    print_func(&#34;It seems like the save you have loaded is incompatible with your current environment. &#34;
+                               &#34;(either the a_size or the s_size are different)\r\nPlaying Aborted.&#34;)
+                else:
+                    print_func(&#34;OS Denied access to save files. Please check that no program is already making use of&#34;
+                               &#34; said files.\r\nTraining Aborted.&#34;)
+                return
+            logs_path = os.path.join(self.save_manger.saves_folder_path, self.LogsFolder)
+            self.summary_writer = tf.summary.FileWriter(logs_path, sess.graph)
+            [w.start(sess, coord, summary_file_writer=self.summary_writer) for w in self.workers]
+            episode_cnt_at_last_save = 0
+            start_time = time.time()
+            while (not coord.should_stop_training(inc_episode_cnt=False)) and (not self.shutdown_requested) and (not get_stop_flag()):
+                time.sleep(self.SleepIntervalLength)
+                if Log_Weights_Histograms_and_Distributions:
+                    # Logs all global tensorflow vars (basically the train model&#39;s weighs) to pretty histograms and
+                    # distribution charts
+                    self.summary_writer.add_summary(sess.run(self.train_model.log_histograms_for_all_global_vars),
+                                                    global_step=coord.get_global_step_cnt())
+                    self.summary_writer.flush()
+
+                curr_ep_cnt = coord.get_episode_cnt()
+                episodes_since_last_save = curr_ep_cnt - episode_cnt_at_last_save
+                if episodes_since_last_save &gt;= self.SaveModelEveryNEpisodes:
+                    self.save(sess, coord)
+                    episode_cnt_at_last_save = curr_ep_cnt
+                    print_func(&#34;Episode %d Started! Model Saved.&#34; % curr_ep_cnt)
+            coord.shutdown()
+            [w.join() for w in self.workers]
+            self.save(sess, coord)
+            self.summary_writer.close()
+        self.workers = []
+        end_time = time.time()
+        print_func(&#34;Finished Training. Model Saved.\r\n&#34;
+                   &#34;Overall Time: %f (secs)\r\nEpisodes run: %s\r\nAvg Time per Episode: %f (secs)&#34; %
+                   (end_time - start_time, coord.get_episode_cnt(),
+                    float(end_time - start_time) / coord.get_episode_cnt()))
+
+    def init_tensorflow_variables_and_coord(self, sess, n_episodes):
+        &#34;&#34;&#34;
+        Use only if you also need a Coordinator class object. Otherwise, use the init_tensorflow_variables() function.
+        Initialize all tensorflow vars and if save files exist, load from them all tensorflow vars.
+        Initializes a Cooordinator class object. If save files exits, continues the global step count from where it was
+        left. If no save files are to be found, initializes global step count to 0.  
+
+        :param sess: tensorflow session object  
+        :param n_episodes: (int) the number of episodes we want to train  
+        :return: Coordinator class object
+        &#34;&#34;&#34;
+        sess.run(tf.global_variables_initializer())
+        global_step = 0
+
+        try:
+            save_file_path, saved_params = self.save_manger.load(sess)  # try to load from save files (will crash if no
+            #                                                            save files are to be found)
+            global_step = saved_params[&#39;global_step_cnt&#39;]
+            print(&#34;Model Loaded! Save File Path: %s&#34; % save_file_path)
+            print(&#34;Parms Loaded! Saved Params: %s&#34; % str(saved_params))
+        except (InvalidSavePathException, ValueError):
+            print(&#34;No Saves Found! Initialized all values.&#34;)
+        return Coordinator(n_episodes, init_global_step_cnt=global_step)
+
+    def init_tensorflow_variables(self, sess):
+        &#34;&#34;&#34;
+        Initialize all tensorflow vars and if save files exist, load from them all tensorflow vars.  
+
+        :param sess: tensorflow session object  
+        :return: None
+        &#34;&#34;&#34;
+        sess.run(tf.global_variables_initializer())
+        try:
+            save_file_path, saved_params = self.save_manger.load(sess)  # try to load from save files (will crash if no
+            #                                                            save files are to be found)
+            print(&#34;Model Loaded! Save File Path: %s&#34; % save_file_path)
+        except (InvalidSavePathException, ValueError):
+            print(&#34;No Saves Found! Initialized all values.&#34;)
+
+    def save(self, sess, coord):
+        &#34;&#34;&#34;
+        Handles saving the model&#39;s tensorflow vars and the necessary parameters.  
+
+        :param sess: tf.Session class object  
+        :param coord: Coordinator class object  
+        :return: None
+        &#34;&#34;&#34;
+        params_dict = {&#39;global_step_cnt&#39;: coord.get_global_step_cnt()}
+        self.save_manger.save(sess, params_dict=params_dict)
+
+
+class Worker(threading.Thread):
+    DiscountFactor = 0.99  # discount factor for value approximation
+
+    def __init__(self, env, AC_network, s_size, a_size, scope, Memory_Buffer_Size, train_network_scope=&#39;global&#39;,
+                 rescale_screen_images_to=[84, 84], OFFLINE=False):
+        &#34;&#34;&#34;
+        A class that is meant to make training more efficient by allowing parallelism.
+        The A3c Create several instances of this class, with each worker playing in his environment,  acquiring
+        experience, updating the global model with the produced gradients and then updating themselves with global
+        model&#39;s new variables.
+
+        :param env: An object that inherits from the abstract Environment class.  
+        :param AC_network: An instance of the AC_network class.  
+        :param s_size: Input size, essentially the size of pixels in the screen.(int)  
+        :param a_size: Action space. The number of actions possible in our environment. (int)  
+        :param scope: Tensorflow Varables scope. (string)  
+        :param Memory_Buffer_Size: The size of the Workers&#39; Memory Buffer in frames (int).  
+        :param train_network_scope: Tensorflow Varables scope of the global model. (string)  
+        :param rescale_screen_images_to: Size to which to scale the screen image.  
+        :param OFFLINE: True if working on localy run environments. False if working on Remotely run environments.
+        &#34;&#34;&#34;
+        super(Worker, self).__init__()
+        self.OFFLINE = OFFLINE
+        self.Memory_Buffer_Size = Memory_Buffer_Size
+        self.local_ACNN_scope = scope
+        self.global_ACNN_scope = train_network_scope
+        self.local_ACNN = AC_network
+        self.env = env
+        self.rescale_screen_images_to = rescale_screen_images_to
+        self.s_size, self.a_size = s_size, a_size
+        self.update_local_ACNN_weights = update_target_graph(self.global_ACNN_scope, self.local_ACNN_scope)
+
+    def start(self, sess, coord, summary_file_writer=None):
+        &#34;&#34;&#34;
+        Starts the Worker thread. The worker will train until coord orders it to stop.  
+
+        :param sess: tensorflow session object  
+        :param coord: Coordinator object  
+        :return: None
+        &#34;&#34;&#34;
+        self.sess = sess
+        self.coord = coord
+        self.summary_file_writer = summary_file_writer
+        super(Worker, self).start()
+
+    def run(self):
+        &#34;&#34;&#34;
+        Goes through episodes and trains the global ACNN  
+
+        :return: None
+        &#34;&#34;&#34;
+        self.train(self.sess, self.coord)
+
+    def train(self, sess, coord):
+        &#34;&#34;&#34;
+        Trains for as long as the coord.should_stop_training() returns false.  
+
+        :param sess: tensorflow session object  
+        :param coord: Coordinator object  
+        :return: None
+        &#34;&#34;&#34;
+        mem = Memory(max_size=self.Memory_Buffer_Size)
+        while not coord.should_stop_training(inc_episode_cnt=True):
+            self.env.start_new_episode()
+            context_out = sess.run(self.local_ACNN.init_context)
+            episode_reward = 0
+            episode_length = 0
+            while not self.env.is_episode_finished():
+                sess.run(self.update_local_ACNN_weights)  # updates model vars to current global ACNN vars.
+                while not mem.is_full() and not self.env.is_episode_finished():  # Gain Experience
+                    state = self.get_state_screen_buffer()
+                    context_in = context_out  # we save it for the memory add_time_step() func
+                    feed_dict = {self.local_ACNN.inputs: np.reshape(state, newshape=[1, -1]),
+                                 self.local_ACNN.context_in: context_in}
+                    value, policy, context_out = sess.run([self.local_ACNN.value, self.local_ACNN.policy,
+                                                       self.local_ACNN.context_out], feed_dict=feed_dict)
+                    policy = policy.flatten()
+                    action2take = (np.random.choice(policy, p=policy) == policy).astype(dtype=np.int32).flatten()
+                    immediate_reward = self.env.step(list(action2take))
+                    episode_reward += immediate_reward
+                    mem.add_time_step(state, action2take, value, context_in, immediate_reward)
+                    episode_length += 1
+
+                &#34;&#34;&#34;Use the experience to calc grads and apply to global ACNN&#34;&#34;&#34;
+                # Here we calculate the V value of the state t tag (considering step t is the last state in the mem
+                # buffer).
+                if not self.env.is_episode_finished():
+                    new_state = self.get_state_screen_buffer()
+                    feed_dict = {self.local_ACNN.inputs: np.reshape(new_state, newshape=[1, -1]),
+                                 self.local_ACNN.context_in: context_out}
+                    value_at_new_state = sess.run([self.local_ACNN.value], feed_dict=feed_dict)
+                else:
+                    value_at_new_state = [self.env.get_post_terminal_step_reward()]
+
+                batch_stats = self.calc_grads_and_update_train_model(sess, mem, value_at_new_state, coord)
+                if self.summary_file_writer:  # logs batch&#39;s stats to log files
+                    # print(&#34;Logging Batch Statistics!&#34;)
+                    log_python_values_to_tensorboard(self.summary_file_writer, batch_stats, coord)
+                mem.reset()
+            episode_reward += self.env.get_post_terminal_step_reward()
+            log_python_values_to_tensorboard(self.summary_file_writer, {&#39;Objective/episode_reward&#39;: episode_reward,
+                                                                        &#39;Objective/episode_length&#39;: episode_length},
+                                             coord)
+
+    def calc_grads_and_update_train_model(self, sess, mem, est_value_of_next_state, coord):
+        &#34;&#34;&#34;
+        Calculates gradients for the model based on the batch. Applies grads to the global network and returns
+        statistics about the batch.
+        Be Aware, this function is one hell of a mess!I built it to feed the ACNN grads but it&#39;s very technical and in
+        all honesty, I&#39;m pretty sure I won&#39;t be able to even understand it tomorrow morning.  
+
+        :param sess: tensorflow session object  
+        :param mem: A Memory class object that contains some experience.  
+        :param est_value_of_next_state: estimated V value of the next state  
+        :param coord: Coordinator class object  
+        :return: a dictionary object containing the following entries:
+                 &#39;avg_value_loss&#39;, &#39;avg_policy_loss&#39;, &#39;avg_entropy&#39;, &#39;grad_norms&#39;, &#39;var_norms&#39;
+        &#34;&#34;&#34;
+        if mem.is_empty():
+            raise CannotLearnFromEmptyMemoryException()
+        states, actions, values, rnn_states, rewards = mem.get_episode_data_for_grads()
+        batch_size = len(actions)
+        # put context into proper form
+        c_in = []
+        h_in = []
+        [(h_in.append(h), c_in.append(c)) for h, c in rnn_states]
+        h_in = np.reshape(np.asarray(h_in), newshape=[batch_size, -1])  # shape: [batch_size, lstm_n_units]
+        c_in = np.reshape(np.asarray(c_in), newshape=[batch_size, -1])  # shape: [batch_size, lstm_n_units]
+        context = h_in, c_in
+        # put the rest of the vars into proper form
+        states = np.reshape(np.asarray(states, dtype=np.float32), newshape=[batch_size, self.s_size])  # shape: [batch_size, s_zise]
+        actions = np.reshape(np.asarray(actions, dtype=np.int32), newshape=[batch_size, self.a_size])
+        values = np.asarray(values, dtype=np.float32)
+        est_value_of_next_state = np.asarray(est_value_of_next_state)
+        target_vs = approximate_real_v(rewards, self.DiscountFactor, est_value_of_next_state).flatten()  # shape: [batch_size * a_size]
+        advantages = calc_advantage(rewards, values, est_value_of_next_state,
+                                    self.DiscountFactor)  # shape: [batch_size]
+
+        actions = np.argmax(actions, axis=1)  # size: [batch_size]
+        feed_dict = {self.local_ACNN.inputs: states, self.local_ACNN.context_in: context,
+                     self.local_ACNN.actions: actions, self.local_ACNN.target_v: target_vs,
+                     self.local_ACNN.advantages: advantages}
+        # print(feed_dict)
+        # [(print(k, &#34;: &#34;,  v.shape)) for k, v in feed_dict.items() if type(v) != tuple]
+        loss, value_loss, policy_loss, entropy, grad_norms, var_norms, _ = \
+            sess.run([self.local_ACNN.loss, self.local_ACNN.value_loss, self.local_ACNN.policy_loss,
+                      self.local_ACNN.entropy, self.local_ACNN.grad_norms, self.local_ACNN.var_norms,
+                      self.local_ACNN.apply_grads], feed_dict=feed_dict)
+        # self.summary_file_writer.flush()
+        batch_statistics = {&#39;Losses/loss&#39;: loss, &#39;Losses/avg_value_loss&#39;: value_loss / batch_size,
+                            &#39;Losses/avg_policy_loss&#39;: policy_loss / batch_size,
+                            &#39;Losses/avg_entropy&#39;: entropy / batch_size, &#39;grad_norms&#39;: grad_norms,
+                            &#39;var_norms&#39;: var_norms}
+        coord.inc_global_step_cnt()
+        return batch_statistics
+
+    def get_state_screen_buffer(self):
+        &#34;&#34;&#34;
+        Gets a state screen buffer from self.env_manager.  
+
+        :return: A state screen buffer (numpy array)
+        &#34;&#34;&#34;
+        if not self.OFFLINE:
+            return self.env.get_state_screen_buffer()
+        else:
+            return self.env.get_state_screen_buffer(img_size_to_return=A3C_Algorithm.Rescale_screen_images_to)
+
+
+def log_python_values_to_tensorboard(summary_file_writer, tags_values_dict, coord, scope=&#34;&#34;):
+    &#34;&#34;&#34;
+    Logs the values to a tensorboard event file.  
+
+    :param summary_file_writer: tf.summary.FileWriter() class object  
+    :param tags_values_dict: the values of the dict will be saved under the names corresponding the the keys.  
+    :param coord: Coordinator class object  
+    :param scope: Scope to put the values under in tensorboard  
+    :return: None
+    &#34;&#34;&#34;
+    summary_entries = [tf.Summary.Value(tag=&#34;/&#34;.join([scope, name]), simple_value=value)
+                       for name, value in tags_values_dict.items()]
+    summary_file_writer.add_summary(tf.Summary(value=summary_entries),
+                                    global_step=coord.get_global_step_cnt())
+    summary_file_writer.flush()
+
+
+class CannotLearnFromEmptyMemoryException(Exception):
+    pass
+
+
+def update_target_graph(from_scope, to_scope):
+    &#34;&#34;&#34;
+    Copies a set of variables from one scope to another.
+    Used to set worker network parameters to those of global network.
+    Taken from https://github.com/awjuliani/DeepRL-Agents/blob/master/A3C-Doom.ipynb  
+
+    :param from_scope:  scope to copy all vars from  
+    :param to_scope:  scope to copy all vars to  
+    :return: None
+    &#34;&#34;&#34;
+    from_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, from_scope)
+    to_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, to_scope)
+    return tf.group([to_var.assign(from_var) for from_var, to_var in list(zip(from_vars, to_vars))])
+
+
+def approximate_real_v(rewards, gamma, est_value_in_T_plus_one):
+    &#34;&#34;&#34;
+    V(s) is defined as so V(s) = max over possible a (r + gamma * sum over all s&#39; (T(s,a,s&#39;)V(s&#39;))).
+    T(s, a, s&#39;) is the probability that we will get to s&#39; if we make action a in state s. We assume it is 1 for now.
+    We also assume the action we did is the best action we could&#39;ve taken.
+    So we can compute V(s) as V(s) = r + gamma * V(s&#39;)
+    That is what we here.  
+
+    :param rewards: rewards given by the environment.  
+    :param gamma: discount factor.  
+    :param est_value_in_T_plus_one: the value the V estimator gave at the state that we got after we took the action who
+                                    us the last reward.  
+    :return: approximated V(s) values.
+    &#34;&#34;&#34;
+    apx_v_reversed = list()
+    apx_v_reversed.append(rewards[-1] + gamma * est_value_in_T_plus_one)
+    for r in reversed(rewards[:-1]):
+        apx_v_reversed.append(r + gamma * apx_v_reversed[-1])
+    return np.asarray(tuple(reversed(apx_v_reversed)))
+
+
+def calc_advantage(rewards, values, value_in_T_plus_one, gamma):
+    &#34;&#34;&#34;
+    Advantage function A(s,a) is defined A(s,a) = Q(s,a) - V(s).
+    We can also write as A(s) = r +  (sum over all s&#39; (T(s,a,s&#39;)V(s&#39;))) - V(s)
+    T(s, a, s&#39;) is the probability that we will get to s&#39; if we make action a in state s. We assume it is 1 for now.
+    So we can compute A(s) as A(s) = r + V(s&#39;) - V(s)  
+
+    :param rewards: rewards given by the environment. (shape=[batch_size])  
+    :param values: The values given by our V estimator at time steps 1 to T. (shape=[batch_size])  
+    :param value_in_T_plus_one: The value given by our V estimator  at time step T + 1. (shape=scalar/[1])  
+    :param gamma: Discount Factor (shape=scalar/[1])  
+    :return: advantage values. for time steps 1 to T. (shape=[batch_size])
+    &#34;&#34;&#34;
+    values_s = values
+    values_s_tag = np.roll(values, shift=-1)
+    values_s_tag[-1] = value_in_T_plus_one
+    advantages = rewards + gamma * values_s_tag - values_s
+    advantages = discount(advantages, gamma)  # frankly, I have no clue why the advantages are discounted, and I can&#39;t
+    #                                           seem to find anything in the maths of the algorithm that justify doing
+    #                                           so. I&#39;ve seen it done in Juliani&#39;s implementation and if we go by tests
+    #                                           I&#39;ve made it seems to improve sample efficiency by a whopping 100% (i.e.
+    #                                           it takes twice as much data without it) and also to reduce oscillation
+    #                                           in performance so I&#39;m putting it here none the less. (What&#39;s more 
+    #                                           important is theoscillation part really, cause before this addition 
+    #                                           the algoorithm was quite unstable)
+    return advantages
+
+
+def discount(x, gamma):
+    &#34;&#34;&#34;
+    Discounts the values of x by a factor gamma meaning that by the end disc_x[i] = x[i] + gamma * disc_x[i + 1].
+    if i == len(x) - 1 (meaning it is the last value in array x),  disc_x[i] = x[i].  
+
+    :param x: Values to discount. (numpy array)  
+    :param gamma: Discount Factor (double)  
+    :return: An array of the discounted values.
+    &#34;&#34;&#34;
+    x = x.copy()
+    for i in range(len(x) - 2, -1, -1):
+        x[i] += gamma * x[i + 1]
+    return np.asarray(x)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+if __name__ == &#39;__main__&#39;:
+    main()</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="Beta.A3C.approximate_real_v"><code class="name flex">
+<span>def <span class="ident">approximate_real_v</span></span>(<span>rewards, gamma, est_value_in_T_plus_one)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>V(s) is defined as so V(s) = max over possible a (r + gamma * sum over all s' (T(s,a,s')V(s'))).
+T(s, a, s') is the probability that we will get to s' if we make action a in state s. We assume it is 1 for now.
+We also assume the action we did is the best action we could've taken.
+So we can compute V(s) as V(s) = r + gamma * V(s')
+That is what we here.
+</p>
+<p>:param rewards: rewards given by the environment.<br>
+:param gamma: discount factor.<br>
+:param est_value_in_T_plus_one: the value the V estimator gave at the state that we got after we took the action who
+us the last reward.<br>
+:return: approximated V(s) values.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def approximate_real_v(rewards, gamma, est_value_in_T_plus_one):
+    &#34;&#34;&#34;
+    V(s) is defined as so V(s) = max over possible a (r + gamma * sum over all s&#39; (T(s,a,s&#39;)V(s&#39;))).
+    T(s, a, s&#39;) is the probability that we will get to s&#39; if we make action a in state s. We assume it is 1 for now.
+    We also assume the action we did is the best action we could&#39;ve taken.
+    So we can compute V(s) as V(s) = r + gamma * V(s&#39;)
+    That is what we here.  
+
+    :param rewards: rewards given by the environment.  
+    :param gamma: discount factor.  
+    :param est_value_in_T_plus_one: the value the V estimator gave at the state that we got after we took the action who
+                                    us the last reward.  
+    :return: approximated V(s) values.
+    &#34;&#34;&#34;
+    apx_v_reversed = list()
+    apx_v_reversed.append(rewards[-1] + gamma * est_value_in_T_plus_one)
+    for r in reversed(rewards[:-1]):
+        apx_v_reversed.append(r + gamma * apx_v_reversed[-1])
+    return np.asarray(tuple(reversed(apx_v_reversed)))</code></pre>
+</details>
+</dd>
+<dt id="Beta.A3C.calc_advantage"><code class="name flex">
+<span>def <span class="ident">calc_advantage</span></span>(<span>rewards, values, value_in_T_plus_one, gamma)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Advantage function A(s,a) is defined A(s,a) = Q(s,a) - V(s).
+We can also write as A(s) = r +
+(sum over all s' (T(s,a,s')V(s'))) - V(s)
+T(s, a, s') is the probability that we will get to s' if we make action a in state s. We assume it is 1 for now.
+So we can compute A(s) as A(s) = r + V(s') - V(s)
+</p>
+<p>:param rewards: rewards given by the environment. (shape=[batch_size])<br>
+:param values: The values given by our V estimator at time steps 1 to T. (shape=[batch_size])<br>
+:param value_in_T_plus_one: The value given by our V estimator
+at time step T + 1. (shape=scalar/[1])<br>
+:param gamma: Discount Factor (shape=scalar/[1])<br>
+:return: advantage values. for time steps 1 to T. (shape=[batch_size])</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def calc_advantage(rewards, values, value_in_T_plus_one, gamma):
+    &#34;&#34;&#34;
+    Advantage function A(s,a) is defined A(s,a) = Q(s,a) - V(s).
+    We can also write as A(s) = r +  (sum over all s&#39; (T(s,a,s&#39;)V(s&#39;))) - V(s)
+    T(s, a, s&#39;) is the probability that we will get to s&#39; if we make action a in state s. We assume it is 1 for now.
+    So we can compute A(s) as A(s) = r + V(s&#39;) - V(s)  
+
+    :param rewards: rewards given by the environment. (shape=[batch_size])  
+    :param values: The values given by our V estimator at time steps 1 to T. (shape=[batch_size])  
+    :param value_in_T_plus_one: The value given by our V estimator  at time step T + 1. (shape=scalar/[1])  
+    :param gamma: Discount Factor (shape=scalar/[1])  
+    :return: advantage values. for time steps 1 to T. (shape=[batch_size])
+    &#34;&#34;&#34;
+    values_s = values
+    values_s_tag = np.roll(values, shift=-1)
+    values_s_tag[-1] = value_in_T_plus_one
+    advantages = rewards + gamma * values_s_tag - values_s
+    advantages = discount(advantages, gamma)  # frankly, I have no clue why the advantages are discounted, and I can&#39;t
+    #                                           seem to find anything in the maths of the algorithm that justify doing
+    #                                           so. I&#39;ve seen it done in Juliani&#39;s implementation and if we go by tests
+    #                                           I&#39;ve made it seems to improve sample efficiency by a whopping 100% (i.e.
+    #                                           it takes twice as much data without it) and also to reduce oscillation
+    #                                           in performance so I&#39;m putting it here none the less. (What&#39;s more 
+    #                                           important is theoscillation part really, cause before this addition 
+    #                                           the algoorithm was quite unstable)
+    return advantages</code></pre>
+</details>
+</dd>
+<dt id="Beta.A3C.discount"><code class="name flex">
+<span>def <span class="ident">discount</span></span>(<span>x, gamma)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Discounts the values of x by a factor gamma meaning that by the end disc_x[i] = x[i] + gamma * disc_x[i + 1].
+if i == len(x) - 1 (meaning it is the last value in array x),
+disc_x[i] = x[i].
+</p>
+<p>:param x: Values to discount. (numpy array)<br>
+:param gamma: Discount Factor (double)<br>
+:return: An array of the discounted values.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def discount(x, gamma):
+    &#34;&#34;&#34;
+    Discounts the values of x by a factor gamma meaning that by the end disc_x[i] = x[i] + gamma * disc_x[i + 1].
+    if i == len(x) - 1 (meaning it is the last value in array x),  disc_x[i] = x[i].  
+
+    :param x: Values to discount. (numpy array)  
+    :param gamma: Discount Factor (double)  
+    :return: An array of the discounted values.
+    &#34;&#34;&#34;
+    x = x.copy()
+    for i in range(len(x) - 2, -1, -1):
+        x[i] += gamma * x[i + 1]
+    return np.asarray(x)</code></pre>
+</details>
+</dd>
+<dt id="Beta.A3C.log_python_values_to_tensorboard"><code class="name flex">
+<span>def <span class="ident">log_python_values_to_tensorboard</span></span>(<span>summary_file_writer, tags_values_dict, coord, scope='')</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Logs the values to a tensorboard event file.
+</p>
+<p>:param summary_file_writer: tf.summary.FileWriter() class object<br>
+:param tags_values_dict: the values of the dict will be saved under the names corresponding the the keys.<br>
+:param coord: Coordinator class object<br>
+:param scope: Scope to put the values under in tensorboard<br>
+:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def log_python_values_to_tensorboard(summary_file_writer, tags_values_dict, coord, scope=&#34;&#34;):
+    &#34;&#34;&#34;
+    Logs the values to a tensorboard event file.  
+
+    :param summary_file_writer: tf.summary.FileWriter() class object  
+    :param tags_values_dict: the values of the dict will be saved under the names corresponding the the keys.  
+    :param coord: Coordinator class object  
+    :param scope: Scope to put the values under in tensorboard  
+    :return: None
+    &#34;&#34;&#34;
+    summary_entries = [tf.Summary.Value(tag=&#34;/&#34;.join([scope, name]), simple_value=value)
+                       for name, value in tags_values_dict.items()]
+    summary_file_writer.add_summary(tf.Summary(value=summary_entries),
+                                    global_step=coord.get_global_step_cnt())
+    summary_file_writer.flush()</code></pre>
+</details>
+</dd>
+<dt id="Beta.A3C.main"><code class="name flex">
+<span>def <span class="ident">main</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>TESTS</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def main():
+    &#34;&#34;&#34;TESTS&#34;&#34;&#34;
+    ip, port = &#34;10.0.0.3&#34;, 5381
+    env_init_str = &#34;Take_Cover&#34;  # &#34;Defend_the_Line&#34;
+    OFFLINE = True
+    if not OFFLINE:
+        env_manager = RemoteEnvironmentsManager(ip, port)
+    else:
+        env_manager = EnvironmentsInitializer()
+    try:
+        start = time.time()
+        if not os.path.exists(A3C_Algorithm.DefaultSavesFolderPath):
+            os.mkdir(A3C_Algorithm.DefaultSavesFolderPath)
+        A3C_Algorithm(env_manager, env_init_str, num_of_workers=8).train(10)
+        A3C_Algorithm(env_manager, env_init_str, num_of_workers=0).play(1)
+        #A3C_Algorithm(env_manager, env_init_str, num_of_workers=8).train(8 * 1000)
+        #A3C_Algorithm(env_manager, env_init_str, num_of_workers=8).train(30000)
+        print(&#34;Time: %d seconds.&#34; % (time.time() - start))
+    except KeyboardInterrupt:
+        print(&#34;Keyboard Interrupt! Exiting...&#34;)
+    if not OFFLINE:
+        env_manager.shutdown()
+        env_manager.join()</code></pre>
+</details>
+</dd>
+<dt id="Beta.A3C.update_target_graph"><code class="name flex">
+<span>def <span class="ident">update_target_graph</span></span>(<span>from_scope, to_scope)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Copies a set of variables from one scope to another.
+Used to set worker network parameters to those of global network.
+Taken from <a href="https://github.com/awjuliani/DeepRL-Agents/blob/master/A3C-Doom.ipynb">https://github.com/awjuliani/DeepRL-Agents/blob/master/A3C-Doom.ipynb</a>
+</p>
+<p>:param from_scope:
+scope to copy all vars from<br>
+:param to_scope:
+scope to copy all vars to<br>
+:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def update_target_graph(from_scope, to_scope):
+    &#34;&#34;&#34;
+    Copies a set of variables from one scope to another.
+    Used to set worker network parameters to those of global network.
+    Taken from https://github.com/awjuliani/DeepRL-Agents/blob/master/A3C-Doom.ipynb  
+
+    :param from_scope:  scope to copy all vars from  
+    :param to_scope:  scope to copy all vars to  
+    :return: None
+    &#34;&#34;&#34;
+    from_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, from_scope)
+    to_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, to_scope)
+    return tf.group([to_var.assign(from_var) for from_var, to_var in list(zip(from_vars, to_vars))])</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="Beta.A3C.A3C_Algorithm"><code class="flex name class">
+<span>class <span class="ident">A3C_Algorithm</span></span>
+<span>(</span><span>envs_manager, env_init_str, save_folder_path='Saves\\', Play_Display_Size=[84, 84], Worker_Memory_Buffer_Size=30, AlphaLearningRate=0.0001, num_of_workers=8)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>A class capable of learning how to maximize a reward function in an environment.
+Uses A3c and is basically the API through which the other parts of the project use machine learning.
+</p>
+<p>:param env_cls: Environment class from which we will create instances. We use these instances to train and play.<br>
+:param num_of_workers: Defines how many worker threads will be raised to train the models.<br>
+:param envs_manager: An instance of either the EnvironmentsInitializer or the RemoteEnvironmentsManager classes.<br>
+:param env_init_str: An environment initialization string. (get list of available environment initialization
+string from the envs_manager.get_available_environments_initialization_strings() func).<br>
+:param save_folder_path: path to the directory we save our model in.<br>
+:param Play_Display_Size: tuple of two int values representing (width, height) in pixels.
+Determines the size of the images given when the .play() func is called.<br>
+:param Worker_Memory_Buffer_Size: The size of the Workers' Memory Buffer in frames (int).<br>
+:param AlphaLearningRate: Alpha Learning Rate (double)<br>
+:param num_of_workers: num of threads to start in addition to the main thread. (int)</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class A3C_Algorithm(object):
+    Rescale_screen_images_to = [84, 84]
+    s_size = Rescale_screen_images_to[0] * Rescale_screen_images_to[1]
+    train_network_scope = &#39;global&#39;  # This is the global network&#39;s scope. The network we update using the gradients
+    #                                 from all threads.
+    Workers_ACNN_Scope_Template = &#34;Worker%d&#34;
+    DefaultSavesFolderPath = &#34;Saves\\&#34;
+    SleepIntervalLength = 0.5  # in seconds
+    SaveModelEveryNEpisodes = 10  # 100
+    DefaultAlphaLearningRate = 1e-4
+    DefaultWorkerMemoryBufferSize = 30
+    LogsFolder = &#34;Logs&#34;
+    def __init__(self, envs_manager, env_init_str, save_folder_path=DefaultSavesFolderPath,
+                 Play_Display_Size=[84, 84], Worker_Memory_Buffer_Size=DefaultWorkerMemoryBufferSize,
+                 AlphaLearningRate=DefaultAlphaLearningRate, num_of_workers=multiprocessing.cpu_count()):
+        &#34;&#34;&#34;
+        A class capable of learning how to maximize a reward function in an environment.
+        Uses A3c and is basically the API through which the other parts of the project use machine learning.  
+
+        :param env_cls: Environment class from which we will create instances. We use these instances to train and play.  
+        :param num_of_workers: Defines how many worker threads will be raised to train the models.  
+        :param envs_manager: An instance of either the EnvironmentsInitializer or the RemoteEnvironmentsManager classes.  
+        :param env_init_str: An environment initialization string. (get list of available environment initialization
+            string from the envs_manager.get_available_environments_initialization_strings() func).  
+        :param save_folder_path: path to the directory we save our model in.  
+        :param Play_Display_Size: tuple of two int values representing (width, height) in pixels.
+            Determines the size of the images given when the .play() func is called.  
+        :param Worker_Memory_Buffer_Size: The size of the Workers&#39; Memory Buffer in frames (int).  
+        :param AlphaLearningRate: Alpha Learning Rate (double)  
+        :param num_of_workers: num of threads to start in addition to the main thread. (int)
+        &#34;&#34;&#34;
+        self.OFFLINE = (not type(envs_manager) is RemoteEnvironmentsManager)
+        self.Worker_Memory_Buffer_Size = Worker_Memory_Buffer_Size
+        self.AlphaLearningRate = AlphaLearningRate
+        self.env_init_str = env_init_str
+        self.env_manager = envs_manager
+        self.Play_Display_Size = Play_Display_Size
+        self.env = self.get_a_new_environment_instance()
+        with tf.variable_scope(&#34;Optimizer&#34;, reuse=tf.AUTO_REUSE):
+            self.trainer = tf.train.AdamOptimizer(learning_rate=self.AlphaLearningRate)  # tf.train.RMSPropOptimizer(learning_rate=self.AlphaLearningRate)
+        self.train_model = AC_Network(s_size=self.s_size, a_size=self.env.a_size,
+                                      scope=self.train_network_scope, trainer=self.trainer,
+                                      train_network_scope=self.train_network_scope)
+
+        # Prepare the things needed for the initialization fo the workers.
+        self.num_of_workers = num_of_workers
+        self.worker_ACNN_Scopes = [self.Workers_ACNN_Scope_Template % i for i in range(self.num_of_workers)]
+        self.worker_envs = [self.get_a_new_environment_instance() for _ in range(self.num_of_workers)]
+        self.worker_local_AC_networks = [AC_Network(self.s_size, self.env.a_size, self.worker_ACNN_Scopes[i],
+                                                    self.trainer, train_network_scope=self.train_network_scope)
+                                         for i in range(self.num_of_workers)]
+        self.workers = []
+
+        self.save_manger = SavesManager(save_folder_path)  # it&#39;s important to only init the saver after all of the
+        #                                                        tensorflow graph has been declared.
+
+        # Preparation for the shutdown property. (i.e. The signal system that shuts down an instance.)
+        self._shutdown_requested_lock = threading.Lock()
+        self._shutdown_requested = False
+
+    def reset_tf_graph(self):
+        &#34;&#34;&#34;
+        Resets and redefines the tensorflow graph so prevent problems when calling .train() and .play() funcs more
+        than once.  
+
+        :return:  None
+        &#34;&#34;&#34;
+        tf.reset_default_graph()
+        with tf.variable_scope(&#34;Optimizer&#34;, reuse=tf.AUTO_REUSE):
+            self.trainer = tf.train.RMSPropOptimizer(learning_rate=self.AlphaLearningRate)
+        self.train_model = AC_Network(s_size=self.s_size, a_size=self.env.a_size,
+                                      scope=self.train_network_scope, trainer=self.trainer,
+                                      train_network_scope=self.train_network_scope)
+        self.worker_local_AC_networks = [AC_Network(self.s_size, self.env.a_size, self.worker_ACNN_Scopes[i],
+                                                    self.trainer, train_network_scope=self.train_network_scope)
+                                         for i in range(self.num_of_workers)]
+        self.save_manger = SavesManager(self.save_manger.saves_folder_path)  # it&#39;s important to only init the saver
+        #                                                                      after all of the tensorflow graph has
+        #                                                                      been declared.
+
+    @property
+    def shutdown_requested(self):
+        &#34;&#34;&#34;
+        shutdown_requested Property getter. Safely returns the value of self._shutdown_requested.  
+
+        :return: The value of self._shutdown_requested.
+        &#34;&#34;&#34;
+        with self._shutdown_requested_lock:
+            return self._shutdown_requested
+
+    @shutdown_requested.setter
+    def shutdown_requested(self, value):
+        &#34;&#34;&#34;
+        shutdown_requested Property setter. Safely sets the value of self._shutdown_requested.  
+
+        :param value: The value to which we set self._shutdown_requested  
+        :return: None
+        &#34;&#34;&#34;
+        with self._shutdown_requested_lock:
+            self._shutdown_requested = value
+
+    def shutdown(self):
+        &#34;&#34;&#34;
+        Terminates operation of instance  
+
+        :return: None
+        &#34;&#34;&#34;
+        self.shutdown_requested = True
+        for w in self.workers:
+            if w.is_alive():
+                w.join()
+        if self.env_manager.status == Status.Running:
+            self.env.close()
+            for env in self.worker_envs:
+                env.close()
+
+    def change_save_folder_path(self, new_path):
+        &#34;&#34;&#34;
+        Change save folder path.  
+
+        :param new_path: path to the new directory we will save our model to.  
+        :return: None
+        &#34;&#34;&#34;
+        self.save_manger.saves_folder_path = new_path
+
+    def get_a_new_environment_instance(self):
+        &#34;&#34;&#34;
+        Gets a new environment instance from self.env_manager.  
+
+        :return: An object that inherits from the abstract Environment class.
+        &#34;&#34;&#34;
+        if not self.OFFLINE:
+            return self.env_manager.get_new_remote_environment_terminal(self.env_init_str, self.Rescale_screen_images_to)
+        else:
+            return self.env_manager.get_env(self.env_init_str)
+
+    def get_state_screen_buffer(self):
+        &#34;&#34;&#34;
+        Gets a state screen buffer from self.env_manager.  
+
+        :return: A state screen buffer (numpy array)
+        &#34;&#34;&#34;
+        if not self.OFFLINE:
+            return self.env.get_state_screen_buffer()
+        else:
+            return self.env.get_state_screen_buffer(img_size_to_return=self.Rescale_screen_images_to)
+
+    def play(self, n_episodes=1, print_func=print, frame_update_func=None, get_stop_flag=lambda *args: False):
+        &#34;&#34;&#34;
+        Plays n_episodes without learning. No threads are put to work learning. It only allows us to how well our model
+        preforms.  
+
+        :param n_episodes: episodes to play  
+        :param print_func: function with which to print our textual output. (must be able to take a single argument)  
+        :param frame_update_func: function with which to output our frame every turn. (must be able to take a single
+            argument that is an instance of the PIL.Image.Image class)  
+        :param get_stop_flag: A function that will be called every some time. if it returns True the .play() will exit.
+            (Must be able to be called with no arguments given)  
+        :return: None
+        &#34;&#34;&#34;
+        self.reset_tf_graph()
+        with tf.Session() as sess:
+            try:
+                self.init_tensorflow_variables(sess)
+            except (tf.errors.InvalidArgumentError, PermissionError) as e:
+                if type(e) is tf.errors.InvalidArgumentError:
+                    print_func(&#34;It seems like the save you have loaded is incompatible with your current environment. &#34;
+                               &#34;(either the a_size or the s_size are different)\r\nPlaying Aborted.&#34;)
+                else:
+                    print_func(&#34;OS Denied access to save files. Please check that no program is already making use of&#34;
+                               &#34; said files.\r\nPlaying Aborted.&#34;)
+                return
+            start_time = time.time()
+            episode_cnt = 0
+            stop_flag_bool = False
+            for i in range(n_episodes):
+                if get_stop_flag() or stop_flag_bool:
+                    break
+                episode_cnt += 1
+                episode_reward = 0
+                episode_length = 0
+                print_func(&#34;Starting Episode %d&#34; % i)
+                self.env.start_new_episode()
+                context = sess.run(self.train_model.init_context)
+                while (not self.env.is_episode_finished()) and (not self.shutdown_requested):
+                    if get_stop_flag():
+                        stop_flag_bool = True
+                        break
+                    frame = Image.fromarray(self.env.get_unprocessed_state_screen_buffer(self.Play_Display_Size)).convert(&#39;RGB&#39;)
+                    if frame_update_func:
+                        frame_update_func(frame)
+                    state = self.get_state_screen_buffer()
+                    feed_dict = {self.train_model.inputs: np.reshape(state, newshape=[1, -1]),
+                                 self.train_model.context_in: context}
+                    policy, context = sess.run([self.train_model.policy, self.train_model.context_out],
+                                                feed_dict=feed_dict)
+                    policy = policy.flatten()
+                    action2take = (np.random.choice(policy, p=policy) == policy).astype(dtype=np.int32).flatten()
+                    # print(policy, action2take)
+                    episode_reward += self.env.step(list(action2take))
+                    episode_length += 1
+                    time.sleep(1.0/60)
+                if self.env.is_episode_finished():
+                    episode_reward += self.env.get_post_terminal_step_reward()
+                print_func(&#34;Episode %d Ended. Episode reward: %f. Episode Length: %d&#34; % (i, episode_reward,
+                                                                                         episode_length))
+            end_time = time.time()
+            print_func(&#34;Finished Playing.\r\n&#34;
+                       &#34;Overall Time: %f (secs)\r\nEpisodes run: %s\r\nAvg Time per Episode: %f (secs)&#34; %
+                       (end_time - start_time, episode_cnt,
+                        float(end_time - start_time) / episode_cnt))
+
+    def train(self, n_episodes=10,  print_func=print, get_stop_flag=lambda *args: False):
+        &#34;&#34;&#34;
+        Trains for n_episodes.  
+
+        :param n_episodes: episodes to play  
+        :param print_func: function with which to print our textual output. (must be able to take a single argument)  
+        :param get_stop_flag: A function that will be called every some time. if it returns True the .play() will exit.
+            (Must be able to be called with no arguments given)  
+        :return: None
+        &#34;&#34;&#34;
+        self.reset_tf_graph()
+        self.workers = [Worker(self.worker_envs[i], self.worker_local_AC_networks[i], self.s_size, self.env.a_size,
+                               self.worker_ACNN_Scopes[i], self.Worker_Memory_Buffer_Size,
+                               train_network_scope=self.train_network_scope, OFFLINE=self.OFFLINE)
+                        for i in range(self.num_of_workers)]
+        with tf.Session(graph=tf.get_default_graph()) as sess:
+            try:
+                # coord is an object of the Coordinator class and is used to keep rack of the global step count and
+                # over how many episodes we&#39;ve trained through.
+                coord = self.init_tensorflow_variables_and_coord(sess, n_episodes)
+            except (tf.errors.InvalidArgumentError, PermissionError) as e:
+                if type(e) is tf.errors.InvalidArgumentError:
+                    print_func(&#34;It seems like the save you have loaded is incompatible with your current environment. &#34;
+                               &#34;(either the a_size or the s_size are different)\r\nPlaying Aborted.&#34;)
+                else:
+                    print_func(&#34;OS Denied access to save files. Please check that no program is already making use of&#34;
+                               &#34; said files.\r\nTraining Aborted.&#34;)
+                return
+            logs_path = os.path.join(self.save_manger.saves_folder_path, self.LogsFolder)
+            self.summary_writer = tf.summary.FileWriter(logs_path, sess.graph)
+            [w.start(sess, coord, summary_file_writer=self.summary_writer) for w in self.workers]
+            episode_cnt_at_last_save = 0
+            start_time = time.time()
+            while (not coord.should_stop_training(inc_episode_cnt=False)) and (not self.shutdown_requested) and (not get_stop_flag()):
+                time.sleep(self.SleepIntervalLength)
+                if Log_Weights_Histograms_and_Distributions:
+                    # Logs all global tensorflow vars (basically the train model&#39;s weighs) to pretty histograms and
+                    # distribution charts
+                    self.summary_writer.add_summary(sess.run(self.train_model.log_histograms_for_all_global_vars),
+                                                    global_step=coord.get_global_step_cnt())
+                    self.summary_writer.flush()
+
+                curr_ep_cnt = coord.get_episode_cnt()
+                episodes_since_last_save = curr_ep_cnt - episode_cnt_at_last_save
+                if episodes_since_last_save &gt;= self.SaveModelEveryNEpisodes:
+                    self.save(sess, coord)
+                    episode_cnt_at_last_save = curr_ep_cnt
+                    print_func(&#34;Episode %d Started! Model Saved.&#34; % curr_ep_cnt)
+            coord.shutdown()
+            [w.join() for w in self.workers]
+            self.save(sess, coord)
+            self.summary_writer.close()
+        self.workers = []
+        end_time = time.time()
+        print_func(&#34;Finished Training. Model Saved.\r\n&#34;
+                   &#34;Overall Time: %f (secs)\r\nEpisodes run: %s\r\nAvg Time per Episode: %f (secs)&#34; %
+                   (end_time - start_time, coord.get_episode_cnt(),
+                    float(end_time - start_time) / coord.get_episode_cnt()))
+
+    def init_tensorflow_variables_and_coord(self, sess, n_episodes):
+        &#34;&#34;&#34;
+        Use only if you also need a Coordinator class object. Otherwise, use the init_tensorflow_variables() function.
+        Initialize all tensorflow vars and if save files exist, load from them all tensorflow vars.
+        Initializes a Cooordinator class object. If save files exits, continues the global step count from where it was
+        left. If no save files are to be found, initializes global step count to 0.  
+
+        :param sess: tensorflow session object  
+        :param n_episodes: (int) the number of episodes we want to train  
+        :return: Coordinator class object
+        &#34;&#34;&#34;
+        sess.run(tf.global_variables_initializer())
+        global_step = 0
+
+        try:
+            save_file_path, saved_params = self.save_manger.load(sess)  # try to load from save files (will crash if no
+            #                                                            save files are to be found)
+            global_step = saved_params[&#39;global_step_cnt&#39;]
+            print(&#34;Model Loaded! Save File Path: %s&#34; % save_file_path)
+            print(&#34;Parms Loaded! Saved Params: %s&#34; % str(saved_params))
+        except (InvalidSavePathException, ValueError):
+            print(&#34;No Saves Found! Initialized all values.&#34;)
+        return Coordinator(n_episodes, init_global_step_cnt=global_step)
+
+    def init_tensorflow_variables(self, sess):
+        &#34;&#34;&#34;
+        Initialize all tensorflow vars and if save files exist, load from them all tensorflow vars.  
+
+        :param sess: tensorflow session object  
+        :return: None
+        &#34;&#34;&#34;
+        sess.run(tf.global_variables_initializer())
+        try:
+            save_file_path, saved_params = self.save_manger.load(sess)  # try to load from save files (will crash if no
+            #                                                            save files are to be found)
+            print(&#34;Model Loaded! Save File Path: %s&#34; % save_file_path)
+        except (InvalidSavePathException, ValueError):
+            print(&#34;No Saves Found! Initialized all values.&#34;)
+
+    def save(self, sess, coord):
+        &#34;&#34;&#34;
+        Handles saving the model&#39;s tensorflow vars and the necessary parameters.  
+
+        :param sess: tf.Session class object  
+        :param coord: Coordinator class object  
+        :return: None
+        &#34;&#34;&#34;
+        params_dict = {&#39;global_step_cnt&#39;: coord.get_global_step_cnt()}
+        self.save_manger.save(sess, params_dict=params_dict)</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="Beta.A3C.A3C_Algorithm.DefaultAlphaLearningRate"><code class="name">var <span class="ident">DefaultAlphaLearningRate</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="Beta.A3C.A3C_Algorithm.DefaultSavesFolderPath"><code class="name">var <span class="ident">DefaultSavesFolderPath</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="Beta.A3C.A3C_Algorithm.DefaultWorkerMemoryBufferSize"><code class="name">var <span class="ident">DefaultWorkerMemoryBufferSize</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="Beta.A3C.A3C_Algorithm.LogsFolder"><code class="name">var <span class="ident">LogsFolder</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="Beta.A3C.A3C_Algorithm.Rescale_screen_images_to"><code class="name">var <span class="ident">Rescale_screen_images_to</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="Beta.A3C.A3C_Algorithm.SaveModelEveryNEpisodes"><code class="name">var <span class="ident">SaveModelEveryNEpisodes</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="Beta.A3C.A3C_Algorithm.SleepIntervalLength"><code class="name">var <span class="ident">SleepIntervalLength</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="Beta.A3C.A3C_Algorithm.Workers_ACNN_Scope_Template"><code class="name">var <span class="ident">Workers_ACNN_Scope_Template</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="Beta.A3C.A3C_Algorithm.s_size"><code class="name">var <span class="ident">s_size</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="Beta.A3C.A3C_Algorithm.train_network_scope"><code class="name">var <span class="ident">train_network_scope</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+</dl>
+<h3>Instance variables</h3>
+<dl>
+<dt id="Beta.A3C.A3C_Algorithm.shutdown_requested"><code class="name">var <span class="ident">shutdown_requested</span></code></dt>
+<dd>
+<section class="desc"><p>shutdown_requested Property getter. Safely returns the value of self._shutdown_requested.
+</p>
+<p>:return: The value of self._shutdown_requested.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@property
+def shutdown_requested(self):
+    &#34;&#34;&#34;
+    shutdown_requested Property getter. Safely returns the value of self._shutdown_requested.  
+
+    :return: The value of self._shutdown_requested.
+    &#34;&#34;&#34;
+    with self._shutdown_requested_lock:
+        return self._shutdown_requested</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="Beta.A3C.A3C_Algorithm.change_save_folder_path"><code class="name flex">
+<span>def <span class="ident">change_save_folder_path</span></span>(<span>self, new_path)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Change save folder path.
+</p>
+<p>:param new_path: path to the new directory we will save our model to.<br>
+:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def change_save_folder_path(self, new_path):
+    &#34;&#34;&#34;
+    Change save folder path.  
+
+    :param new_path: path to the new directory we will save our model to.  
+    :return: None
+    &#34;&#34;&#34;
+    self.save_manger.saves_folder_path = new_path</code></pre>
+</details>
+</dd>
+<dt id="Beta.A3C.A3C_Algorithm.get_a_new_environment_instance"><code class="name flex">
+<span>def <span class="ident">get_a_new_environment_instance</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Gets a new environment instance from self.env_manager.
+</p>
+<p>:return: An object that inherits from the abstract Environment class.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def get_a_new_environment_instance(self):
+    &#34;&#34;&#34;
+    Gets a new environment instance from self.env_manager.  
+
+    :return: An object that inherits from the abstract Environment class.
+    &#34;&#34;&#34;
+    if not self.OFFLINE:
+        return self.env_manager.get_new_remote_environment_terminal(self.env_init_str, self.Rescale_screen_images_to)
+    else:
+        return self.env_manager.get_env(self.env_init_str)</code></pre>
+</details>
+</dd>
+<dt id="Beta.A3C.A3C_Algorithm.get_state_screen_buffer"><code class="name flex">
+<span>def <span class="ident">get_state_screen_buffer</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Gets a state screen buffer from self.env_manager.
+</p>
+<p>:return: A state screen buffer (numpy array)</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def get_state_screen_buffer(self):
+    &#34;&#34;&#34;
+    Gets a state screen buffer from self.env_manager.  
+
+    :return: A state screen buffer (numpy array)
+    &#34;&#34;&#34;
+    if not self.OFFLINE:
+        return self.env.get_state_screen_buffer()
+    else:
+        return self.env.get_state_screen_buffer(img_size_to_return=self.Rescale_screen_images_to)</code></pre>
+</details>
+</dd>
+<dt id="Beta.A3C.A3C_Algorithm.init_tensorflow_variables"><code class="name flex">
+<span>def <span class="ident">init_tensorflow_variables</span></span>(<span>self, sess)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Initialize all tensorflow vars and if save files exist, load from them all tensorflow vars.
+</p>
+<p>:param sess: tensorflow session object<br>
+:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def init_tensorflow_variables(self, sess):
+    &#34;&#34;&#34;
+    Initialize all tensorflow vars and if save files exist, load from them all tensorflow vars.  
+
+    :param sess: tensorflow session object  
+    :return: None
+    &#34;&#34;&#34;
+    sess.run(tf.global_variables_initializer())
+    try:
+        save_file_path, saved_params = self.save_manger.load(sess)  # try to load from save files (will crash if no
+        #                                                            save files are to be found)
+        print(&#34;Model Loaded! Save File Path: %s&#34; % save_file_path)
+    except (InvalidSavePathException, ValueError):
+        print(&#34;No Saves Found! Initialized all values.&#34;)</code></pre>
+</details>
+</dd>
+<dt id="Beta.A3C.A3C_Algorithm.init_tensorflow_variables_and_coord"><code class="name flex">
+<span>def <span class="ident">init_tensorflow_variables_and_coord</span></span>(<span>self, sess, n_episodes)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Use only if you also need a Coordinator class object. Otherwise, use the init_tensorflow_variables() function.
+Initialize all tensorflow vars and if save files exist, load from them all tensorflow vars.
+Initializes a Cooordinator class object. If save files exits, continues the global step count from where it was
+left. If no save files are to be found, initializes global step count to 0.
+</p>
+<p>:param sess: tensorflow session object<br>
+:param n_episodes: (int) the number of episodes we want to train<br>
+:return: Coordinator class object</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def init_tensorflow_variables_and_coord(self, sess, n_episodes):
+    &#34;&#34;&#34;
+    Use only if you also need a Coordinator class object. Otherwise, use the init_tensorflow_variables() function.
+    Initialize all tensorflow vars and if save files exist, load from them all tensorflow vars.
+    Initializes a Cooordinator class object. If save files exits, continues the global step count from where it was
+    left. If no save files are to be found, initializes global step count to 0.  
+
+    :param sess: tensorflow session object  
+    :param n_episodes: (int) the number of episodes we want to train  
+    :return: Coordinator class object
+    &#34;&#34;&#34;
+    sess.run(tf.global_variables_initializer())
+    global_step = 0
+
+    try:
+        save_file_path, saved_params = self.save_manger.load(sess)  # try to load from save files (will crash if no
+        #                                                            save files are to be found)
+        global_step = saved_params[&#39;global_step_cnt&#39;]
+        print(&#34;Model Loaded! Save File Path: %s&#34; % save_file_path)
+        print(&#34;Parms Loaded! Saved Params: %s&#34; % str(saved_params))
+    except (InvalidSavePathException, ValueError):
+        print(&#34;No Saves Found! Initialized all values.&#34;)
+    return Coordinator(n_episodes, init_global_step_cnt=global_step)</code></pre>
+</details>
+</dd>
+<dt id="Beta.A3C.A3C_Algorithm.play"><code class="name flex">
+<span>def <span class="ident">play</span></span>(<span>self, n_episodes=1, print_func=<built-in function print>, frame_update_func=None, get_stop_flag=<function A3C_Algorithm.<lambda> at 0x0000000029C9DD08>)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Plays n_episodes without learning. No threads are put to work learning. It only allows us to how well our model
+preforms.
+</p>
+<p>:param n_episodes: episodes to play<br>
+:param print_func: function with which to print our textual output. (must be able to take a single argument)<br>
+:param frame_update_func: function with which to output our frame every turn. (must be able to take a single
+argument that is an instance of the PIL.Image.Image class)<br>
+:param get_stop_flag: A function that will be called every some time. if it returns True the .play() will exit.
+(Must be able to be called with no arguments given)<br>
+:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def play(self, n_episodes=1, print_func=print, frame_update_func=None, get_stop_flag=lambda *args: False):
+    &#34;&#34;&#34;
+    Plays n_episodes without learning. No threads are put to work learning. It only allows us to how well our model
+    preforms.  
+
+    :param n_episodes: episodes to play  
+    :param print_func: function with which to print our textual output. (must be able to take a single argument)  
+    :param frame_update_func: function with which to output our frame every turn. (must be able to take a single
+        argument that is an instance of the PIL.Image.Image class)  
+    :param get_stop_flag: A function that will be called every some time. if it returns True the .play() will exit.
+        (Must be able to be called with no arguments given)  
+    :return: None
+    &#34;&#34;&#34;
+    self.reset_tf_graph()
+    with tf.Session() as sess:
+        try:
+            self.init_tensorflow_variables(sess)
+        except (tf.errors.InvalidArgumentError, PermissionError) as e:
+            if type(e) is tf.errors.InvalidArgumentError:
+                print_func(&#34;It seems like the save you have loaded is incompatible with your current environment. &#34;
+                           &#34;(either the a_size or the s_size are different)\r\nPlaying Aborted.&#34;)
+            else:
+                print_func(&#34;OS Denied access to save files. Please check that no program is already making use of&#34;
+                           &#34; said files.\r\nPlaying Aborted.&#34;)
+            return
+        start_time = time.time()
+        episode_cnt = 0
+        stop_flag_bool = False
+        for i in range(n_episodes):
+            if get_stop_flag() or stop_flag_bool:
+                break
+            episode_cnt += 1
+            episode_reward = 0
+            episode_length = 0
+            print_func(&#34;Starting Episode %d&#34; % i)
+            self.env.start_new_episode()
+            context = sess.run(self.train_model.init_context)
+            while (not self.env.is_episode_finished()) and (not self.shutdown_requested):
+                if get_stop_flag():
+                    stop_flag_bool = True
+                    break
+                frame = Image.fromarray(self.env.get_unprocessed_state_screen_buffer(self.Play_Display_Size)).convert(&#39;RGB&#39;)
+                if frame_update_func:
+                    frame_update_func(frame)
+                state = self.get_state_screen_buffer()
+                feed_dict = {self.train_model.inputs: np.reshape(state, newshape=[1, -1]),
+                             self.train_model.context_in: context}
+                policy, context = sess.run([self.train_model.policy, self.train_model.context_out],
+                                            feed_dict=feed_dict)
+                policy = policy.flatten()
+                action2take = (np.random.choice(policy, p=policy) == policy).astype(dtype=np.int32).flatten()
+                # print(policy, action2take)
+                episode_reward += self.env.step(list(action2take))
+                episode_length += 1
+                time.sleep(1.0/60)
+            if self.env.is_episode_finished():
+                episode_reward += self.env.get_post_terminal_step_reward()
+            print_func(&#34;Episode %d Ended. Episode reward: %f. Episode Length: %d&#34; % (i, episode_reward,
+                                                                                     episode_length))
+        end_time = time.time()
+        print_func(&#34;Finished Playing.\r\n&#34;
+                   &#34;Overall Time: %f (secs)\r\nEpisodes run: %s\r\nAvg Time per Episode: %f (secs)&#34; %
+                   (end_time - start_time, episode_cnt,
+                    float(end_time - start_time) / episode_cnt))</code></pre>
+</details>
+</dd>
+<dt id="Beta.A3C.A3C_Algorithm.reset_tf_graph"><code class="name flex">
+<span>def <span class="ident">reset_tf_graph</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Resets and redefines the tensorflow graph so prevent problems when calling .train() and .play() funcs more
+than once.
+</p>
+<p>:return:
+None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def reset_tf_graph(self):
+    &#34;&#34;&#34;
+    Resets and redefines the tensorflow graph so prevent problems when calling .train() and .play() funcs more
+    than once.  
+
+    :return:  None
+    &#34;&#34;&#34;
+    tf.reset_default_graph()
+    with tf.variable_scope(&#34;Optimizer&#34;, reuse=tf.AUTO_REUSE):
+        self.trainer = tf.train.RMSPropOptimizer(learning_rate=self.AlphaLearningRate)
+    self.train_model = AC_Network(s_size=self.s_size, a_size=self.env.a_size,
+                                  scope=self.train_network_scope, trainer=self.trainer,
+                                  train_network_scope=self.train_network_scope)
+    self.worker_local_AC_networks = [AC_Network(self.s_size, self.env.a_size, self.worker_ACNN_Scopes[i],
+                                                self.trainer, train_network_scope=self.train_network_scope)
+                                     for i in range(self.num_of_workers)]
+    self.save_manger = SavesManager(self.save_manger.saves_folder_path)  # it&#39;s important to only init the saver</code></pre>
+</details>
+</dd>
+<dt id="Beta.A3C.A3C_Algorithm.save"><code class="name flex">
+<span>def <span class="ident">save</span></span>(<span>self, sess, coord)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Handles saving the model's tensorflow vars and the necessary parameters.
+</p>
+<p>:param sess: tf.Session class object<br>
+:param coord: Coordinator class object<br>
+:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def save(self, sess, coord):
+    &#34;&#34;&#34;
+    Handles saving the model&#39;s tensorflow vars and the necessary parameters.  
+
+    :param sess: tf.Session class object  
+    :param coord: Coordinator class object  
+    :return: None
+    &#34;&#34;&#34;
+    params_dict = {&#39;global_step_cnt&#39;: coord.get_global_step_cnt()}
+    self.save_manger.save(sess, params_dict=params_dict)</code></pre>
+</details>
+</dd>
+<dt id="Beta.A3C.A3C_Algorithm.shutdown"><code class="name flex">
+<span>def <span class="ident">shutdown</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Terminates operation of instance
+</p>
+<p>:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def shutdown(self):
+    &#34;&#34;&#34;
+    Terminates operation of instance  
+
+    :return: None
+    &#34;&#34;&#34;
+    self.shutdown_requested = True
+    for w in self.workers:
+        if w.is_alive():
+            w.join()
+    if self.env_manager.status == Status.Running:
+        self.env.close()
+        for env in self.worker_envs:
+            env.close()</code></pre>
+</details>
+</dd>
+<dt id="Beta.A3C.A3C_Algorithm.train"><code class="name flex">
+<span>def <span class="ident">train</span></span>(<span>self, n_episodes=10, print_func=<built-in function print>, get_stop_flag=<function A3C_Algorithm.<lambda> at 0x0000000029C9DE18>)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Trains for n_episodes.
+</p>
+<p>:param n_episodes: episodes to play<br>
+:param print_func: function with which to print our textual output. (must be able to take a single argument)<br>
+:param get_stop_flag: A function that will be called every some time. if it returns True the .play() will exit.
+(Must be able to be called with no arguments given)<br>
+:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def train(self, n_episodes=10,  print_func=print, get_stop_flag=lambda *args: False):
+    &#34;&#34;&#34;
+    Trains for n_episodes.  
+
+    :param n_episodes: episodes to play  
+    :param print_func: function with which to print our textual output. (must be able to take a single argument)  
+    :param get_stop_flag: A function that will be called every some time. if it returns True the .play() will exit.
+        (Must be able to be called with no arguments given)  
+    :return: None
+    &#34;&#34;&#34;
+    self.reset_tf_graph()
+    self.workers = [Worker(self.worker_envs[i], self.worker_local_AC_networks[i], self.s_size, self.env.a_size,
+                           self.worker_ACNN_Scopes[i], self.Worker_Memory_Buffer_Size,
+                           train_network_scope=self.train_network_scope, OFFLINE=self.OFFLINE)
+                    for i in range(self.num_of_workers)]
+    with tf.Session(graph=tf.get_default_graph()) as sess:
+        try:
+            # coord is an object of the Coordinator class and is used to keep rack of the global step count and
+            # over how many episodes we&#39;ve trained through.
+            coord = self.init_tensorflow_variables_and_coord(sess, n_episodes)
+        except (tf.errors.InvalidArgumentError, PermissionError) as e:
+            if type(e) is tf.errors.InvalidArgumentError:
+                print_func(&#34;It seems like the save you have loaded is incompatible with your current environment. &#34;
+                           &#34;(either the a_size or the s_size are different)\r\nPlaying Aborted.&#34;)
+            else:
+                print_func(&#34;OS Denied access to save files. Please check that no program is already making use of&#34;
+                           &#34; said files.\r\nTraining Aborted.&#34;)
+            return
+        logs_path = os.path.join(self.save_manger.saves_folder_path, self.LogsFolder)
+        self.summary_writer = tf.summary.FileWriter(logs_path, sess.graph)
+        [w.start(sess, coord, summary_file_writer=self.summary_writer) for w in self.workers]
+        episode_cnt_at_last_save = 0
+        start_time = time.time()
+        while (not coord.should_stop_training(inc_episode_cnt=False)) and (not self.shutdown_requested) and (not get_stop_flag()):
+            time.sleep(self.SleepIntervalLength)
+            if Log_Weights_Histograms_and_Distributions:
+                # Logs all global tensorflow vars (basically the train model&#39;s weighs) to pretty histograms and
+                # distribution charts
+                self.summary_writer.add_summary(sess.run(self.train_model.log_histograms_for_all_global_vars),
+                                                global_step=coord.get_global_step_cnt())
+                self.summary_writer.flush()
+
+            curr_ep_cnt = coord.get_episode_cnt()
+            episodes_since_last_save = curr_ep_cnt - episode_cnt_at_last_save
+            if episodes_since_last_save &gt;= self.SaveModelEveryNEpisodes:
+                self.save(sess, coord)
+                episode_cnt_at_last_save = curr_ep_cnt
+                print_func(&#34;Episode %d Started! Model Saved.&#34; % curr_ep_cnt)
+        coord.shutdown()
+        [w.join() for w in self.workers]
+        self.save(sess, coord)
+        self.summary_writer.close()
+    self.workers = []
+    end_time = time.time()
+    print_func(&#34;Finished Training. Model Saved.\r\n&#34;
+               &#34;Overall Time: %f (secs)\r\nEpisodes run: %s\r\nAvg Time per Episode: %f (secs)&#34; %
+               (end_time - start_time, coord.get_episode_cnt(),
+                float(end_time - start_time) / coord.get_episode_cnt()))</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="Beta.A3C.CannotLearnFromEmptyMemoryException"><code class="flex name class">
+<span>class <span class="ident">CannotLearnFromEmptyMemoryException</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Common base class for all non-exit exceptions.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class CannotLearnFromEmptyMemoryException(Exception):
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="Beta.A3C.Worker"><code class="flex name class">
+<span>class <span class="ident">Worker</span></span>
+<span>(</span><span>env, AC_network, s_size, a_size, scope, Memory_Buffer_Size, train_network_scope='global', rescale_screen_images_to=[84, 84], OFFLINE=False)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>A class that represents a thread of control.</p>
+<p>This class can be safely subclassed in a limited fashion. There are two ways
+to specify the activity: by passing a callable object to the constructor, or
+by overriding the run() method in a subclass.</p>
+<p>A class that is meant to make training more efficient by allowing parallelism.
+The A3c Create several instances of this class, with each worker playing in his environment,
+acquiring
+experience, updating the global model with the produced gradients and then updating themselves with global
+model's new variables.</p>
+<p>:param env: An object that inherits from the abstract Environment class.<br>
+:param AC_network: An instance of the AC_network class.<br>
+:param s_size: Input size, essentially the size of pixels in the screen.(int)<br>
+:param a_size: Action space. The number of actions possible in our environment. (int)<br>
+:param scope: Tensorflow Varables scope. (string)<br>
+:param Memory_Buffer_Size: The size of the Workers' Memory Buffer in frames (int).<br>
+:param train_network_scope: Tensorflow Varables scope of the global model. (string)<br>
+:param rescale_screen_images_to: Size to which to scale the screen image.<br>
+:param OFFLINE: True if working on localy run environments. False if working on Remotely run environments.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class Worker(threading.Thread):
+    DiscountFactor = 0.99  # discount factor for value approximation
+
+    def __init__(self, env, AC_network, s_size, a_size, scope, Memory_Buffer_Size, train_network_scope=&#39;global&#39;,
+                 rescale_screen_images_to=[84, 84], OFFLINE=False):
+        &#34;&#34;&#34;
+        A class that is meant to make training more efficient by allowing parallelism.
+        The A3c Create several instances of this class, with each worker playing in his environment,  acquiring
+        experience, updating the global model with the produced gradients and then updating themselves with global
+        model&#39;s new variables.
+
+        :param env: An object that inherits from the abstract Environment class.  
+        :param AC_network: An instance of the AC_network class.  
+        :param s_size: Input size, essentially the size of pixels in the screen.(int)  
+        :param a_size: Action space. The number of actions possible in our environment. (int)  
+        :param scope: Tensorflow Varables scope. (string)  
+        :param Memory_Buffer_Size: The size of the Workers&#39; Memory Buffer in frames (int).  
+        :param train_network_scope: Tensorflow Varables scope of the global model. (string)  
+        :param rescale_screen_images_to: Size to which to scale the screen image.  
+        :param OFFLINE: True if working on localy run environments. False if working on Remotely run environments.
+        &#34;&#34;&#34;
+        super(Worker, self).__init__()
+        self.OFFLINE = OFFLINE
+        self.Memory_Buffer_Size = Memory_Buffer_Size
+        self.local_ACNN_scope = scope
+        self.global_ACNN_scope = train_network_scope
+        self.local_ACNN = AC_network
+        self.env = env
+        self.rescale_screen_images_to = rescale_screen_images_to
+        self.s_size, self.a_size = s_size, a_size
+        self.update_local_ACNN_weights = update_target_graph(self.global_ACNN_scope, self.local_ACNN_scope)
+
+    def start(self, sess, coord, summary_file_writer=None):
+        &#34;&#34;&#34;
+        Starts the Worker thread. The worker will train until coord orders it to stop.  
+
+        :param sess: tensorflow session object  
+        :param coord: Coordinator object  
+        :return: None
+        &#34;&#34;&#34;
+        self.sess = sess
+        self.coord = coord
+        self.summary_file_writer = summary_file_writer
+        super(Worker, self).start()
+
+    def run(self):
+        &#34;&#34;&#34;
+        Goes through episodes and trains the global ACNN  
+
+        :return: None
+        &#34;&#34;&#34;
+        self.train(self.sess, self.coord)
+
+    def train(self, sess, coord):
+        &#34;&#34;&#34;
+        Trains for as long as the coord.should_stop_training() returns false.  
+
+        :param sess: tensorflow session object  
+        :param coord: Coordinator object  
+        :return: None
+        &#34;&#34;&#34;
+        mem = Memory(max_size=self.Memory_Buffer_Size)
+        while not coord.should_stop_training(inc_episode_cnt=True):
+            self.env.start_new_episode()
+            context_out = sess.run(self.local_ACNN.init_context)
+            episode_reward = 0
+            episode_length = 0
+            while not self.env.is_episode_finished():
+                sess.run(self.update_local_ACNN_weights)  # updates model vars to current global ACNN vars.
+                while not mem.is_full() and not self.env.is_episode_finished():  # Gain Experience
+                    state = self.get_state_screen_buffer()
+                    context_in = context_out  # we save it for the memory add_time_step() func
+                    feed_dict = {self.local_ACNN.inputs: np.reshape(state, newshape=[1, -1]),
+                                 self.local_ACNN.context_in: context_in}
+                    value, policy, context_out = sess.run([self.local_ACNN.value, self.local_ACNN.policy,
+                                                       self.local_ACNN.context_out], feed_dict=feed_dict)
+                    policy = policy.flatten()
+                    action2take = (np.random.choice(policy, p=policy) == policy).astype(dtype=np.int32).flatten()
+                    immediate_reward = self.env.step(list(action2take))
+                    episode_reward += immediate_reward
+                    mem.add_time_step(state, action2take, value, context_in, immediate_reward)
+                    episode_length += 1
+
+                &#34;&#34;&#34;Use the experience to calc grads and apply to global ACNN&#34;&#34;&#34;
+                # Here we calculate the V value of the state t tag (considering step t is the last state in the mem
+                # buffer).
+                if not self.env.is_episode_finished():
+                    new_state = self.get_state_screen_buffer()
+                    feed_dict = {self.local_ACNN.inputs: np.reshape(new_state, newshape=[1, -1]),
+                                 self.local_ACNN.context_in: context_out}
+                    value_at_new_state = sess.run([self.local_ACNN.value], feed_dict=feed_dict)
+                else:
+                    value_at_new_state = [self.env.get_post_terminal_step_reward()]
+
+                batch_stats = self.calc_grads_and_update_train_model(sess, mem, value_at_new_state, coord)
+                if self.summary_file_writer:  # logs batch&#39;s stats to log files
+                    # print(&#34;Logging Batch Statistics!&#34;)
+                    log_python_values_to_tensorboard(self.summary_file_writer, batch_stats, coord)
+                mem.reset()
+            episode_reward += self.env.get_post_terminal_step_reward()
+            log_python_values_to_tensorboard(self.summary_file_writer, {&#39;Objective/episode_reward&#39;: episode_reward,
+                                                                        &#39;Objective/episode_length&#39;: episode_length},
+                                             coord)
+
+    def calc_grads_and_update_train_model(self, sess, mem, est_value_of_next_state, coord):
+        &#34;&#34;&#34;
+        Calculates gradients for the model based on the batch. Applies grads to the global network and returns
+        statistics about the batch.
+        Be Aware, this function is one hell of a mess!I built it to feed the ACNN grads but it&#39;s very technical and in
+        all honesty, I&#39;m pretty sure I won&#39;t be able to even understand it tomorrow morning.  
+
+        :param sess: tensorflow session object  
+        :param mem: A Memory class object that contains some experience.  
+        :param est_value_of_next_state: estimated V value of the next state  
+        :param coord: Coordinator class object  
+        :return: a dictionary object containing the following entries:
+                 &#39;avg_value_loss&#39;, &#39;avg_policy_loss&#39;, &#39;avg_entropy&#39;, &#39;grad_norms&#39;, &#39;var_norms&#39;
+        &#34;&#34;&#34;
+        if mem.is_empty():
+            raise CannotLearnFromEmptyMemoryException()
+        states, actions, values, rnn_states, rewards = mem.get_episode_data_for_grads()
+        batch_size = len(actions)
+        # put context into proper form
+        c_in = []
+        h_in = []
+        [(h_in.append(h), c_in.append(c)) for h, c in rnn_states]
+        h_in = np.reshape(np.asarray(h_in), newshape=[batch_size, -1])  # shape: [batch_size, lstm_n_units]
+        c_in = np.reshape(np.asarray(c_in), newshape=[batch_size, -1])  # shape: [batch_size, lstm_n_units]
+        context = h_in, c_in
+        # put the rest of the vars into proper form
+        states = np.reshape(np.asarray(states, dtype=np.float32), newshape=[batch_size, self.s_size])  # shape: [batch_size, s_zise]
+        actions = np.reshape(np.asarray(actions, dtype=np.int32), newshape=[batch_size, self.a_size])
+        values = np.asarray(values, dtype=np.float32)
+        est_value_of_next_state = np.asarray(est_value_of_next_state)
+        target_vs = approximate_real_v(rewards, self.DiscountFactor, est_value_of_next_state).flatten()  # shape: [batch_size * a_size]
+        advantages = calc_advantage(rewards, values, est_value_of_next_state,
+                                    self.DiscountFactor)  # shape: [batch_size]
+
+        actions = np.argmax(actions, axis=1)  # size: [batch_size]
+        feed_dict = {self.local_ACNN.inputs: states, self.local_ACNN.context_in: context,
+                     self.local_ACNN.actions: actions, self.local_ACNN.target_v: target_vs,
+                     self.local_ACNN.advantages: advantages}
+        # print(feed_dict)
+        # [(print(k, &#34;: &#34;,  v.shape)) for k, v in feed_dict.items() if type(v) != tuple]
+        loss, value_loss, policy_loss, entropy, grad_norms, var_norms, _ = \
+            sess.run([self.local_ACNN.loss, self.local_ACNN.value_loss, self.local_ACNN.policy_loss,
+                      self.local_ACNN.entropy, self.local_ACNN.grad_norms, self.local_ACNN.var_norms,
+                      self.local_ACNN.apply_grads], feed_dict=feed_dict)
+        # self.summary_file_writer.flush()
+        batch_statistics = {&#39;Losses/loss&#39;: loss, &#39;Losses/avg_value_loss&#39;: value_loss / batch_size,
+                            &#39;Losses/avg_policy_loss&#39;: policy_loss / batch_size,
+                            &#39;Losses/avg_entropy&#39;: entropy / batch_size, &#39;grad_norms&#39;: grad_norms,
+                            &#39;var_norms&#39;: var_norms}
+        coord.inc_global_step_cnt()
+        return batch_statistics
+
+    def get_state_screen_buffer(self):
+        &#34;&#34;&#34;
+        Gets a state screen buffer from self.env_manager.  
+
+        :return: A state screen buffer (numpy array)
+        &#34;&#34;&#34;
+        if not self.OFFLINE:
+            return self.env.get_state_screen_buffer()
+        else:
+            return self.env.get_state_screen_buffer(img_size_to_return=A3C_Algorithm.Rescale_screen_images_to)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>threading.Thread</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="Beta.A3C.Worker.DiscountFactor"><code class="name">var <span class="ident">DiscountFactor</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="Beta.A3C.Worker.calc_grads_and_update_train_model"><code class="name flex">
+<span>def <span class="ident">calc_grads_and_update_train_model</span></span>(<span>self, sess, mem, est_value_of_next_state, coord)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Calculates gradients for the model based on the batch. Applies grads to the global network and returns
+statistics about the batch.
+Be Aware, this function is one hell of a mess!I built it to feed the ACNN grads but it's very technical and in
+all honesty, I'm pretty sure I won't be able to even understand it tomorrow morning.
+</p>
+<p>:param sess: tensorflow session object<br>
+:param mem: A Memory class object that contains some experience.<br>
+:param est_value_of_next_state: estimated V value of the next state<br>
+:param coord: Coordinator class object<br>
+:return: a dictionary object containing the following entries:
+'avg_value_loss', 'avg_policy_loss', 'avg_entropy', 'grad_norms', 'var_norms'</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def calc_grads_and_update_train_model(self, sess, mem, est_value_of_next_state, coord):
+    &#34;&#34;&#34;
+    Calculates gradients for the model based on the batch. Applies grads to the global network and returns
+    statistics about the batch.
+    Be Aware, this function is one hell of a mess!I built it to feed the ACNN grads but it&#39;s very technical and in
+    all honesty, I&#39;m pretty sure I won&#39;t be able to even understand it tomorrow morning.  
+
+    :param sess: tensorflow session object  
+    :param mem: A Memory class object that contains some experience.  
+    :param est_value_of_next_state: estimated V value of the next state  
+    :param coord: Coordinator class object  
+    :return: a dictionary object containing the following entries:
+             &#39;avg_value_loss&#39;, &#39;avg_policy_loss&#39;, &#39;avg_entropy&#39;, &#39;grad_norms&#39;, &#39;var_norms&#39;
+    &#34;&#34;&#34;
+    if mem.is_empty():
+        raise CannotLearnFromEmptyMemoryException()
+    states, actions, values, rnn_states, rewards = mem.get_episode_data_for_grads()
+    batch_size = len(actions)
+    # put context into proper form
+    c_in = []
+    h_in = []
+    [(h_in.append(h), c_in.append(c)) for h, c in rnn_states]
+    h_in = np.reshape(np.asarray(h_in), newshape=[batch_size, -1])  # shape: [batch_size, lstm_n_units]
+    c_in = np.reshape(np.asarray(c_in), newshape=[batch_size, -1])  # shape: [batch_size, lstm_n_units]
+    context = h_in, c_in
+    # put the rest of the vars into proper form
+    states = np.reshape(np.asarray(states, dtype=np.float32), newshape=[batch_size, self.s_size])  # shape: [batch_size, s_zise]
+    actions = np.reshape(np.asarray(actions, dtype=np.int32), newshape=[batch_size, self.a_size])
+    values = np.asarray(values, dtype=np.float32)
+    est_value_of_next_state = np.asarray(est_value_of_next_state)
+    target_vs = approximate_real_v(rewards, self.DiscountFactor, est_value_of_next_state).flatten()  # shape: [batch_size * a_size]
+    advantages = calc_advantage(rewards, values, est_value_of_next_state,
+                                self.DiscountFactor)  # shape: [batch_size]
+
+    actions = np.argmax(actions, axis=1)  # size: [batch_size]
+    feed_dict = {self.local_ACNN.inputs: states, self.local_ACNN.context_in: context,
+                 self.local_ACNN.actions: actions, self.local_ACNN.target_v: target_vs,
+                 self.local_ACNN.advantages: advantages}
+    # print(feed_dict)
+    # [(print(k, &#34;: &#34;,  v.shape)) for k, v in feed_dict.items() if type(v) != tuple]
+    loss, value_loss, policy_loss, entropy, grad_norms, var_norms, _ = \
+        sess.run([self.local_ACNN.loss, self.local_ACNN.value_loss, self.local_ACNN.policy_loss,
+                  self.local_ACNN.entropy, self.local_ACNN.grad_norms, self.local_ACNN.var_norms,
+                  self.local_ACNN.apply_grads], feed_dict=feed_dict)
+    # self.summary_file_writer.flush()
+    batch_statistics = {&#39;Losses/loss&#39;: loss, &#39;Losses/avg_value_loss&#39;: value_loss / batch_size,
+                        &#39;Losses/avg_policy_loss&#39;: policy_loss / batch_size,
+                        &#39;Losses/avg_entropy&#39;: entropy / batch_size, &#39;grad_norms&#39;: grad_norms,
+                        &#39;var_norms&#39;: var_norms}
+    coord.inc_global_step_cnt()
+    return batch_statistics</code></pre>
+</details>
+</dd>
+<dt id="Beta.A3C.Worker.get_state_screen_buffer"><code class="name flex">
+<span>def <span class="ident">get_state_screen_buffer</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Gets a state screen buffer from self.env_manager.
+</p>
+<p>:return: A state screen buffer (numpy array)</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def get_state_screen_buffer(self):
+    &#34;&#34;&#34;
+    Gets a state screen buffer from self.env_manager.  
+
+    :return: A state screen buffer (numpy array)
+    &#34;&#34;&#34;
+    if not self.OFFLINE:
+        return self.env.get_state_screen_buffer()
+    else:
+        return self.env.get_state_screen_buffer(img_size_to_return=A3C_Algorithm.Rescale_screen_images_to)</code></pre>
+</details>
+</dd>
+<dt id="Beta.A3C.Worker.run"><code class="name flex">
+<span>def <span class="ident">run</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Goes through episodes and trains the global ACNN
+</p>
+<p>:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def run(self):
+    &#34;&#34;&#34;
+    Goes through episodes and trains the global ACNN  
+
+    :return: None
+    &#34;&#34;&#34;
+    self.train(self.sess, self.coord)</code></pre>
+</details>
+</dd>
+<dt id="Beta.A3C.Worker.start"><code class="name flex">
+<span>def <span class="ident">start</span></span>(<span>self, sess, coord, summary_file_writer=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Starts the Worker thread. The worker will train until coord orders it to stop.
+</p>
+<p>:param sess: tensorflow session object<br>
+:param coord: Coordinator object<br>
+:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def start(self, sess, coord, summary_file_writer=None):
+    &#34;&#34;&#34;
+    Starts the Worker thread. The worker will train until coord orders it to stop.  
+
+    :param sess: tensorflow session object  
+    :param coord: Coordinator object  
+    :return: None
+    &#34;&#34;&#34;
+    self.sess = sess
+    self.coord = coord
+    self.summary_file_writer = summary_file_writer
+    super(Worker, self).start()</code></pre>
+</details>
+</dd>
+<dt id="Beta.A3C.Worker.train"><code class="name flex">
+<span>def <span class="ident">train</span></span>(<span>self, sess, coord)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Trains for as long as the coord.should_stop_training() returns false.
+</p>
+<p>:param sess: tensorflow session object<br>
+:param coord: Coordinator object<br>
+:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def train(self, sess, coord):
+    &#34;&#34;&#34;
+    Trains for as long as the coord.should_stop_training() returns false.  
+
+    :param sess: tensorflow session object  
+    :param coord: Coordinator object  
+    :return: None
+    &#34;&#34;&#34;
+    mem = Memory(max_size=self.Memory_Buffer_Size)
+    while not coord.should_stop_training(inc_episode_cnt=True):
+        self.env.start_new_episode()
+        context_out = sess.run(self.local_ACNN.init_context)
+        episode_reward = 0
+        episode_length = 0
+        while not self.env.is_episode_finished():
+            sess.run(self.update_local_ACNN_weights)  # updates model vars to current global ACNN vars.
+            while not mem.is_full() and not self.env.is_episode_finished():  # Gain Experience
+                state = self.get_state_screen_buffer()
+                context_in = context_out  # we save it for the memory add_time_step() func
+                feed_dict = {self.local_ACNN.inputs: np.reshape(state, newshape=[1, -1]),
+                             self.local_ACNN.context_in: context_in}
+                value, policy, context_out = sess.run([self.local_ACNN.value, self.local_ACNN.policy,
+                                                   self.local_ACNN.context_out], feed_dict=feed_dict)
+                policy = policy.flatten()
+                action2take = (np.random.choice(policy, p=policy) == policy).astype(dtype=np.int32).flatten()
+                immediate_reward = self.env.step(list(action2take))
+                episode_reward += immediate_reward
+                mem.add_time_step(state, action2take, value, context_in, immediate_reward)
+                episode_length += 1
+
+            &#34;&#34;&#34;Use the experience to calc grads and apply to global ACNN&#34;&#34;&#34;
+            # Here we calculate the V value of the state t tag (considering step t is the last state in the mem
+            # buffer).
+            if not self.env.is_episode_finished():
+                new_state = self.get_state_screen_buffer()
+                feed_dict = {self.local_ACNN.inputs: np.reshape(new_state, newshape=[1, -1]),
+                             self.local_ACNN.context_in: context_out}
+                value_at_new_state = sess.run([self.local_ACNN.value], feed_dict=feed_dict)
+            else:
+                value_at_new_state = [self.env.get_post_terminal_step_reward()]
+
+            batch_stats = self.calc_grads_and_update_train_model(sess, mem, value_at_new_state, coord)
+            if self.summary_file_writer:  # logs batch&#39;s stats to log files
+                # print(&#34;Logging Batch Statistics!&#34;)
+                log_python_values_to_tensorboard(self.summary_file_writer, batch_stats, coord)
+            mem.reset()
+        episode_reward += self.env.get_post_terminal_step_reward()
+        log_python_values_to_tensorboard(self.summary_file_writer, {&#39;Objective/episode_reward&#39;: episode_reward,
+                                                                    &#39;Objective/episode_length&#39;: episode_length},
+                                         coord)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="Beta" href="index.html">Beta</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="Beta.A3C.approximate_real_v" href="#Beta.A3C.approximate_real_v">approximate_real_v</a></code></li>
+<li><code><a title="Beta.A3C.calc_advantage" href="#Beta.A3C.calc_advantage">calc_advantage</a></code></li>
+<li><code><a title="Beta.A3C.discount" href="#Beta.A3C.discount">discount</a></code></li>
+<li><code><a title="Beta.A3C.log_python_values_to_tensorboard" href="#Beta.A3C.log_python_values_to_tensorboard">log_python_values_to_tensorboard</a></code></li>
+<li><code><a title="Beta.A3C.main" href="#Beta.A3C.main">main</a></code></li>
+<li><code><a title="Beta.A3C.update_target_graph" href="#Beta.A3C.update_target_graph">update_target_graph</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="Beta.A3C.A3C_Algorithm" href="#Beta.A3C.A3C_Algorithm">A3C_Algorithm</a></code></h4>
+<ul class="">
+<li><code><a title="Beta.A3C.A3C_Algorithm.DefaultAlphaLearningRate" href="#Beta.A3C.A3C_Algorithm.DefaultAlphaLearningRate">DefaultAlphaLearningRate</a></code></li>
+<li><code><a title="Beta.A3C.A3C_Algorithm.DefaultSavesFolderPath" href="#Beta.A3C.A3C_Algorithm.DefaultSavesFolderPath">DefaultSavesFolderPath</a></code></li>
+<li><code><a title="Beta.A3C.A3C_Algorithm.DefaultWorkerMemoryBufferSize" href="#Beta.A3C.A3C_Algorithm.DefaultWorkerMemoryBufferSize">DefaultWorkerMemoryBufferSize</a></code></li>
+<li><code><a title="Beta.A3C.A3C_Algorithm.LogsFolder" href="#Beta.A3C.A3C_Algorithm.LogsFolder">LogsFolder</a></code></li>
+<li><code><a title="Beta.A3C.A3C_Algorithm.Rescale_screen_images_to" href="#Beta.A3C.A3C_Algorithm.Rescale_screen_images_to">Rescale_screen_images_to</a></code></li>
+<li><code><a title="Beta.A3C.A3C_Algorithm.SaveModelEveryNEpisodes" href="#Beta.A3C.A3C_Algorithm.SaveModelEveryNEpisodes">SaveModelEveryNEpisodes</a></code></li>
+<li><code><a title="Beta.A3C.A3C_Algorithm.SleepIntervalLength" href="#Beta.A3C.A3C_Algorithm.SleepIntervalLength">SleepIntervalLength</a></code></li>
+<li><code><a title="Beta.A3C.A3C_Algorithm.Workers_ACNN_Scope_Template" href="#Beta.A3C.A3C_Algorithm.Workers_ACNN_Scope_Template">Workers_ACNN_Scope_Template</a></code></li>
+<li><code><a title="Beta.A3C.A3C_Algorithm.change_save_folder_path" href="#Beta.A3C.A3C_Algorithm.change_save_folder_path">change_save_folder_path</a></code></li>
+<li><code><a title="Beta.A3C.A3C_Algorithm.get_a_new_environment_instance" href="#Beta.A3C.A3C_Algorithm.get_a_new_environment_instance">get_a_new_environment_instance</a></code></li>
+<li><code><a title="Beta.A3C.A3C_Algorithm.get_state_screen_buffer" href="#Beta.A3C.A3C_Algorithm.get_state_screen_buffer">get_state_screen_buffer</a></code></li>
+<li><code><a title="Beta.A3C.A3C_Algorithm.init_tensorflow_variables" href="#Beta.A3C.A3C_Algorithm.init_tensorflow_variables">init_tensorflow_variables</a></code></li>
+<li><code><a title="Beta.A3C.A3C_Algorithm.init_tensorflow_variables_and_coord" href="#Beta.A3C.A3C_Algorithm.init_tensorflow_variables_and_coord">init_tensorflow_variables_and_coord</a></code></li>
+<li><code><a title="Beta.A3C.A3C_Algorithm.play" href="#Beta.A3C.A3C_Algorithm.play">play</a></code></li>
+<li><code><a title="Beta.A3C.A3C_Algorithm.reset_tf_graph" href="#Beta.A3C.A3C_Algorithm.reset_tf_graph">reset_tf_graph</a></code></li>
+<li><code><a title="Beta.A3C.A3C_Algorithm.s_size" href="#Beta.A3C.A3C_Algorithm.s_size">s_size</a></code></li>
+<li><code><a title="Beta.A3C.A3C_Algorithm.save" href="#Beta.A3C.A3C_Algorithm.save">save</a></code></li>
+<li><code><a title="Beta.A3C.A3C_Algorithm.shutdown" href="#Beta.A3C.A3C_Algorithm.shutdown">shutdown</a></code></li>
+<li><code><a title="Beta.A3C.A3C_Algorithm.shutdown_requested" href="#Beta.A3C.A3C_Algorithm.shutdown_requested">shutdown_requested</a></code></li>
+<li><code><a title="Beta.A3C.A3C_Algorithm.train" href="#Beta.A3C.A3C_Algorithm.train">train</a></code></li>
+<li><code><a title="Beta.A3C.A3C_Algorithm.train_network_scope" href="#Beta.A3C.A3C_Algorithm.train_network_scope">train_network_scope</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="Beta.A3C.CannotLearnFromEmptyMemoryException" href="#Beta.A3C.CannotLearnFromEmptyMemoryException">CannotLearnFromEmptyMemoryException</a></code></h4>
+</li>
+<li>
+<h4><code><a title="Beta.A3C.Worker" href="#Beta.A3C.Worker">Worker</a></code></h4>
+<ul class="">
+<li><code><a title="Beta.A3C.Worker.DiscountFactor" href="#Beta.A3C.Worker.DiscountFactor">DiscountFactor</a></code></li>
+<li><code><a title="Beta.A3C.Worker.calc_grads_and_update_train_model" href="#Beta.A3C.Worker.calc_grads_and_update_train_model">calc_grads_and_update_train_model</a></code></li>
+<li><code><a title="Beta.A3C.Worker.get_state_screen_buffer" href="#Beta.A3C.Worker.get_state_screen_buffer">get_state_screen_buffer</a></code></li>
+<li><code><a title="Beta.A3C.Worker.run" href="#Beta.A3C.Worker.run">run</a></code></li>
+<li><code><a title="Beta.A3C.Worker.start" href="#Beta.A3C.Worker.start">start</a></code></li>
+<li><code><a title="Beta.A3C.Worker.train" href="#Beta.A3C.Worker.train">train</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.6.2</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

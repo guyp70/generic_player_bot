@@ -1,0 +1,1918 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.6.2" />
+<title>Beta.Server.Environments API documentation</title>
+<meta name="description" content="" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase;cursor:pointer}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>Beta.Server.Environments</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">from vizdoom import DoomGame
+from vizdoom import Button
+from vizdoom import GameVariable
+from vizdoom import ScreenFormat
+from vizdoom import ScreenResolution
+from abc import ABC, abstractmethod
+import cv2
+import random
+import time
+import numpy as np
+import os
+from importlib.machinery import SourceFileLoader
+import gym
+
+
+VisibleScreen = False
+
+
+class Environment(ABC):
+    # A template for all future environments, meant to work with GrayScale screen buffers.
+
+    def __init__(self, a_size):
+        &#34;&#34;&#34;
+        Initiates an Environment instance. Meant to be inherited from and not to operate by itself.
+        A partially abstract class.  
+
+        :param a_size: Number of possible actions in the environment.
+        &#34;&#34;&#34;
+        self.a_size = a_size  # The number of possible actions.
+
+    @property
+    def possible_actions(self):
+        &#34;&#34;&#34;
+        Returns a list of one hot vectors representing the possible actions in our environment.  
+
+        :return: a list of one hot vectors representing the possible actions in our environment.
+        &#34;&#34;&#34;
+        return np.identity(self.a_size, dtype=np.float32).tolist()
+
+    @abstractmethod
+    def step(self, action):
+        &#34;&#34;&#34;
+        Makes an action and returns a reward. Also scales the reward if self.reward_scaling_enabled is True.  
+
+        :param action: one hot vector detailing the action to take.(must be one of the vectors in self.possible_actions)  
+        :return: Reward value
+        &#34;&#34;&#34;
+        pass
+
+    @abstractmethod
+    def get_post_terminal_step_reward(self):
+        &#34;&#34;&#34;
+        Returns a reward for the state after the terminal step.
+        Technically all steps after the episode is finished are supposed have a V value of zero but mean normalization
+        might change what a reward of zero means and so we put zero through all the process a normal reward goes
+        through and send the result.  
+
+        :return: Terminal reward value
+        &#34;&#34;&#34;
+        pass
+
+    @abstractmethod
+    def get_state_screen_buffer(self):
+        &#34;&#34;&#34;
+        Returns the current state&#39;s screen buffer. (Should be used  
+
+        :param img_size_to_return: tuple of 2 integers. The size of the image that will be returned in pixels.  
+        :param scaling: If true scales all pixels values to the range between 0 and 1. Improves performance.  
+        :return: returns the current state&#39;s screen buffer.
+        &#34;&#34;&#34;
+        pass
+
+    @abstractmethod
+    def start_new_episode(self):
+        &#34;&#34;&#34;
+        Starts a new episode.  
+
+        :return: None
+        &#34;&#34;&#34;
+        pass
+
+    @abstractmethod
+    def is_episode_finished(self):
+        &#34;&#34;&#34;
+        Returns True if episode is finished, False otherwise.  
+
+        :return: True if episode is finished, False otherwise.
+        &#34;&#34;&#34;
+        pass
+
+    @abstractmethod
+    def get_total_reward(self):
+        &#34;&#34;&#34;
+        Returns accumulated total reward from all states since episode start.  
+
+        :return: The accumulated total reward since episode start.
+        &#34;&#34;&#34;
+        pass
+
+    @abstractmethod
+    def close(self):
+        &#34;&#34;&#34;
+        Close environment.  
+
+        :return: None
+        &#34;&#34;&#34;
+        pass
+
+
+class LocalEnvironment(Environment):
+    # A template for all future environments run locally, meant to work with GrayScale screen buffers.
+
+    Max_Pixel_value = 255
+
+    def __init__(self, a_size, screen_buffer_pixel_values_scaling, reward_scaling_enabled, max_episode_reward,
+                 min_episode_reward, mean_normalization_enabled, episode_timeout, mean_step_reward):
+        &#34;&#34;&#34;
+        Initiates a LocalEnvironment instance. Meant to be inherited from and not to operate by itself.
+        Partially abstract.  
+
+        :param a_size: Number of possible actions in the environment.  
+        :param screen_buffer_pixel_values_scaling: True/False, whether we should apply scaling to the screen buffer&#39;s
+                                                   pixel values.  
+        :param reward_scaling_enabled: True/False, whether we should apply scaling to the rewards values.  
+        :param max_episode_reward: Episode&#39;s maximum possible total reward.  
+        :param min_episode_reward: Episode&#39;s minimum possible total reward.  
+        :param mean_normalization_enabled: True/False, whether we should apply mean normalization to the rewards values.  
+        :param episode_timeout: Must be either None\False\0 or a positive number. If None\False\0 episode never
+                                times out. If a positive number limits the episode run on this instance to this number
+                                of steps. (is_terminal starts returning True afterwards.)  
+        :param mean_step_reward: The average reward for a step.
+        &#34;&#34;&#34;
+        super(LocalEnvironment, self).__init__(a_size)
+        self.episode_timeout = episode_timeout
+        self.episode_steps_cnt = 0
+        self.screen_buffer_pixel_values_scaling = screen_buffer_pixel_values_scaling
+        self.reward_scaling_enabled = reward_scaling_enabled
+        self.mean_normalization_enabled = mean_normalization_enabled
+        self.max_episode_reward = max_episode_reward
+        self.min_episode_reward = min_episode_reward
+        self.mean_reward = mean_step_reward
+
+    @property
+    def possible_actions(self):
+        &#34;&#34;&#34;
+        Returns a list of one hot vectors representing the possible actions in our environment.  
+
+        :return: a list of one hot vectors representing the possible actions in our environment.
+        &#34;&#34;&#34;
+        return np.identity(self.a_size, dtype=np.int32).tolist()
+
+    def step(self, action):
+        &#34;&#34;&#34;
+        Makes an action and returns a reward. Also scales the reward if self.reward_scaling_enabled is True.  
+
+        :param action: one hot vector detailing the action to take.(must be one of the vectors in self.possible_actions)  
+        :return: Reward value
+        &#34;&#34;&#34;
+        reward = self._step(action)
+        if self.mean_normalization_enabled:
+            reward = self.mean_normalize_reward(reward)
+        if self.reward_scaling_enabled:
+            reward = self.scale_reward(reward)
+        self.episode_steps_cnt += 1
+        return reward
+
+    @abstractmethod
+    def _step(self, action):
+        &#34;&#34;&#34;
+        DO NOT use this function!!! Use the .step() function instead!
+        Makes an action and returns a reward.
+        self.step() is a wrapper to this function so please use self.step().  
+
+        :param action: (list) action to do (must be from self.possible_action)  
+        :return: reward(int) ( R(s,a) )
+        &#34;&#34;&#34;
+        pass
+
+    def get_post_terminal_step_reward(self):
+        &#34;&#34;&#34;
+        Returns a reward for the state after the terminal step.
+        Technically all steps after the episode is finished are supposed have a V value of zero but mean normalization
+        might change what a reward of zero means and so we put zero through all the process a normal reward goes
+        through and send the result.  
+
+        :return: Terminal reward value
+        &#34;&#34;&#34;
+        reward = 0  # if the episode ended, we get no reward in the next state
+        if self.mean_normalization_enabled:
+            reward = self.mean_normalize_reward(reward)
+        if self.reward_scaling_enabled:
+            reward = self.scale_reward(reward)
+        return reward
+
+    def mean_normalize_reward(self, reward):
+        &#34;&#34;&#34;
+        Applies mean normalization to the reward. Essentially reduce the reward by the mean reward so as to make the
+        mean reward 0. (theoretically not necessary,  but greatly improves performance with most learning algorithms)  
+
+        :param reward: (int or float) Reward value to mean normalize.  
+        :return: mean normalized reward.
+        &#34;&#34;&#34;
+        return float(reward) - self.mean_reward
+
+    def scale_reward(self, reward):
+        &#34;&#34;&#34;
+        scales the reward so that they are always between -1 and 1. (theoretically not necessary,  but greatly improves
+         performance with most learning algorithms)  
+
+        :param reward: (int or float) Reward value to scale  
+        :return: scaled reward in range between -1 and 1 (inclusive).
+        &#34;&#34;&#34;
+        return float(reward) / max(abs(self.min_episode_reward), abs(self.max_episode_reward))
+
+    @abstractmethod
+    def _get_state_screen_buffer(self):
+        &#34;&#34;&#34;
+        DO NOT use this function!!! Use the .get_state_screen_buffer() function instead.
+        This is the one you should overwrite when inheriting from this class though, not .get_state_screen_buffer()
+        returns the current state&#39;s original screen buffer.
+        self.get_state_screen_buffer() is a wrapper to this function so please use self.get_state_screen_buffer().  
+
+        :return: returns the current state&#39;s screen buffer.
+        &#34;&#34;&#34;
+        pass
+
+    def get_state_screen_buffer(self, img_size_to_return=None):
+        &#34;&#34;&#34;
+        Returns the current state&#39;s preprocessed screen buffer.  
+
+        :param img_size_to_return: tuple of 2 integers. The size of the image that will be returned in pixels.  
+        :return: returns the current state&#39;s screen buffer.
+        &#34;&#34;&#34;
+        screen_buffer = self._get_state_screen_buffer()
+        if not img_size_to_return == None:
+            screen_buffer = cv2.resize(screen_buffer, dsize=tuple(img_size_to_return))
+        if self.screen_buffer_pixel_values_scaling:
+            screen_buffer = self.scale_pixel_values(screen_buffer)
+        return screen_buffer
+
+    def get_unprocessed_state_screen_buffer(self, img_size_to_return=None):
+        &#34;&#34;&#34;
+        Returns the current state&#39;s unprocessed screen buffer.  
+
+        :param img_size_to_return: tuple of 2 integers. The size of the image that will be returned in pixels.  
+        :return: returns the current state&#39;s screen buffer.
+        &#34;&#34;&#34;
+        screen_buffer = self._get_state_screen_buffer()
+        if not img_size_to_return == None:
+            screen_buffer = cv2.resize(screen_buffer, dsize=tuple(img_size_to_return))
+        return screen_buffer
+
+
+    def scale_pixel_values(self, state_screen_buffer):
+        &#34;&#34;&#34;
+        Returns the current state&#39;s screen buffer with its values all scaled to the range between 0 and 1.
+        (theoretically not necessary,  but greatly improves performance with most learning algorithms)  
+
+        :param state_screen_buffer: state_screen_buffer from self.get_state_screen_buffer().  
+        :return: screen buffer with its values all scaled to the range between 0 and 1
+        &#34;&#34;&#34;
+        return state_screen_buffer / float(self.Max_Pixel_value)
+
+    def start_new_episode(self):
+        &#34;&#34;&#34;
+        Starts a new episode.  
+
+        :return: None
+        &#34;&#34;&#34;
+        self._start_new_episode()
+        self.episode_steps_cnt = 0
+
+    @abstractmethod
+    def _start_new_episode(self):
+        &#34;&#34;&#34;
+        DO NOT use this function!!! Use the .start_new_episode() function instead.
+        This is the one you should overwrite when inheriting from this class though, not .start_new_episode()
+
+        Starts a new episode.  
+
+        :return: None
+        &#34;&#34;&#34;
+        pass
+
+    def is_episode_finished(self):
+        &#34;&#34;&#34;
+        Returns True if episode is finished, False otherwise.  
+
+        :return: True if episode is finished, False otherwise.
+        &#34;&#34;&#34;
+        is_finished = self._is_episode_finished()
+        if self.episode_timeout:
+            is_finished = is_finished or not (self.episode_steps_cnt &lt; self.episode_timeout)
+        return is_finished
+
+
+    @abstractmethod
+    def _is_episode_finished(self):
+        &#34;&#34;&#34;
+        DO NOT use this function!!! Use the .is_episode_finished() function instead.
+        This is the one you should overwrite when inheriting from this class though, not .is_episode_finished()
+        returns True if episode is finished, False otherwise&#34;&#34;&#34;
+        pass
+
+    @abstractmethod
+    def get_total_reward(self):
+        &#34;&#34;&#34;
+        Returns accumulated total reward from all states since episode start.  
+
+        :return: The accumulated total reward since episode start.
+        &#34;&#34;&#34;
+        pass
+
+    @abstractmethod
+    def close(self):
+        &#34;&#34;&#34;
+        Close environment.  
+
+        :return: None
+        &#34;&#34;&#34;
+        pass
+
+
+class DoomGameEnvironment(LocalEnvironment):
+    def __init__(self, settings_file_path, visible_screen=False, sound_enabled=False):
+        &#34;&#34;&#34;
+        Initiates a Local DoomGame environment (from VizDoom). Inherits from LocalEnvironment and therefore adheres to
+        the interface defined in said LocalEnvironment class.  
+
+        :param settings_file_path: Path to the environment&#39;s settings.py file (string).  
+        :param visible_screen: If true VizDoom will open a window in the machine it runs on and display the game.
+            If False, will run environment in the background and will not open such a display window.  
+        :param sound_enabled: If true VizDoom will enable sound from environment.
+            If False, VizDoom will mute said environment.
+        &#34;&#34;&#34;
+        self.game = DoomGame()
+        settings = SourceFileLoader(&#39;settings&#39;, settings_file_path).load_module()  # A .py file containing details about
+        #                                                                            the environment.
+
+        # Load the correct configuration
+        self.game.load_config(settings.VizDoom_CFG_File)
+
+        # Load the correct scenario (in our case basic scenario)
+        self.game.set_doom_scenario_path(settings.VizDoom_WAD_File)
+
+        self.game.set_screen_format(ScreenFormat.GRAY8)
+        self.game.set_screen_resolution(ScreenResolution.RES_160X120)
+
+        self.game.set_window_visible(visible_screen)  # sets screen visibility
+        self.game.set_sound_enabled(sound_enabled)  # enables or disables sound
+        self.game.init()
+
+        a_size = len(self.game.get_available_buttons())
+        super(DoomGameEnvironment, self).__init__(a_size, settings.Screen_Buffer_Pixel_Values_Scaling,
+                                                  settings.RewardScalingEnabled,
+                                                  settings.Scenario_Max_Reward_Per_Episode,
+                                                  settings.Scenario_Min_Reward_Per_Episode,
+                                                  settings.Mean_Normalization_Enabled,
+                                                  settings.Episode_Timeout,
+                                                  settings.Mean_Step_Reward)
+
+    def _start_new_episode(self):
+        &#34;&#34;&#34;
+        DO NOT use this function!!! Use the .start_new_episode() function instead!
+        &#34;&#34;&#34;
+        self.game.new_episode()
+
+    def _step(self, action):
+        &#34;&#34;&#34;
+        DO NOT use this function!!! Use the .step() function instead!
+        &#34;&#34;&#34;
+        reward = self.game.make_action(action)
+        return reward
+
+    def _get_state_screen_buffer(self):
+        &#34;&#34;&#34;
+        DO NOT use this function!!! Use the .get_state_screen_buffer() function instead!
+        &#34;&#34;&#34;
+        return self.game.get_state().screen_buffer
+
+    def _is_episode_finished(self):
+        &#34;&#34;&#34;
+        DO NOT use this function!!! Use the .is_episode_finished() function instead!
+        &#34;&#34;&#34;
+        return self.game.is_episode_finished()
+
+    def get_total_reward(self):
+        &#34;&#34;&#34;
+        Returns accumulated total reward from all states since episode start.  
+
+        :return: The accumulated total reward since episode start.
+        &#34;&#34;&#34;
+        return self.game.get_total_reward()
+
+    def close(self):
+        &#34;&#34;&#34;
+        Close environment.  
+
+        :return: None
+        &#34;&#34;&#34;
+        self.game.close()
+
+
+class OpenAIGymEnvironment(LocalEnvironment):
+    def __init__(self, settings_file_path, visible_screen=True):
+        &#34;&#34;&#34;
+        Initiates a Local OpenAIGym environment. Inherits from LocalEnvironment and therefore adheres to
+        the interface defined in said LocalEnvironment class.  
+
+        :param settings_file_path: Path to the environment&#39;s settings.py file (string).  
+        :param visible_screen: If true OpenAIGym will open a window in the machine it runs on and display the game.
+            If False, will run environment in the background and will not open such a display window.
+        &#34;&#34;&#34;
+        self.visible_screen = visible_screen
+
+        settings = SourceFileLoader(&#39;settings&#39;, settings_file_path).load_module()  # A .py file containing details about
+        #                                                                            the environment.
+
+        self.env = gym.make(settings.Env_ID)  # loads the environment
+
+        a_size = self.env.action_space.n
+        super(OpenAIGymEnvironment, self).__init__(a_size, settings.Screen_Buffer_Pixel_Values_Scaling,
+                                                   settings.RewardScalingEnabled,
+                                                   settings.Scenario_Max_Reward_Per_Episode,
+                                                   settings.Scenario_Min_Reward_Per_Episode,
+                                                   settings.Mean_Normalization_Enabled,
+                                                   settings.Episode_Timeout,
+                                                   settings.Mean_Step_Reward)
+
+        self.curr_state = None
+        self.is_terminal = None
+        self.total_episode_reward = None
+        self.start_new_episode()
+
+    def _start_new_episode(self):
+        &#34;&#34;&#34;
+        DO NOT use this function!!! Use the .start_new_episode() function instead!
+        &#34;&#34;&#34;
+        self.curr_state = self.env.reset()
+        self.is_terminal = False
+        self.total_episode_reward = 0
+
+    def _step(self, action):
+        &#34;&#34;&#34;
+        DO NOT use this function!!! Use the .step() function instead!
+        &#34;&#34;&#34;
+        action = np.argmax(np.asarray(action))
+        self.curr_state, reward, self.is_terminal, info = self.env.step(action)
+        self.total_episode_reward += reward
+
+        if self.visible_screen:
+            self.env.render()
+
+        return reward
+
+    def _get_state_screen_buffer(self):
+        &#34;&#34;&#34;
+        DO NOT use this function!!! Use the .get_state_screen_buffer() function instead!
+        &#34;&#34;&#34;
+        return rgb2gray(self.curr_state)
+
+    def _is_episode_finished(self):
+        &#34;&#34;&#34;
+        DO NOT use this function!!! Use the .is_episode_finished() function instead!
+        &#34;&#34;&#34;
+        return self.is_terminal
+
+    def get_total_reward(self):
+        &#34;&#34;&#34;
+        Returns accumulated total reward from all states since episode start.  
+
+        :return: The accumulated total reward since episode start.
+        &#34;&#34;&#34;
+        return self.total_episode_reward
+
+    def close(self):
+        &#34;&#34;&#34;
+        Close environment.  
+
+        :return: None
+        &#34;&#34;&#34;
+        self.env.close()
+
+
+class EnvironmentsInitializer(object):
+    Icon_Files_Name = &#34;icon.jpg&#34;
+    &#34;&#34;&#34;A class used to initialize environments.&#34;&#34;&#34;
+    def __init__(self, environments_settings_folder=&#34;Environments_Settings&#34;):
+        &#34;&#34;&#34;
+        A class used to initialize environments.  
+
+        :param environments_settings_folder:  Path to the Environments_Settings directory. (string)
+        &#34;&#34;&#34;
+        self.environments_settings_folder = os.path.join(os.path.dirname(__file__), environments_settings_folder)
+
+    def get_env(self, env_name):
+        &#34;&#34;&#34;
+        Reutrns an instance that complies with the structure of Environment abstract class.  
+
+        :param env_name: The request environment identifying string.  
+        :return: An instance that complies with the structure of Environment abstract class.
+        &#34;&#34;&#34;
+        vizdoom_envs_folder_path = os.path.join(self.environments_settings_folder, &#39;VizDoom&#39;)
+        vizdoom_envs = os.listdir(vizdoom_envs_folder_path)
+        if env_name in vizdoom_envs:
+            settings_file_path = os.path.join(vizdoom_envs_folder_path, env_name, &#34;settings.py&#34;)
+            return DoomGameEnvironment(settings_file_path, visible_screen=VisibleScreen)
+
+        open_ai_gym_envs_folder_path = os.path.join(self.environments_settings_folder, &#39;OpenAIgym&#39;)
+        open_ai_gym_envs = os.listdir(open_ai_gym_envs_folder_path)
+        if env_name in open_ai_gym_envs:
+            settings_file_path = os.path.join(open_ai_gym_envs_folder_path, env_name, &#34;settings.py&#34;)
+            return OpenAIGymEnvironment(settings_file_path, visible_screen=VisibleScreen)
+
+        raise UnknownEnvironmentRequested()
+
+    def get_available_envs(self):
+        &#34;&#34;&#34;
+        Returns the identifying string of all available environments.
+
+        :return: A list of all available environments.
+        &#34;&#34;&#34;
+        return os.listdir(os.path.join(self.environments_settings_folder, &#39;VizDoom&#39;)) + \
+               os.listdir(os.path.join(self.environments_settings_folder, &#39;OpenAIgym&#39;))
+
+    def get_available_environments_initialization_strings(self):
+        &#34;&#34;&#34;
+        Alias for self.get_available_envs().
+        Returns the identifying string of all available environments.
+
+        :return: A list of all available environments.
+        &#34;&#34;&#34;
+        return self.get_available_envs()
+
+    def env_init_str_to_env_icon_dict(self, icon_display_size):
+        &#34;&#34;&#34;
+        Returns a dict where the keys, the environment initialization strings, map to their environments&#39; corresponding
+        icons (stored as numpy arrays).  
+
+        :param icon_display_size: The size of the icons to be placed in the dict. (tuple of 2 ints (width, height))  
+        :return: A dict where the keys, the environment initialization strings, map to their environments&#39; corresponding
+            icons (stored as numpy arrays).
+        &#34;&#34;&#34;
+        env_init_str_to_icon = dict()
+        paths = [os.path.join(self.environments_settings_folder, &#39;VizDoom&#39;),
+                 os.path.join(self.environments_settings_folder, &#39;OpenAIgym&#39;)]
+        for path in paths:
+            for env_init_str in os.listdir(path):
+                env_init_str_to_icon[env_init_str] = cv2.resize(cv2.imread(os.path.join(path, env_init_str,
+                                                                                        self.Icon_Files_Name)),
+                                                                dsize=tuple(icon_display_size))
+        return env_init_str_to_icon
+
+
+class UnknownEnvironmentRequested(Exception):
+    pass
+
+
+class OpenAIGymNotImplementedYet(Exception):
+    pass
+
+
+def rgb2gray(rgb):
+    &#34;&#34;&#34;
+    Converts an RGB image (stored as a numpy array) int a gray scale image (stored as a numpy array as well).  
+
+    :param rgb: RGB image (stored as a numpy array).  
+    :return: gray scale image (stored as a numpy array as well).
+    &#34;&#34;&#34;
+    return np.dot(rgb[:, :, :3], [0.2989, 0.5870, 0.1140])
+
+
+def main():
+    &#34;&#34;&#34;TESTS&#34;&#34;&#34;
+    SAVE_SCREEN = True
+    print(&#34;---DOOM TEST---&#34;)
+    env_init = EnvironmentsInitializer()
+    env_init.env_init_str_to_env_icon_dict((300, 300))
+    print(env_init.get_available_envs())
+    env_init_str = env_init.get_available_envs()[0]
+    print(env_init_str)
+    game = env_init.get_env(env_init_str)
+
+    game.start_new_episode()
+    if SAVE_SCREEN:
+        from PIL import Image
+        photos_folder = &#39;eps&#39;
+        if not os.path.isdir(photos_folder):
+            os.mkdir(photos_folder)
+        cnt = 0
+
+    while not game.is_episode_finished():
+        print(game.episode_steps_cnt)  # game.get_state_screen_buffer())
+        if SAVE_SCREEN:
+            screen = game.get_state_screen_buffer()
+            if game.screen_buffer_pixel_values_scaling:
+                screen *= 256
+            Image.fromarray(screen).convert(&#39;RGB&#39;).save(os.path.join(photos_folder, r&#34;%d.bmp&#34; % cnt))
+            cnt += 1
+        game.step(random.choice(game.possible_actions))
+        time.sleep(0.2)
+
+
+if __name__ == &#34;__main__&#34;:
+    main()</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="Beta.Server.Environments.main"><code class="name flex">
+<span>def <span class="ident">main</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>TESTS</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def main():
+    &#34;&#34;&#34;TESTS&#34;&#34;&#34;
+    SAVE_SCREEN = True
+    print(&#34;---DOOM TEST---&#34;)
+    env_init = EnvironmentsInitializer()
+    env_init.env_init_str_to_env_icon_dict((300, 300))
+    print(env_init.get_available_envs())
+    env_init_str = env_init.get_available_envs()[0]
+    print(env_init_str)
+    game = env_init.get_env(env_init_str)
+
+    game.start_new_episode()
+    if SAVE_SCREEN:
+        from PIL import Image
+        photos_folder = &#39;eps&#39;
+        if not os.path.isdir(photos_folder):
+            os.mkdir(photos_folder)
+        cnt = 0
+
+    while not game.is_episode_finished():
+        print(game.episode_steps_cnt)  # game.get_state_screen_buffer())
+        if SAVE_SCREEN:
+            screen = game.get_state_screen_buffer()
+            if game.screen_buffer_pixel_values_scaling:
+                screen *= 256
+            Image.fromarray(screen).convert(&#39;RGB&#39;).save(os.path.join(photos_folder, r&#34;%d.bmp&#34; % cnt))
+            cnt += 1
+        game.step(random.choice(game.possible_actions))
+        time.sleep(0.2)</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Environments.rgb2gray"><code class="name flex">
+<span>def <span class="ident">rgb2gray</span></span>(<span>rgb)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Converts an RGB image (stored as a numpy array) int a gray scale image (stored as a numpy array as well).
+</p>
+<p>:param rgb: RGB image (stored as a numpy array).<br>
+:return: gray scale image (stored as a numpy array as well).</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def rgb2gray(rgb):
+    &#34;&#34;&#34;
+    Converts an RGB image (stored as a numpy array) int a gray scale image (stored as a numpy array as well).  
+
+    :param rgb: RGB image (stored as a numpy array).  
+    :return: gray scale image (stored as a numpy array as well).
+    &#34;&#34;&#34;
+    return np.dot(rgb[:, :, :3], [0.2989, 0.5870, 0.1140])</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="Beta.Server.Environments.DoomGameEnvironment"><code class="flex name class">
+<span>class <span class="ident">DoomGameEnvironment</span></span>
+<span>(</span><span>settings_file_path, visible_screen=False, sound_enabled=False)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Helper class that provides a standard way to create an ABC using
+inheritance.</p>
+<p>Initiates a Local DoomGame environment (from VizDoom). Inherits from LocalEnvironment and therefore adheres to
+the interface defined in said LocalEnvironment class.
+</p>
+<p>:param settings_file_path: Path to the environment's settings.py file (string).<br>
+:param visible_screen: If true VizDoom will open a window in the machine it runs on and display the game.
+If False, will run environment in the background and will not open such a display window.<br>
+:param sound_enabled: If true VizDoom will enable sound from environment.
+If False, VizDoom will mute said environment.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class DoomGameEnvironment(LocalEnvironment):
+    def __init__(self, settings_file_path, visible_screen=False, sound_enabled=False):
+        &#34;&#34;&#34;
+        Initiates a Local DoomGame environment (from VizDoom). Inherits from LocalEnvironment and therefore adheres to
+        the interface defined in said LocalEnvironment class.  
+
+        :param settings_file_path: Path to the environment&#39;s settings.py file (string).  
+        :param visible_screen: If true VizDoom will open a window in the machine it runs on and display the game.
+            If False, will run environment in the background and will not open such a display window.  
+        :param sound_enabled: If true VizDoom will enable sound from environment.
+            If False, VizDoom will mute said environment.
+        &#34;&#34;&#34;
+        self.game = DoomGame()
+        settings = SourceFileLoader(&#39;settings&#39;, settings_file_path).load_module()  # A .py file containing details about
+        #                                                                            the environment.
+
+        # Load the correct configuration
+        self.game.load_config(settings.VizDoom_CFG_File)
+
+        # Load the correct scenario (in our case basic scenario)
+        self.game.set_doom_scenario_path(settings.VizDoom_WAD_File)
+
+        self.game.set_screen_format(ScreenFormat.GRAY8)
+        self.game.set_screen_resolution(ScreenResolution.RES_160X120)
+
+        self.game.set_window_visible(visible_screen)  # sets screen visibility
+        self.game.set_sound_enabled(sound_enabled)  # enables or disables sound
+        self.game.init()
+
+        a_size = len(self.game.get_available_buttons())
+        super(DoomGameEnvironment, self).__init__(a_size, settings.Screen_Buffer_Pixel_Values_Scaling,
+                                                  settings.RewardScalingEnabled,
+                                                  settings.Scenario_Max_Reward_Per_Episode,
+                                                  settings.Scenario_Min_Reward_Per_Episode,
+                                                  settings.Mean_Normalization_Enabled,
+                                                  settings.Episode_Timeout,
+                                                  settings.Mean_Step_Reward)
+
+    def _start_new_episode(self):
+        &#34;&#34;&#34;
+        DO NOT use this function!!! Use the .start_new_episode() function instead!
+        &#34;&#34;&#34;
+        self.game.new_episode()
+
+    def _step(self, action):
+        &#34;&#34;&#34;
+        DO NOT use this function!!! Use the .step() function instead!
+        &#34;&#34;&#34;
+        reward = self.game.make_action(action)
+        return reward
+
+    def _get_state_screen_buffer(self):
+        &#34;&#34;&#34;
+        DO NOT use this function!!! Use the .get_state_screen_buffer() function instead!
+        &#34;&#34;&#34;
+        return self.game.get_state().screen_buffer
+
+    def _is_episode_finished(self):
+        &#34;&#34;&#34;
+        DO NOT use this function!!! Use the .is_episode_finished() function instead!
+        &#34;&#34;&#34;
+        return self.game.is_episode_finished()
+
+    def get_total_reward(self):
+        &#34;&#34;&#34;
+        Returns accumulated total reward from all states since episode start.  
+
+        :return: The accumulated total reward since episode start.
+        &#34;&#34;&#34;
+        return self.game.get_total_reward()
+
+    def close(self):
+        &#34;&#34;&#34;
+        Close environment.  
+
+        :return: None
+        &#34;&#34;&#34;
+        self.game.close()</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="Beta.Server.Environments.LocalEnvironment" href="#Beta.Server.Environments.LocalEnvironment">LocalEnvironment</a></li>
+<li><a title="Beta.Server.Environments.Environment" href="#Beta.Server.Environments.Environment">Environment</a></li>
+<li>abc.ABC</li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="Beta.Server.Environments.LocalEnvironment" href="#Beta.Server.Environments.LocalEnvironment">LocalEnvironment</a></b></code>:
+<ul class="hlist">
+<li><code><a title="Beta.Server.Environments.LocalEnvironment.close" href="#Beta.Server.Environments.Environment.close">close</a></code></li>
+<li><code><a title="Beta.Server.Environments.LocalEnvironment.get_post_terminal_step_reward" href="#Beta.Server.Environments.Environment.get_post_terminal_step_reward">get_post_terminal_step_reward</a></code></li>
+<li><code><a title="Beta.Server.Environments.LocalEnvironment.get_state_screen_buffer" href="#Beta.Server.Environments.LocalEnvironment.get_state_screen_buffer">get_state_screen_buffer</a></code></li>
+<li><code><a title="Beta.Server.Environments.LocalEnvironment.get_total_reward" href="#Beta.Server.Environments.Environment.get_total_reward">get_total_reward</a></code></li>
+<li><code><a title="Beta.Server.Environments.LocalEnvironment.get_unprocessed_state_screen_buffer" href="#Beta.Server.Environments.LocalEnvironment.get_unprocessed_state_screen_buffer">get_unprocessed_state_screen_buffer</a></code></li>
+<li><code><a title="Beta.Server.Environments.LocalEnvironment.is_episode_finished" href="#Beta.Server.Environments.Environment.is_episode_finished">is_episode_finished</a></code></li>
+<li><code><a title="Beta.Server.Environments.LocalEnvironment.mean_normalize_reward" href="#Beta.Server.Environments.LocalEnvironment.mean_normalize_reward">mean_normalize_reward</a></code></li>
+<li><code><a title="Beta.Server.Environments.LocalEnvironment.possible_actions" href="#Beta.Server.Environments.Environment.possible_actions">possible_actions</a></code></li>
+<li><code><a title="Beta.Server.Environments.LocalEnvironment.scale_pixel_values" href="#Beta.Server.Environments.LocalEnvironment.scale_pixel_values">scale_pixel_values</a></code></li>
+<li><code><a title="Beta.Server.Environments.LocalEnvironment.scale_reward" href="#Beta.Server.Environments.LocalEnvironment.scale_reward">scale_reward</a></code></li>
+<li><code><a title="Beta.Server.Environments.LocalEnvironment.start_new_episode" href="#Beta.Server.Environments.Environment.start_new_episode">start_new_episode</a></code></li>
+<li><code><a title="Beta.Server.Environments.LocalEnvironment.step" href="#Beta.Server.Environments.Environment.step">step</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="Beta.Server.Environments.Environment"><code class="flex name class">
+<span>class <span class="ident">Environment</span></span>
+<span>(</span><span>a_size)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Helper class that provides a standard way to create an ABC using
+inheritance.</p>
+<p>Initiates an Environment instance. Meant to be inherited from and not to operate by itself.
+A partially abstract class.
+</p>
+<p>:param a_size: Number of possible actions in the environment.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class Environment(ABC):
+    # A template for all future environments, meant to work with GrayScale screen buffers.
+
+    def __init__(self, a_size):
+        &#34;&#34;&#34;
+        Initiates an Environment instance. Meant to be inherited from and not to operate by itself.
+        A partially abstract class.  
+
+        :param a_size: Number of possible actions in the environment.
+        &#34;&#34;&#34;
+        self.a_size = a_size  # The number of possible actions.
+
+    @property
+    def possible_actions(self):
+        &#34;&#34;&#34;
+        Returns a list of one hot vectors representing the possible actions in our environment.  
+
+        :return: a list of one hot vectors representing the possible actions in our environment.
+        &#34;&#34;&#34;
+        return np.identity(self.a_size, dtype=np.float32).tolist()
+
+    @abstractmethod
+    def step(self, action):
+        &#34;&#34;&#34;
+        Makes an action and returns a reward. Also scales the reward if self.reward_scaling_enabled is True.  
+
+        :param action: one hot vector detailing the action to take.(must be one of the vectors in self.possible_actions)  
+        :return: Reward value
+        &#34;&#34;&#34;
+        pass
+
+    @abstractmethod
+    def get_post_terminal_step_reward(self):
+        &#34;&#34;&#34;
+        Returns a reward for the state after the terminal step.
+        Technically all steps after the episode is finished are supposed have a V value of zero but mean normalization
+        might change what a reward of zero means and so we put zero through all the process a normal reward goes
+        through and send the result.  
+
+        :return: Terminal reward value
+        &#34;&#34;&#34;
+        pass
+
+    @abstractmethod
+    def get_state_screen_buffer(self):
+        &#34;&#34;&#34;
+        Returns the current state&#39;s screen buffer. (Should be used  
+
+        :param img_size_to_return: tuple of 2 integers. The size of the image that will be returned in pixels.  
+        :param scaling: If true scales all pixels values to the range between 0 and 1. Improves performance.  
+        :return: returns the current state&#39;s screen buffer.
+        &#34;&#34;&#34;
+        pass
+
+    @abstractmethod
+    def start_new_episode(self):
+        &#34;&#34;&#34;
+        Starts a new episode.  
+
+        :return: None
+        &#34;&#34;&#34;
+        pass
+
+    @abstractmethod
+    def is_episode_finished(self):
+        &#34;&#34;&#34;
+        Returns True if episode is finished, False otherwise.  
+
+        :return: True if episode is finished, False otherwise.
+        &#34;&#34;&#34;
+        pass
+
+    @abstractmethod
+    def get_total_reward(self):
+        &#34;&#34;&#34;
+        Returns accumulated total reward from all states since episode start.  
+
+        :return: The accumulated total reward since episode start.
+        &#34;&#34;&#34;
+        pass
+
+    @abstractmethod
+    def close(self):
+        &#34;&#34;&#34;
+        Close environment.  
+
+        :return: None
+        &#34;&#34;&#34;
+        pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>abc.ABC</li>
+</ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="Beta.Server.Environments.LocalEnvironment" href="#Beta.Server.Environments.LocalEnvironment">LocalEnvironment</a></li>
+</ul>
+<h3>Instance variables</h3>
+<dl>
+<dt id="Beta.Server.Environments.Environment.possible_actions"><code class="name">var <span class="ident">possible_actions</span></code></dt>
+<dd>
+<section class="desc"><p>Returns a list of one hot vectors representing the possible actions in our environment.
+</p>
+<p>:return: a list of one hot vectors representing the possible actions in our environment.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@property
+def possible_actions(self):
+    &#34;&#34;&#34;
+    Returns a list of one hot vectors representing the possible actions in our environment.  
+
+    :return: a list of one hot vectors representing the possible actions in our environment.
+    &#34;&#34;&#34;
+    return np.identity(self.a_size, dtype=np.float32).tolist()</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="Beta.Server.Environments.Environment.close"><code class="name flex">
+<span>def <span class="ident">close</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Close environment.
+</p>
+<p>:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@abstractmethod
+def close(self):
+    &#34;&#34;&#34;
+    Close environment.  
+
+    :return: None
+    &#34;&#34;&#34;
+    pass</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Environments.Environment.get_post_terminal_step_reward"><code class="name flex">
+<span>def <span class="ident">get_post_terminal_step_reward</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Returns a reward for the state after the terminal step.
+Technically all steps after the episode is finished are supposed have a V value of zero but mean normalization
+might change what a reward of zero means and so we put zero through all the process a normal reward goes
+through and send the result.
+</p>
+<p>:return: Terminal reward value</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@abstractmethod
+def get_post_terminal_step_reward(self):
+    &#34;&#34;&#34;
+    Returns a reward for the state after the terminal step.
+    Technically all steps after the episode is finished are supposed have a V value of zero but mean normalization
+    might change what a reward of zero means and so we put zero through all the process a normal reward goes
+    through and send the result.  
+
+    :return: Terminal reward value
+    &#34;&#34;&#34;
+    pass</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Environments.Environment.get_state_screen_buffer"><code class="name flex">
+<span>def <span class="ident">get_state_screen_buffer</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Returns the current state's screen buffer. (Should be used
+</p>
+<p>:param img_size_to_return: tuple of 2 integers. The size of the image that will be returned in pixels.<br>
+:param scaling: If true scales all pixels values to the range between 0 and 1. Improves performance.<br>
+:return: returns the current state's screen buffer.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@abstractmethod
+def get_state_screen_buffer(self):
+    &#34;&#34;&#34;
+    Returns the current state&#39;s screen buffer. (Should be used  
+
+    :param img_size_to_return: tuple of 2 integers. The size of the image that will be returned in pixels.  
+    :param scaling: If true scales all pixels values to the range between 0 and 1. Improves performance.  
+    :return: returns the current state&#39;s screen buffer.
+    &#34;&#34;&#34;
+    pass</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Environments.Environment.get_total_reward"><code class="name flex">
+<span>def <span class="ident">get_total_reward</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Returns accumulated total reward from all states since episode start.
+</p>
+<p>:return: The accumulated total reward since episode start.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@abstractmethod
+def get_total_reward(self):
+    &#34;&#34;&#34;
+    Returns accumulated total reward from all states since episode start.  
+
+    :return: The accumulated total reward since episode start.
+    &#34;&#34;&#34;
+    pass</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Environments.Environment.is_episode_finished"><code class="name flex">
+<span>def <span class="ident">is_episode_finished</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Returns True if episode is finished, False otherwise.
+</p>
+<p>:return: True if episode is finished, False otherwise.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@abstractmethod
+def is_episode_finished(self):
+    &#34;&#34;&#34;
+    Returns True if episode is finished, False otherwise.  
+
+    :return: True if episode is finished, False otherwise.
+    &#34;&#34;&#34;
+    pass</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Environments.Environment.start_new_episode"><code class="name flex">
+<span>def <span class="ident">start_new_episode</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Starts a new episode.
+</p>
+<p>:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@abstractmethod
+def start_new_episode(self):
+    &#34;&#34;&#34;
+    Starts a new episode.  
+
+    :return: None
+    &#34;&#34;&#34;
+    pass</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Environments.Environment.step"><code class="name flex">
+<span>def <span class="ident">step</span></span>(<span>self, action)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Makes an action and returns a reward. Also scales the reward if self.reward_scaling_enabled is True.
+</p>
+<p>:param action: one hot vector detailing the action to take.(must be one of the vectors in self.possible_actions)<br>
+:return: Reward value</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@abstractmethod
+def step(self, action):
+    &#34;&#34;&#34;
+    Makes an action and returns a reward. Also scales the reward if self.reward_scaling_enabled is True.  
+
+    :param action: one hot vector detailing the action to take.(must be one of the vectors in self.possible_actions)  
+    :return: Reward value
+    &#34;&#34;&#34;
+    pass</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="Beta.Server.Environments.EnvironmentsInitializer"><code class="flex name class">
+<span>class <span class="ident">EnvironmentsInitializer</span></span>
+<span>(</span><span>environments_settings_folder='Environments_Settings')</span>
+</code></dt>
+<dd>
+<section class="desc"><p>A class used to initialize environments.
+</p>
+<p>:param environments_settings_folder:
+Path to the Environments_Settings directory. (string)</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class EnvironmentsInitializer(object):
+    Icon_Files_Name = &#34;icon.jpg&#34;
+    &#34;&#34;&#34;A class used to initialize environments.&#34;&#34;&#34;
+    def __init__(self, environments_settings_folder=&#34;Environments_Settings&#34;):
+        &#34;&#34;&#34;
+        A class used to initialize environments.  
+
+        :param environments_settings_folder:  Path to the Environments_Settings directory. (string)
+        &#34;&#34;&#34;
+        self.environments_settings_folder = os.path.join(os.path.dirname(__file__), environments_settings_folder)
+
+    def get_env(self, env_name):
+        &#34;&#34;&#34;
+        Reutrns an instance that complies with the structure of Environment abstract class.  
+
+        :param env_name: The request environment identifying string.  
+        :return: An instance that complies with the structure of Environment abstract class.
+        &#34;&#34;&#34;
+        vizdoom_envs_folder_path = os.path.join(self.environments_settings_folder, &#39;VizDoom&#39;)
+        vizdoom_envs = os.listdir(vizdoom_envs_folder_path)
+        if env_name in vizdoom_envs:
+            settings_file_path = os.path.join(vizdoom_envs_folder_path, env_name, &#34;settings.py&#34;)
+            return DoomGameEnvironment(settings_file_path, visible_screen=VisibleScreen)
+
+        open_ai_gym_envs_folder_path = os.path.join(self.environments_settings_folder, &#39;OpenAIgym&#39;)
+        open_ai_gym_envs = os.listdir(open_ai_gym_envs_folder_path)
+        if env_name in open_ai_gym_envs:
+            settings_file_path = os.path.join(open_ai_gym_envs_folder_path, env_name, &#34;settings.py&#34;)
+            return OpenAIGymEnvironment(settings_file_path, visible_screen=VisibleScreen)
+
+        raise UnknownEnvironmentRequested()
+
+    def get_available_envs(self):
+        &#34;&#34;&#34;
+        Returns the identifying string of all available environments.
+
+        :return: A list of all available environments.
+        &#34;&#34;&#34;
+        return os.listdir(os.path.join(self.environments_settings_folder, &#39;VizDoom&#39;)) + \
+               os.listdir(os.path.join(self.environments_settings_folder, &#39;OpenAIgym&#39;))
+
+    def get_available_environments_initialization_strings(self):
+        &#34;&#34;&#34;
+        Alias for self.get_available_envs().
+        Returns the identifying string of all available environments.
+
+        :return: A list of all available environments.
+        &#34;&#34;&#34;
+        return self.get_available_envs()
+
+    def env_init_str_to_env_icon_dict(self, icon_display_size):
+        &#34;&#34;&#34;
+        Returns a dict where the keys, the environment initialization strings, map to their environments&#39; corresponding
+        icons (stored as numpy arrays).  
+
+        :param icon_display_size: The size of the icons to be placed in the dict. (tuple of 2 ints (width, height))  
+        :return: A dict where the keys, the environment initialization strings, map to their environments&#39; corresponding
+            icons (stored as numpy arrays).
+        &#34;&#34;&#34;
+        env_init_str_to_icon = dict()
+        paths = [os.path.join(self.environments_settings_folder, &#39;VizDoom&#39;),
+                 os.path.join(self.environments_settings_folder, &#39;OpenAIgym&#39;)]
+        for path in paths:
+            for env_init_str in os.listdir(path):
+                env_init_str_to_icon[env_init_str] = cv2.resize(cv2.imread(os.path.join(path, env_init_str,
+                                                                                        self.Icon_Files_Name)),
+                                                                dsize=tuple(icon_display_size))
+        return env_init_str_to_icon</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="Beta.Server.Environments.EnvironmentsInitializer.Icon_Files_Name"><code class="name">var <span class="ident">Icon_Files_Name</span></code></dt>
+<dd>
+<section class="desc"><p>A class used to initialize environments.</p></section>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="Beta.Server.Environments.EnvironmentsInitializer.env_init_str_to_env_icon_dict"><code class="name flex">
+<span>def <span class="ident">env_init_str_to_env_icon_dict</span></span>(<span>self, icon_display_size)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Returns a dict where the keys, the environment initialization strings, map to their environments' corresponding
+icons (stored as numpy arrays).
+</p>
+<p>:param icon_display_size: The size of the icons to be placed in the dict. (tuple of 2 ints (width, height))<br>
+:return: A dict where the keys, the environment initialization strings, map to their environments' corresponding
+icons (stored as numpy arrays).</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def env_init_str_to_env_icon_dict(self, icon_display_size):
+    &#34;&#34;&#34;
+    Returns a dict where the keys, the environment initialization strings, map to their environments&#39; corresponding
+    icons (stored as numpy arrays).  
+
+    :param icon_display_size: The size of the icons to be placed in the dict. (tuple of 2 ints (width, height))  
+    :return: A dict where the keys, the environment initialization strings, map to their environments&#39; corresponding
+        icons (stored as numpy arrays).
+    &#34;&#34;&#34;
+    env_init_str_to_icon = dict()
+    paths = [os.path.join(self.environments_settings_folder, &#39;VizDoom&#39;),
+             os.path.join(self.environments_settings_folder, &#39;OpenAIgym&#39;)]
+    for path in paths:
+        for env_init_str in os.listdir(path):
+            env_init_str_to_icon[env_init_str] = cv2.resize(cv2.imread(os.path.join(path, env_init_str,
+                                                                                    self.Icon_Files_Name)),
+                                                            dsize=tuple(icon_display_size))
+    return env_init_str_to_icon</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Environments.EnvironmentsInitializer.get_available_environments_initialization_strings"><code class="name flex">
+<span>def <span class="ident">get_available_environments_initialization_strings</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Alias for self.get_available_envs().
+Returns the identifying string of all available environments.</p>
+<p>:return: A list of all available environments.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def get_available_environments_initialization_strings(self):
+    &#34;&#34;&#34;
+    Alias for self.get_available_envs().
+    Returns the identifying string of all available environments.
+
+    :return: A list of all available environments.
+    &#34;&#34;&#34;
+    return self.get_available_envs()</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Environments.EnvironmentsInitializer.get_available_envs"><code class="name flex">
+<span>def <span class="ident">get_available_envs</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Returns the identifying string of all available environments.</p>
+<p>:return: A list of all available environments.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def get_available_envs(self):
+    &#34;&#34;&#34;
+    Returns the identifying string of all available environments.
+
+    :return: A list of all available environments.
+    &#34;&#34;&#34;
+    return os.listdir(os.path.join(self.environments_settings_folder, &#39;VizDoom&#39;)) + \
+           os.listdir(os.path.join(self.environments_settings_folder, &#39;OpenAIgym&#39;))</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Environments.EnvironmentsInitializer.get_env"><code class="name flex">
+<span>def <span class="ident">get_env</span></span>(<span>self, env_name)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Reutrns an instance that complies with the structure of Environment abstract class.
+</p>
+<p>:param env_name: The request environment identifying string.<br>
+:return: An instance that complies with the structure of Environment abstract class.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def get_env(self, env_name):
+    &#34;&#34;&#34;
+    Reutrns an instance that complies with the structure of Environment abstract class.  
+
+    :param env_name: The request environment identifying string.  
+    :return: An instance that complies with the structure of Environment abstract class.
+    &#34;&#34;&#34;
+    vizdoom_envs_folder_path = os.path.join(self.environments_settings_folder, &#39;VizDoom&#39;)
+    vizdoom_envs = os.listdir(vizdoom_envs_folder_path)
+    if env_name in vizdoom_envs:
+        settings_file_path = os.path.join(vizdoom_envs_folder_path, env_name, &#34;settings.py&#34;)
+        return DoomGameEnvironment(settings_file_path, visible_screen=VisibleScreen)
+
+    open_ai_gym_envs_folder_path = os.path.join(self.environments_settings_folder, &#39;OpenAIgym&#39;)
+    open_ai_gym_envs = os.listdir(open_ai_gym_envs_folder_path)
+    if env_name in open_ai_gym_envs:
+        settings_file_path = os.path.join(open_ai_gym_envs_folder_path, env_name, &#34;settings.py&#34;)
+        return OpenAIGymEnvironment(settings_file_path, visible_screen=VisibleScreen)
+
+    raise UnknownEnvironmentRequested()</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="Beta.Server.Environments.LocalEnvironment"><code class="flex name class">
+<span>class <span class="ident">LocalEnvironment</span></span>
+<span>(</span><span>a_size, screen_buffer_pixel_values_scaling, reward_scaling_enabled, max_episode_reward, min_episode_reward, mean_normalization_enabled, episode_timeout, mean_step_reward)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Helper class that provides a standard way to create an ABC using
+inheritance.</p>
+<p>Initiates a LocalEnvironment instance. Meant to be inherited from and not to operate by itself.
+Partially abstract.
+</p>
+<p>:param a_size: Number of possible actions in the environment.<br>
+:param screen_buffer_pixel_values_scaling: True/False, whether we should apply scaling to the screen buffer's
+pixel values.<br>
+:param reward_scaling_enabled: True/False, whether we should apply scaling to the rewards values.<br>
+:param max_episode_reward: Episode's maximum possible total reward.<br>
+:param min_episode_reward: Episode's minimum possible total reward.<br>
+:param mean_normalization_enabled: True/False, whether we should apply mean normalization to the rewards values.<br>
+:param episode_timeout: Must be either None\False  or a positive number. If None\False  episode never
+times out. If a positive number limits the episode run on this instance to this number
+of steps. (is_terminal starts returning True afterwards.)<br>
+:param mean_step_reward: The average reward for a step.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class LocalEnvironment(Environment):
+    # A template for all future environments run locally, meant to work with GrayScale screen buffers.
+
+    Max_Pixel_value = 255
+
+    def __init__(self, a_size, screen_buffer_pixel_values_scaling, reward_scaling_enabled, max_episode_reward,
+                 min_episode_reward, mean_normalization_enabled, episode_timeout, mean_step_reward):
+        &#34;&#34;&#34;
+        Initiates a LocalEnvironment instance. Meant to be inherited from and not to operate by itself.
+        Partially abstract.  
+
+        :param a_size: Number of possible actions in the environment.  
+        :param screen_buffer_pixel_values_scaling: True/False, whether we should apply scaling to the screen buffer&#39;s
+                                                   pixel values.  
+        :param reward_scaling_enabled: True/False, whether we should apply scaling to the rewards values.  
+        :param max_episode_reward: Episode&#39;s maximum possible total reward.  
+        :param min_episode_reward: Episode&#39;s minimum possible total reward.  
+        :param mean_normalization_enabled: True/False, whether we should apply mean normalization to the rewards values.  
+        :param episode_timeout: Must be either None\False\0 or a positive number. If None\False\0 episode never
+                                times out. If a positive number limits the episode run on this instance to this number
+                                of steps. (is_terminal starts returning True afterwards.)  
+        :param mean_step_reward: The average reward for a step.
+        &#34;&#34;&#34;
+        super(LocalEnvironment, self).__init__(a_size)
+        self.episode_timeout = episode_timeout
+        self.episode_steps_cnt = 0
+        self.screen_buffer_pixel_values_scaling = screen_buffer_pixel_values_scaling
+        self.reward_scaling_enabled = reward_scaling_enabled
+        self.mean_normalization_enabled = mean_normalization_enabled
+        self.max_episode_reward = max_episode_reward
+        self.min_episode_reward = min_episode_reward
+        self.mean_reward = mean_step_reward
+
+    @property
+    def possible_actions(self):
+        &#34;&#34;&#34;
+        Returns a list of one hot vectors representing the possible actions in our environment.  
+
+        :return: a list of one hot vectors representing the possible actions in our environment.
+        &#34;&#34;&#34;
+        return np.identity(self.a_size, dtype=np.int32).tolist()
+
+    def step(self, action):
+        &#34;&#34;&#34;
+        Makes an action and returns a reward. Also scales the reward if self.reward_scaling_enabled is True.  
+
+        :param action: one hot vector detailing the action to take.(must be one of the vectors in self.possible_actions)  
+        :return: Reward value
+        &#34;&#34;&#34;
+        reward = self._step(action)
+        if self.mean_normalization_enabled:
+            reward = self.mean_normalize_reward(reward)
+        if self.reward_scaling_enabled:
+            reward = self.scale_reward(reward)
+        self.episode_steps_cnt += 1
+        return reward
+
+    @abstractmethod
+    def _step(self, action):
+        &#34;&#34;&#34;
+        DO NOT use this function!!! Use the .step() function instead!
+        Makes an action and returns a reward.
+        self.step() is a wrapper to this function so please use self.step().  
+
+        :param action: (list) action to do (must be from self.possible_action)  
+        :return: reward(int) ( R(s,a) )
+        &#34;&#34;&#34;
+        pass
+
+    def get_post_terminal_step_reward(self):
+        &#34;&#34;&#34;
+        Returns a reward for the state after the terminal step.
+        Technically all steps after the episode is finished are supposed have a V value of zero but mean normalization
+        might change what a reward of zero means and so we put zero through all the process a normal reward goes
+        through and send the result.  
+
+        :return: Terminal reward value
+        &#34;&#34;&#34;
+        reward = 0  # if the episode ended, we get no reward in the next state
+        if self.mean_normalization_enabled:
+            reward = self.mean_normalize_reward(reward)
+        if self.reward_scaling_enabled:
+            reward = self.scale_reward(reward)
+        return reward
+
+    def mean_normalize_reward(self, reward):
+        &#34;&#34;&#34;
+        Applies mean normalization to the reward. Essentially reduce the reward by the mean reward so as to make the
+        mean reward 0. (theoretically not necessary,  but greatly improves performance with most learning algorithms)  
+
+        :param reward: (int or float) Reward value to mean normalize.  
+        :return: mean normalized reward.
+        &#34;&#34;&#34;
+        return float(reward) - self.mean_reward
+
+    def scale_reward(self, reward):
+        &#34;&#34;&#34;
+        scales the reward so that they are always between -1 and 1. (theoretically not necessary,  but greatly improves
+         performance with most learning algorithms)  
+
+        :param reward: (int or float) Reward value to scale  
+        :return: scaled reward in range between -1 and 1 (inclusive).
+        &#34;&#34;&#34;
+        return float(reward) / max(abs(self.min_episode_reward), abs(self.max_episode_reward))
+
+    @abstractmethod
+    def _get_state_screen_buffer(self):
+        &#34;&#34;&#34;
+        DO NOT use this function!!! Use the .get_state_screen_buffer() function instead.
+        This is the one you should overwrite when inheriting from this class though, not .get_state_screen_buffer()
+        returns the current state&#39;s original screen buffer.
+        self.get_state_screen_buffer() is a wrapper to this function so please use self.get_state_screen_buffer().  
+
+        :return: returns the current state&#39;s screen buffer.
+        &#34;&#34;&#34;
+        pass
+
+    def get_state_screen_buffer(self, img_size_to_return=None):
+        &#34;&#34;&#34;
+        Returns the current state&#39;s preprocessed screen buffer.  
+
+        :param img_size_to_return: tuple of 2 integers. The size of the image that will be returned in pixels.  
+        :return: returns the current state&#39;s screen buffer.
+        &#34;&#34;&#34;
+        screen_buffer = self._get_state_screen_buffer()
+        if not img_size_to_return == None:
+            screen_buffer = cv2.resize(screen_buffer, dsize=tuple(img_size_to_return))
+        if self.screen_buffer_pixel_values_scaling:
+            screen_buffer = self.scale_pixel_values(screen_buffer)
+        return screen_buffer
+
+    def get_unprocessed_state_screen_buffer(self, img_size_to_return=None):
+        &#34;&#34;&#34;
+        Returns the current state&#39;s unprocessed screen buffer.  
+
+        :param img_size_to_return: tuple of 2 integers. The size of the image that will be returned in pixels.  
+        :return: returns the current state&#39;s screen buffer.
+        &#34;&#34;&#34;
+        screen_buffer = self._get_state_screen_buffer()
+        if not img_size_to_return == None:
+            screen_buffer = cv2.resize(screen_buffer, dsize=tuple(img_size_to_return))
+        return screen_buffer
+
+
+    def scale_pixel_values(self, state_screen_buffer):
+        &#34;&#34;&#34;
+        Returns the current state&#39;s screen buffer with its values all scaled to the range between 0 and 1.
+        (theoretically not necessary,  but greatly improves performance with most learning algorithms)  
+
+        :param state_screen_buffer: state_screen_buffer from self.get_state_screen_buffer().  
+        :return: screen buffer with its values all scaled to the range between 0 and 1
+        &#34;&#34;&#34;
+        return state_screen_buffer / float(self.Max_Pixel_value)
+
+    def start_new_episode(self):
+        &#34;&#34;&#34;
+        Starts a new episode.  
+
+        :return: None
+        &#34;&#34;&#34;
+        self._start_new_episode()
+        self.episode_steps_cnt = 0
+
+    @abstractmethod
+    def _start_new_episode(self):
+        &#34;&#34;&#34;
+        DO NOT use this function!!! Use the .start_new_episode() function instead.
+        This is the one you should overwrite when inheriting from this class though, not .start_new_episode()
+
+        Starts a new episode.  
+
+        :return: None
+        &#34;&#34;&#34;
+        pass
+
+    def is_episode_finished(self):
+        &#34;&#34;&#34;
+        Returns True if episode is finished, False otherwise.  
+
+        :return: True if episode is finished, False otherwise.
+        &#34;&#34;&#34;
+        is_finished = self._is_episode_finished()
+        if self.episode_timeout:
+            is_finished = is_finished or not (self.episode_steps_cnt &lt; self.episode_timeout)
+        return is_finished
+
+
+    @abstractmethod
+    def _is_episode_finished(self):
+        &#34;&#34;&#34;
+        DO NOT use this function!!! Use the .is_episode_finished() function instead.
+        This is the one you should overwrite when inheriting from this class though, not .is_episode_finished()
+        returns True if episode is finished, False otherwise&#34;&#34;&#34;
+        pass
+
+    @abstractmethod
+    def get_total_reward(self):
+        &#34;&#34;&#34;
+        Returns accumulated total reward from all states since episode start.  
+
+        :return: The accumulated total reward since episode start.
+        &#34;&#34;&#34;
+        pass
+
+    @abstractmethod
+    def close(self):
+        &#34;&#34;&#34;
+        Close environment.  
+
+        :return: None
+        &#34;&#34;&#34;
+        pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="Beta.Server.Environments.Environment" href="#Beta.Server.Environments.Environment">Environment</a></li>
+<li>abc.ABC</li>
+</ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="Beta.Server.Environments.DoomGameEnvironment" href="#Beta.Server.Environments.DoomGameEnvironment">DoomGameEnvironment</a></li>
+<li><a title="Beta.Server.Environments.OpenAIGymEnvironment" href="#Beta.Server.Environments.OpenAIGymEnvironment">OpenAIGymEnvironment</a></li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="Beta.Server.Environments.LocalEnvironment.Max_Pixel_value"><code class="name">var <span class="ident">Max_Pixel_value</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="Beta.Server.Environments.LocalEnvironment.get_state_screen_buffer"><code class="name flex">
+<span>def <span class="ident">get_state_screen_buffer</span></span>(<span>self, img_size_to_return=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Returns the current state's preprocessed screen buffer.
+</p>
+<p>:param img_size_to_return: tuple of 2 integers. The size of the image that will be returned in pixels.<br>
+:return: returns the current state's screen buffer.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def get_state_screen_buffer(self, img_size_to_return=None):
+    &#34;&#34;&#34;
+    Returns the current state&#39;s preprocessed screen buffer.  
+
+    :param img_size_to_return: tuple of 2 integers. The size of the image that will be returned in pixels.  
+    :return: returns the current state&#39;s screen buffer.
+    &#34;&#34;&#34;
+    screen_buffer = self._get_state_screen_buffer()
+    if not img_size_to_return == None:
+        screen_buffer = cv2.resize(screen_buffer, dsize=tuple(img_size_to_return))
+    if self.screen_buffer_pixel_values_scaling:
+        screen_buffer = self.scale_pixel_values(screen_buffer)
+    return screen_buffer</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Environments.LocalEnvironment.get_unprocessed_state_screen_buffer"><code class="name flex">
+<span>def <span class="ident">get_unprocessed_state_screen_buffer</span></span>(<span>self, img_size_to_return=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Returns the current state's unprocessed screen buffer.
+</p>
+<p>:param img_size_to_return: tuple of 2 integers. The size of the image that will be returned in pixels.<br>
+:return: returns the current state's screen buffer.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def get_unprocessed_state_screen_buffer(self, img_size_to_return=None):
+    &#34;&#34;&#34;
+    Returns the current state&#39;s unprocessed screen buffer.  
+
+    :param img_size_to_return: tuple of 2 integers. The size of the image that will be returned in pixels.  
+    :return: returns the current state&#39;s screen buffer.
+    &#34;&#34;&#34;
+    screen_buffer = self._get_state_screen_buffer()
+    if not img_size_to_return == None:
+        screen_buffer = cv2.resize(screen_buffer, dsize=tuple(img_size_to_return))
+    return screen_buffer</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Environments.LocalEnvironment.mean_normalize_reward"><code class="name flex">
+<span>def <span class="ident">mean_normalize_reward</span></span>(<span>self, reward)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Applies mean normalization to the reward. Essentially reduce the reward by the mean reward so as to make the
+mean reward 0. (theoretically not necessary,
+but greatly improves performance with most learning algorithms)
+</p>
+<p>:param reward: (int or float) Reward value to mean normalize.<br>
+:return: mean normalized reward.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def mean_normalize_reward(self, reward):
+    &#34;&#34;&#34;
+    Applies mean normalization to the reward. Essentially reduce the reward by the mean reward so as to make the
+    mean reward 0. (theoretically not necessary,  but greatly improves performance with most learning algorithms)  
+
+    :param reward: (int or float) Reward value to mean normalize.  
+    :return: mean normalized reward.
+    &#34;&#34;&#34;
+    return float(reward) - self.mean_reward</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Environments.LocalEnvironment.scale_pixel_values"><code class="name flex">
+<span>def <span class="ident">scale_pixel_values</span></span>(<span>self, state_screen_buffer)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Returns the current state's screen buffer with its values all scaled to the range between 0 and 1.
+(theoretically not necessary,
+but greatly improves performance with most learning algorithms)
+</p>
+<p>:param state_screen_buffer: state_screen_buffer from self.get_state_screen_buffer().<br>
+:return: screen buffer with its values all scaled to the range between 0 and 1</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def scale_pixel_values(self, state_screen_buffer):
+    &#34;&#34;&#34;
+    Returns the current state&#39;s screen buffer with its values all scaled to the range between 0 and 1.
+    (theoretically not necessary,  but greatly improves performance with most learning algorithms)  
+
+    :param state_screen_buffer: state_screen_buffer from self.get_state_screen_buffer().  
+    :return: screen buffer with its values all scaled to the range between 0 and 1
+    &#34;&#34;&#34;
+    return state_screen_buffer / float(self.Max_Pixel_value)</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Environments.LocalEnvironment.scale_reward"><code class="name flex">
+<span>def <span class="ident">scale_reward</span></span>(<span>self, reward)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>scales the reward so that they are always between -1 and 1. (theoretically not necessary,
+but greatly improves
+performance with most learning algorithms)
+</p>
+<p>:param reward: (int or float) Reward value to scale<br>
+:return: scaled reward in range between -1 and 1 (inclusive).</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def scale_reward(self, reward):
+    &#34;&#34;&#34;
+    scales the reward so that they are always between -1 and 1. (theoretically not necessary,  but greatly improves
+     performance with most learning algorithms)  
+
+    :param reward: (int or float) Reward value to scale  
+    :return: scaled reward in range between -1 and 1 (inclusive).
+    &#34;&#34;&#34;
+    return float(reward) / max(abs(self.min_episode_reward), abs(self.max_episode_reward))</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="Beta.Server.Environments.Environment" href="#Beta.Server.Environments.Environment">Environment</a></b></code>:
+<ul class="hlist">
+<li><code><a title="Beta.Server.Environments.Environment.close" href="#Beta.Server.Environments.Environment.close">close</a></code></li>
+<li><code><a title="Beta.Server.Environments.Environment.get_post_terminal_step_reward" href="#Beta.Server.Environments.Environment.get_post_terminal_step_reward">get_post_terminal_step_reward</a></code></li>
+<li><code><a title="Beta.Server.Environments.Environment.get_total_reward" href="#Beta.Server.Environments.Environment.get_total_reward">get_total_reward</a></code></li>
+<li><code><a title="Beta.Server.Environments.Environment.is_episode_finished" href="#Beta.Server.Environments.Environment.is_episode_finished">is_episode_finished</a></code></li>
+<li><code><a title="Beta.Server.Environments.Environment.possible_actions" href="#Beta.Server.Environments.Environment.possible_actions">possible_actions</a></code></li>
+<li><code><a title="Beta.Server.Environments.Environment.start_new_episode" href="#Beta.Server.Environments.Environment.start_new_episode">start_new_episode</a></code></li>
+<li><code><a title="Beta.Server.Environments.Environment.step" href="#Beta.Server.Environments.Environment.step">step</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="Beta.Server.Environments.OpenAIGymEnvironment"><code class="flex name class">
+<span>class <span class="ident">OpenAIGymEnvironment</span></span>
+<span>(</span><span>settings_file_path, visible_screen=True)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Helper class that provides a standard way to create an ABC using
+inheritance.</p>
+<p>Initiates a Local OpenAIGym environment. Inherits from LocalEnvironment and therefore adheres to
+the interface defined in said LocalEnvironment class.
+</p>
+<p>:param settings_file_path: Path to the environment's settings.py file (string).<br>
+:param visible_screen: If true OpenAIGym will open a window in the machine it runs on and display the game.
+If False, will run environment in the background and will not open such a display window.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class OpenAIGymEnvironment(LocalEnvironment):
+    def __init__(self, settings_file_path, visible_screen=True):
+        &#34;&#34;&#34;
+        Initiates a Local OpenAIGym environment. Inherits from LocalEnvironment and therefore adheres to
+        the interface defined in said LocalEnvironment class.  
+
+        :param settings_file_path: Path to the environment&#39;s settings.py file (string).  
+        :param visible_screen: If true OpenAIGym will open a window in the machine it runs on and display the game.
+            If False, will run environment in the background and will not open such a display window.
+        &#34;&#34;&#34;
+        self.visible_screen = visible_screen
+
+        settings = SourceFileLoader(&#39;settings&#39;, settings_file_path).load_module()  # A .py file containing details about
+        #                                                                            the environment.
+
+        self.env = gym.make(settings.Env_ID)  # loads the environment
+
+        a_size = self.env.action_space.n
+        super(OpenAIGymEnvironment, self).__init__(a_size, settings.Screen_Buffer_Pixel_Values_Scaling,
+                                                   settings.RewardScalingEnabled,
+                                                   settings.Scenario_Max_Reward_Per_Episode,
+                                                   settings.Scenario_Min_Reward_Per_Episode,
+                                                   settings.Mean_Normalization_Enabled,
+                                                   settings.Episode_Timeout,
+                                                   settings.Mean_Step_Reward)
+
+        self.curr_state = None
+        self.is_terminal = None
+        self.total_episode_reward = None
+        self.start_new_episode()
+
+    def _start_new_episode(self):
+        &#34;&#34;&#34;
+        DO NOT use this function!!! Use the .start_new_episode() function instead!
+        &#34;&#34;&#34;
+        self.curr_state = self.env.reset()
+        self.is_terminal = False
+        self.total_episode_reward = 0
+
+    def _step(self, action):
+        &#34;&#34;&#34;
+        DO NOT use this function!!! Use the .step() function instead!
+        &#34;&#34;&#34;
+        action = np.argmax(np.asarray(action))
+        self.curr_state, reward, self.is_terminal, info = self.env.step(action)
+        self.total_episode_reward += reward
+
+        if self.visible_screen:
+            self.env.render()
+
+        return reward
+
+    def _get_state_screen_buffer(self):
+        &#34;&#34;&#34;
+        DO NOT use this function!!! Use the .get_state_screen_buffer() function instead!
+        &#34;&#34;&#34;
+        return rgb2gray(self.curr_state)
+
+    def _is_episode_finished(self):
+        &#34;&#34;&#34;
+        DO NOT use this function!!! Use the .is_episode_finished() function instead!
+        &#34;&#34;&#34;
+        return self.is_terminal
+
+    def get_total_reward(self):
+        &#34;&#34;&#34;
+        Returns accumulated total reward from all states since episode start.  
+
+        :return: The accumulated total reward since episode start.
+        &#34;&#34;&#34;
+        return self.total_episode_reward
+
+    def close(self):
+        &#34;&#34;&#34;
+        Close environment.  
+
+        :return: None
+        &#34;&#34;&#34;
+        self.env.close()</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="Beta.Server.Environments.LocalEnvironment" href="#Beta.Server.Environments.LocalEnvironment">LocalEnvironment</a></li>
+<li><a title="Beta.Server.Environments.Environment" href="#Beta.Server.Environments.Environment">Environment</a></li>
+<li>abc.ABC</li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="Beta.Server.Environments.LocalEnvironment" href="#Beta.Server.Environments.LocalEnvironment">LocalEnvironment</a></b></code>:
+<ul class="hlist">
+<li><code><a title="Beta.Server.Environments.LocalEnvironment.close" href="#Beta.Server.Environments.Environment.close">close</a></code></li>
+<li><code><a title="Beta.Server.Environments.LocalEnvironment.get_post_terminal_step_reward" href="#Beta.Server.Environments.Environment.get_post_terminal_step_reward">get_post_terminal_step_reward</a></code></li>
+<li><code><a title="Beta.Server.Environments.LocalEnvironment.get_state_screen_buffer" href="#Beta.Server.Environments.LocalEnvironment.get_state_screen_buffer">get_state_screen_buffer</a></code></li>
+<li><code><a title="Beta.Server.Environments.LocalEnvironment.get_total_reward" href="#Beta.Server.Environments.Environment.get_total_reward">get_total_reward</a></code></li>
+<li><code><a title="Beta.Server.Environments.LocalEnvironment.get_unprocessed_state_screen_buffer" href="#Beta.Server.Environments.LocalEnvironment.get_unprocessed_state_screen_buffer">get_unprocessed_state_screen_buffer</a></code></li>
+<li><code><a title="Beta.Server.Environments.LocalEnvironment.is_episode_finished" href="#Beta.Server.Environments.Environment.is_episode_finished">is_episode_finished</a></code></li>
+<li><code><a title="Beta.Server.Environments.LocalEnvironment.mean_normalize_reward" href="#Beta.Server.Environments.LocalEnvironment.mean_normalize_reward">mean_normalize_reward</a></code></li>
+<li><code><a title="Beta.Server.Environments.LocalEnvironment.possible_actions" href="#Beta.Server.Environments.Environment.possible_actions">possible_actions</a></code></li>
+<li><code><a title="Beta.Server.Environments.LocalEnvironment.scale_pixel_values" href="#Beta.Server.Environments.LocalEnvironment.scale_pixel_values">scale_pixel_values</a></code></li>
+<li><code><a title="Beta.Server.Environments.LocalEnvironment.scale_reward" href="#Beta.Server.Environments.LocalEnvironment.scale_reward">scale_reward</a></code></li>
+<li><code><a title="Beta.Server.Environments.LocalEnvironment.start_new_episode" href="#Beta.Server.Environments.Environment.start_new_episode">start_new_episode</a></code></li>
+<li><code><a title="Beta.Server.Environments.LocalEnvironment.step" href="#Beta.Server.Environments.Environment.step">step</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="Beta.Server.Environments.OpenAIGymNotImplementedYet"><code class="flex name class">
+<span>class <span class="ident">OpenAIGymNotImplementedYet</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Common base class for all non-exit exceptions.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class OpenAIGymNotImplementedYet(Exception):
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="Beta.Server.Environments.UnknownEnvironmentRequested"><code class="flex name class">
+<span>class <span class="ident">UnknownEnvironmentRequested</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Common base class for all non-exit exceptions.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class UnknownEnvironmentRequested(Exception):
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="Beta.Server" href="index.html">Beta.Server</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="Beta.Server.Environments.main" href="#Beta.Server.Environments.main">main</a></code></li>
+<li><code><a title="Beta.Server.Environments.rgb2gray" href="#Beta.Server.Environments.rgb2gray">rgb2gray</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="Beta.Server.Environments.DoomGameEnvironment" href="#Beta.Server.Environments.DoomGameEnvironment">DoomGameEnvironment</a></code></h4>
+</li>
+<li>
+<h4><code><a title="Beta.Server.Environments.Environment" href="#Beta.Server.Environments.Environment">Environment</a></code></h4>
+<ul class="">
+<li><code><a title="Beta.Server.Environments.Environment.close" href="#Beta.Server.Environments.Environment.close">close</a></code></li>
+<li><code><a title="Beta.Server.Environments.Environment.get_post_terminal_step_reward" href="#Beta.Server.Environments.Environment.get_post_terminal_step_reward">get_post_terminal_step_reward</a></code></li>
+<li><code><a title="Beta.Server.Environments.Environment.get_state_screen_buffer" href="#Beta.Server.Environments.Environment.get_state_screen_buffer">get_state_screen_buffer</a></code></li>
+<li><code><a title="Beta.Server.Environments.Environment.get_total_reward" href="#Beta.Server.Environments.Environment.get_total_reward">get_total_reward</a></code></li>
+<li><code><a title="Beta.Server.Environments.Environment.is_episode_finished" href="#Beta.Server.Environments.Environment.is_episode_finished">is_episode_finished</a></code></li>
+<li><code><a title="Beta.Server.Environments.Environment.possible_actions" href="#Beta.Server.Environments.Environment.possible_actions">possible_actions</a></code></li>
+<li><code><a title="Beta.Server.Environments.Environment.start_new_episode" href="#Beta.Server.Environments.Environment.start_new_episode">start_new_episode</a></code></li>
+<li><code><a title="Beta.Server.Environments.Environment.step" href="#Beta.Server.Environments.Environment.step">step</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="Beta.Server.Environments.EnvironmentsInitializer" href="#Beta.Server.Environments.EnvironmentsInitializer">EnvironmentsInitializer</a></code></h4>
+<ul class="">
+<li><code><a title="Beta.Server.Environments.EnvironmentsInitializer.Icon_Files_Name" href="#Beta.Server.Environments.EnvironmentsInitializer.Icon_Files_Name">Icon_Files_Name</a></code></li>
+<li><code><a title="Beta.Server.Environments.EnvironmentsInitializer.env_init_str_to_env_icon_dict" href="#Beta.Server.Environments.EnvironmentsInitializer.env_init_str_to_env_icon_dict">env_init_str_to_env_icon_dict</a></code></li>
+<li><code><a title="Beta.Server.Environments.EnvironmentsInitializer.get_available_environments_initialization_strings" href="#Beta.Server.Environments.EnvironmentsInitializer.get_available_environments_initialization_strings">get_available_environments_initialization_strings</a></code></li>
+<li><code><a title="Beta.Server.Environments.EnvironmentsInitializer.get_available_envs" href="#Beta.Server.Environments.EnvironmentsInitializer.get_available_envs">get_available_envs</a></code></li>
+<li><code><a title="Beta.Server.Environments.EnvironmentsInitializer.get_env" href="#Beta.Server.Environments.EnvironmentsInitializer.get_env">get_env</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="Beta.Server.Environments.LocalEnvironment" href="#Beta.Server.Environments.LocalEnvironment">LocalEnvironment</a></code></h4>
+<ul class="">
+<li><code><a title="Beta.Server.Environments.LocalEnvironment.Max_Pixel_value" href="#Beta.Server.Environments.LocalEnvironment.Max_Pixel_value">Max_Pixel_value</a></code></li>
+<li><code><a title="Beta.Server.Environments.LocalEnvironment.get_state_screen_buffer" href="#Beta.Server.Environments.LocalEnvironment.get_state_screen_buffer">get_state_screen_buffer</a></code></li>
+<li><code><a title="Beta.Server.Environments.LocalEnvironment.get_unprocessed_state_screen_buffer" href="#Beta.Server.Environments.LocalEnvironment.get_unprocessed_state_screen_buffer">get_unprocessed_state_screen_buffer</a></code></li>
+<li><code><a title="Beta.Server.Environments.LocalEnvironment.mean_normalize_reward" href="#Beta.Server.Environments.LocalEnvironment.mean_normalize_reward">mean_normalize_reward</a></code></li>
+<li><code><a title="Beta.Server.Environments.LocalEnvironment.scale_pixel_values" href="#Beta.Server.Environments.LocalEnvironment.scale_pixel_values">scale_pixel_values</a></code></li>
+<li><code><a title="Beta.Server.Environments.LocalEnvironment.scale_reward" href="#Beta.Server.Environments.LocalEnvironment.scale_reward">scale_reward</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="Beta.Server.Environments.OpenAIGymEnvironment" href="#Beta.Server.Environments.OpenAIGymEnvironment">OpenAIGymEnvironment</a></code></h4>
+</li>
+<li>
+<h4><code><a title="Beta.Server.Environments.OpenAIGymNotImplementedYet" href="#Beta.Server.Environments.OpenAIGymNotImplementedYet">OpenAIGymNotImplementedYet</a></code></h4>
+</li>
+<li>
+<h4><code><a title="Beta.Server.Environments.UnknownEnvironmentRequested" href="#Beta.Server.Environments.UnknownEnvironmentRequested">UnknownEnvironmentRequested</a></code></h4>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.6.2</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

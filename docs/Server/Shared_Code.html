@@ -1,0 +1,2660 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.6.2" />
+<title>Beta.Server.Shared_Code API documentation</title>
+<meta name="description" content="" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase;cursor:pointer}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>Beta.Server.Shared_Code</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">import pickle
+import numpy as np
+import threading
+import socket
+
+
+MSG_SIZE_HEADER_LENGTH = 10
+
+
+class ProtocolHandler(object):
+    MSG_IDENTIFIER_LEN = 4
+    State_Msg_Identifier = b&#34;STAT&#34;
+    Send_Action_Make_Msg_Identifier = b&#34;SA2M&#34;
+    Get_Post_Terminal_Step_Reward_Msg_Identifier = b&#34;GPTR&#34;
+    Post_Terminal_Step_Reward_Msg_Identifier = b&#34;PTSR&#34;
+    Setup_Environment_Msg_Identifier = b&#34;SEEN&#34;
+    New_Environment_Initiated_Msg_Identifier = b&#34;NEIN&#34;
+    Close_Environment_Msg_Identifier = b&#34;CLEN&#34;
+    Start_New_Episode_Msg_Identifier = b&#34;STNE&#34;
+    New_Episode_Started_Msg_Identifier = b&#34;NEST&#34;
+    Request_Available_Environment_Initialization_Strings_Msg_Identifier = b&#34;RAES&#34;
+    Available_Environment_Initialization_Strings_Msg_Identifier = b&#34;AEIS&#34;
+    Get_Unprocessed_Screen_Msg_Identifier = b&#34;GUPS&#34;
+    Unprocessed_Screen_Msg_Identifier = b&#34;UPSC&#34;
+    Ping_Msg_Identifier = b&#34;PING&#34;
+    Get_Menu_Msg_Identifier = b&#34;GTMN&#34;
+    Menu_Msg_Identifier = b&#34;MENU&#34;
+    Error_Msg_Identifier = b&#34;EROR&#34;
+    Exit_Msg_Identifier = b&#34;EXIT&#34;
+
+    &#34;&#34;&#34; 
+        STAT - State msg. Data Structure: 4 bytes msg identifier, pickled dict with values for the following keys:  
+               environment_id (str), state(numpy array), reward_for_last_action (float), is_terminal_state (boolean).  
+        SA2M - Send action to make msg. Data Structure: 4 bytes msg identifier, pickled dict with values for the  
+               following keys: environment_id (str), action (int - between 0 and a_size).  
+        GPTR - Get post terminal step reward msg. Data Structure: 4 bytes msg identifier, environment_id (str).  
+        PTSR - Post Terminal step reward msg. Data Structure: 4 bytes msg identifier, pickled dict with values for the  
+               following keys: environment_id (str), post_terminal_step_reward (float).  
+        SEEN - Setup environment msg. Data Structure: 4 bytes msg identifier, pickled dict with values for the following  
+               keys: environment_id (str), environment_string (string), s_size (int)).  
+        NEIN - New environment initiated msg. Data Structure: 4 bytes msg identifier, pickled dict with values for the  
+               following keys: new_environment_id (str), a_size (int).  
+        CLEN - Close Environment. Data Structure: 4 bytes msg identifier, pickled environment_id (string).  
+        STNE - Start a new episode. Data Structure: 4 bytes msg identifier, pickled environment_id (string).  
+        NEST - New episode started msg. 4 bytes msg identifier pickled dict with values for the following keys:  
+               environment_id, initial state (numpy array), is_terminal (bool).  
+        RAES - Request all available environment initialization strings msg. Data Structure: 4 bytes msg identifier.  
+        AEIS - All available environment initialization strings msg. Data Structure: 4 bytes msg identifier, pickled  
+               list of all available environments strings.  
+        GUPS - Get unprocessed screen message. Data Structure: 4 bytes msg identifier, pickled dict with values for the  
+               following keys: environment_id (str), requested_screen_size (tuple of ints, [width, height]).  
+        UPSC - Unprocessed screen message. Data Structure: 4 bytes msg identifier, pickled dict with values for the  
+               following keys: environment_id (str), state(numpy array).  
+        GTMN - Get menu message. Data Structure: 4 bytes msg identifier, pickled tuple of integers signifying the size  
+                                                 of the icon display (width (int) , height (int)).  
+        MENU - Menu message. Data Structure: 4 bytes msg identifier, pickled dict where each key is the initialization  
+               string of an available environment while it&#39;s value is the environment&#39;s icon (numpy array of image the  
+               size of icon_display_size as passed in the GTMN message).  
+        PING - Ping message. Data Structure: 4 bytes msg identifier.  
+        EROR - Error msg. Data Structure: 4 bytes msg identifier, pickled error description string.  
+        EXIT - exit msg. Data Structure: 4 bytes msg identifier  
+          
+        Just to make it clear, environment initialization strings are the string used to describe the type of the 
+        environment to initiate and are not to be confused with the environment_id strings which are used to identify 
+        and refer to instances of environments already initiated.  
+        Environment initialization strings are chosen from the list offered in AEIS messages while environment ids are 
+        chosen by the client.  
+    &#34;&#34;&#34;
+
+    @staticmethod
+    def format_STAT_msg(environment_id, state, reward_for_last_action, is_terminal_state):
+        &#34;&#34;&#34;
+        Format a state msg, sent by the server after receiving a SA2M message.  
+
+        :param environment_id: environment id (string)  
+        :param state: state at time t (numpy array)  
+        :param reward_for_last_action: reward for action made at time t-1 (float)  
+        :param is_terminal_state: True if state at time t is terminal state. False otherwise.  
+        :return: msg string to send
+        &#34;&#34;&#34;
+        msg_dict = {&#39;environment_id&#39;: environment_id, &#39;state&#39;: state, &#39;reward_for_last_action&#39;: reward_for_last_action,
+                    &#39;is_terminal_state&#39;: is_terminal_state}
+        return ProtocolHandler.State_Msg_Identifier + pickle.dumps(msg_dict)
+
+    @staticmethod
+    def parse_STAT_msg(msg):
+        &#34;&#34;&#34;
+        Parse a state msg, sent by the server after receiving a SA2M message.  
+
+        :param msg: message string  
+        :return: Returns msg dict containing values for keys: environment_id (string), state (numpy array of s_size), reward_for_last_action (float),
+                 is_terminal_state (boolean)
+        &#34;&#34;&#34;
+        msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+        msg = msg[ProtocolHandler.MSG_IDENTIFIER_LEN:]
+        return pickle.loads(msg)
+
+    @staticmethod
+    def format_SA2M_msg(environment_id, action2make):
+        &#34;&#34;&#34;
+        Format a send action to make msg, sent by the client.  
+
+        :param environment_id: environment id (string)  
+        :param action2make: action to make (one hot vector of action, numpy array)  
+        :return: msg string to send
+        &#34;&#34;&#34;
+        msg_dict = {&#39;environment_id&#39;: environment_id, &#39;action2make&#39;: np.argmax(action2make),
+                    &#39;a_size&#39;: np.size(action2make)}
+        return ProtocolHandler.Send_Action_Make_Msg_Identifier + pickle.dumps(msg_dict)
+
+    @staticmethod
+    def parse_SA2M_msg(msg):
+        &#34;&#34;&#34;
+        Parse a send action to make msg, sent by the client.&#34;  
+
+        :param msg: message string  
+        :param a_size: a_size (int)  
+        :return: Returns msg dict containing values for keys: environment_id (string), action2make (one hot vector of size [a_size], numpy array)
+        &#34;&#34;&#34;
+        msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+        msg = msg[ProtocolHandler.MSG_IDENTIFIER_LEN:]
+        msg_dict = pickle.loads(msg)
+        msg_dict[&#39;action2make&#39;] = np.identity(msg_dict[&#39;a_size&#39;], dtype=np.int32)[:, msg_dict[&#39;action2make&#39;]].tolist()
+        return msg_dict
+
+    @staticmethod
+    def format_GPTR_msg(environment_id):
+        &#34;&#34;&#34;
+        Format a get post terminal step reward msg, sent by the client.  
+
+        :param environment_id: environment id (string)  
+        :return: msg string to send
+        &#34;&#34;&#34;
+        return ProtocolHandler.Get_Post_Terminal_Step_Reward_Msg_Identifier + environment_id.encode()
+
+    @staticmethod
+    def parse_GPTR_msg(msg):
+        &#34;&#34;&#34;
+        Parse a get post terminal step reward msg, sent by the client.&#34;  
+
+        :param msg: message string  
+        :return: Returns environment_id (string)
+        &#34;&#34;&#34;
+        msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+        msg = msg[ProtocolHandler.MSG_IDENTIFIER_LEN:]
+        env_id = msg
+        return env_id.decode()
+
+    @staticmethod
+    def format_PTSR_msg(environment_id, post_terminal_step_reward):
+        &#34;&#34;&#34;
+        Format a post terminal step reward msg, sent by the server after receiving a GPTR message.  
+
+        :param environment_id: environment id (string)  
+        :param post_terminal_step_reward: The reward for a post terminal state.  
+        :return: msg string to send
+        &#34;&#34;&#34;
+        msg_dict = {&#39;environment_id&#39;: environment_id, &#39;post_terminal_step_reward&#39;: post_terminal_step_reward}
+        return ProtocolHandler.Post_Terminal_Step_Reward_Msg_Identifier + pickle.dumps(msg_dict)
+
+    @staticmethod
+    def parse_PTSR_msg(msg):
+        &#34;&#34;&#34;
+        Parse a post terminal step reward msg, sent by the server after receiving a GPTR message.  
+
+        :param msg: message string  
+        :return: Returns msg dict containing value for keys: environment_id (string), post_terminal_step_reward (float)
+        &#34;&#34;&#34;
+        msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+        msg = msg[ProtocolHandler.MSG_IDENTIFIER_LEN:]
+        msg_dict = pickle.loads(msg)
+        return msg_dict
+
+    @staticmethod
+    def format_SEEN_msg(environment_id, environment_initialization_string, s_size):
+        &#34;&#34;&#34;
+        Format a setup a new environment message, sent by the client to initiate an environment instance on the server side.  
+
+        :param new_environment_id: The environment id for the new environment(string)  
+        :param environment_initialization_string: A string from the ones offered in th AEIS message detailing the
+                                                  requested environment (string).  
+        :param s_size: a_size (int)  
+        :return: msg string to send
+        &#34;&#34;&#34;
+        msg_dict = {&#39;environment_id&#39;: environment_id,
+                    &#39;environment_initialization_string&#39;: environment_initialization_string, &#39;s_size&#39;: s_size}
+        return ProtocolHandler.Setup_Environment_Msg_Identifier + pickle.dumps(msg_dict)
+
+    @staticmethod
+    def parse_SEEN_msg(msg):
+        &#34;&#34;&#34;
+        Parse a setup a new environment message, sent by the client to initiate an environment instance on the server side.  
+
+        :param msg: message string  
+        :return: Returns msg dict containing values for keys: environment_id (string), environment_initialization_string (string), s_size (int).
+        &#34;&#34;&#34;
+        msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+        msg = msg[ProtocolHandler.MSG_IDENTIFIER_LEN:]
+        return pickle.loads(msg)
+
+    @staticmethod
+    def format_NEIN_msg(environment_id, a_size):
+        &#34;&#34;&#34;
+        Format a new environment initiated msg, sent by the sever after receiving a SEEN message.  
+
+        :param environment_id: environment id (string)  
+        :param a_size: a_size (int)  
+        :return: msg string to send
+        &#34;&#34;&#34;
+        msg_dict = {&#39;environment_id&#39;: environment_id, &#39;a_size&#39;: a_size}
+        return ProtocolHandler.New_Environment_Initiated_Msg_Identifier + pickle.dumps(msg_dict)
+
+    @staticmethod
+    def parse_NEIN_msg(msg):
+        &#34;&#34;&#34;
+        Parse a new environment initiated msg, sent by the sever after receiving a SEEN message.  
+
+        :param msg: message string  
+        :return: Returns a pickled dict containing values for keys: environment_id (string), a_size (int)
+        &#34;&#34;&#34;
+        msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+        msg = msg[ProtocolHandler.MSG_IDENTIFIER_LEN:]
+        return pickle.loads(msg)
+
+    @staticmethod
+    def format_STNE_msg(environment_id):
+        &#34;&#34;&#34;
+        Format a start a new episode message, sent by the client.  
+
+        :param environment_id: environment id (string)  
+        :return: msg string to send
+        &#34;&#34;&#34;
+        return ProtocolHandler.Start_New_Episode_Msg_Identifier + pickle.dumps(environment_id)
+
+    @staticmethod
+    def parse_STNE_msg(msg):
+        &#34;&#34;&#34;
+        Parse a start a new episode message, sent by the client.  
+
+        :param msg: message string  
+        :return: Returns environment_id
+        &#34;&#34;&#34;
+        msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+        msg = msg[ProtocolHandler.MSG_IDENTIFIER_LEN:]
+        return pickle.loads(msg)
+
+    @staticmethod
+    def format_CLEN_msg(environment_id):
+        &#34;&#34;&#34;
+        Format a close environment message, sent by the client.  
+
+        :param environment_id: environment id (string)  
+        :return: msg string to send
+        &#34;&#34;&#34;
+        return ProtocolHandler.Close_Environment_Msg_Identifier + pickle.dumps(environment_id)
+
+    @staticmethod
+    def parse_CLEN_msg(msg):
+        &#34;&#34;&#34;
+        Parse a close environment message, sent by the client.  
+
+        :param msg: message string  
+        :return: Returns environment_id
+        &#34;&#34;&#34;
+        msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+        msg = msg[ProtocolHandler.MSG_IDENTIFIER_LEN:]
+        return pickle.loads(msg)
+
+    @staticmethod
+    def format_NEST_msg(environment_id, initial_state, is_terminal):
+        &#34;&#34;&#34;
+        Format a new episode started msg, sent by the server after receiving a STNE message.  
+
+        :param environment_id: environment id (string)  
+        :param initial_state: initial state at time step 0 (numpy array)  
+        :param is_terminal: is the initial state also the terminal state (bool)  
+        :return: msg string to send
+        &#34;&#34;&#34;
+        msg_dict = {&#39;environment_id&#39;: environment_id, &#39;initial_state&#39;: initial_state, &#39;is_terminal&#39;: is_terminal}
+        return ProtocolHandler.New_Episode_Started_Msg_Identifier + pickle.dumps(msg_dict)
+
+    @staticmethod
+    def parse_NEST_msg(msg):
+        &#34;&#34;&#34;
+        Parse a new episode started msg, sent by the server after receiving a STNE message.  
+
+        :param msg: message string  
+        :return: Returns msg dict containing values for keys: environment_id (string),
+                 initial_state (numpy array of s_size), is_terminal (bool)
+        &#34;&#34;&#34;
+        msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+        msg = msg[ProtocolHandler.MSG_IDENTIFIER_LEN:]
+        return pickle.loads(msg)
+
+    @staticmethod
+    def format_RAES_msg():
+        &#34;&#34;&#34;
+        Format a request all available environment initialization strings msg, sent by client.  
+
+        :return: msg string to send
+        &#34;&#34;&#34;
+        return ProtocolHandler.Request_Available_Environment_Initialization_Strings_Msg_Identifier
+
+    @staticmethod
+    def parse_RAES_msg(msg):
+        &#34;&#34;&#34;
+        Parse a request all available environment initialization strings msg, sent by client.  
+
+        :param msg: message string  
+        :return: None
+        &#34;&#34;&#34;
+        msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+        return None
+
+    @staticmethod
+    def format_AEIS_msg(all_available_environment_initialization_strings):
+        &#34;&#34;&#34;
+        Format a all available environment initialization strings msg, sent by the server after receiving a RAES message.  
+
+        :param all_available_environment_initialization_strings: A list of all available environment initialization strings. (list of strings)  
+        :return: msg string to send
+        &#34;&#34;&#34;
+        return ProtocolHandler.Available_Environment_Initialization_Strings_Msg_Identifier + \
+               pickle.dumps(all_available_environment_initialization_strings)
+
+    @staticmethod
+    def parse_AEIS_msg(msg):
+        &#34;&#34;&#34;
+        Parse an all available environment initialization strings msg, sent by the server after receiving a RAES message.  
+
+        :return: Returns a list of all available environments strings
+        &#34;&#34;&#34;
+        msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+        msg = msg[ProtocolHandler.MSG_IDENTIFIER_LEN:]
+        return pickle.loads(msg)
+
+    @staticmethod
+    def format_GUPS_msg(environment_id, requested_screen_size):
+        &#34;&#34;&#34;
+        Format a get unprocessed screen sent by the client.  
+
+        :param environment_id: environment id (string)  
+        :param requested_screen_size: requested screen size (tuple of ints, [width, height])  
+        :return: msg string to send
+        &#34;&#34;&#34;
+        msg_dict = {&#39;environment_id&#39;: environment_id, &#39;requested_screen_size&#39;: requested_screen_size}
+        return ProtocolHandler.Get_Unprocessed_Screen_Msg_Identifier + pickle.dumps(msg_dict)
+
+    @staticmethod
+    def parse_GUPS_msg(msg):
+        &#34;&#34;&#34;
+        Parse a get unprocessed screen sent by the client.  
+
+        :param msg: message string  
+        :return: Returns msg dict containing values for keys: environment_id (str),
+                                                              requested_screen_size (tuple of ints, [width, height])
+        &#34;&#34;&#34;
+        msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+        msg = msg[ProtocolHandler.MSG_IDENTIFIER_LEN:]
+        return pickle.loads(msg)
+
+    @staticmethod
+    def format_UPSC_msg(environment_id, state):
+        &#34;&#34;&#34;
+        Format an unprocessed screen message sent by the server as response to a GUPS message.  
+
+        :param environment_id: environment id (string)  
+        :param state: state (numpy array)  
+        :return: msg string to send
+        &#34;&#34;&#34;
+        msg_dict = {&#39;environment_id&#39;: environment_id, &#39;state&#39;: state}
+        return ProtocolHandler.Unprocessed_Screen_Msg_Identifier + pickle.dumps(msg_dict)
+
+    @staticmethod
+    def parse_UPSC_msg(msg):
+        &#34;&#34;&#34;
+        Parse an unprocessed screen message sent by the server as response to a GUPS message.  
+
+        :param msg: message string  
+        :return: Returns msg dict containing values for keys: environment_id (str), state(numpy array)
+        &#34;&#34;&#34;
+        msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+        msg = msg[ProtocolHandler.MSG_IDENTIFIER_LEN:]
+        return pickle.loads(msg)
+
+    @staticmethod
+    def format_GTMN_msg(icon_display_size):
+        &#34;&#34;&#34;
+        Format a GTMN message sent by the client to request a MENU message.  
+
+        :param icon_display_size: tupple of integers. ( width (int) , height (int) )  
+        :return: msg string to send
+        &#34;&#34;&#34;
+        return ProtocolHandler.Get_Menu_Msg_Identifier + pickle.dumps(icon_display_size)
+
+    @staticmethod
+    def parse_GTMN_msg(msg):
+        &#34;&#34;&#34;
+        Parse a GTMN message sent by the client to request a MENU message.  
+
+        :return: icon_display_size: tupple of integers. ( width (int) , height (int) )
+        &#34;&#34;&#34;
+        msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+        msg = msg[ProtocolHandler.MSG_IDENTIFIER_LEN:]
+        return pickle.loads(msg)
+
+    @staticmethod
+    def format_MENU_msg(env_init_str_to_env_icon_dict):
+        &#34;&#34;&#34;
+        Format a menu sent by the server as response to a GTMN message.  
+
+        :param env_init_str_to_env_icon_dict: dict of the following structure: {environment_name (string):
+                                               environment icon (numpy array of image the size of icon_display_size as
+                                               passed in the GTMN message)} for all available environments  
+        :return: msg string to send
+        &#34;&#34;&#34;
+        return ProtocolHandler.Menu_Msg_Identifier + pickle.dumps(env_init_str_to_env_icon_dict)
+
+    @staticmethod
+    def parse_MENU_msg(msg):
+        &#34;&#34;&#34;
+        Parse a Menu sent by the server as response to a GTMN message.  
+
+        :param msg: message string  
+        :return: Returns msg dict where each key is the initialization string of an available environment while it&#39;s
+                 value is the environment&#39;s icon (numpy array of image the size of icon_display_size as passed in the
+                 GTMN message).
+        &#34;&#34;&#34;
+        msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+        msg = msg[ProtocolHandler.MSG_IDENTIFIER_LEN:]
+        return pickle.loads(msg)
+
+    @staticmethod
+    def format_PING_msg():
+        &#34;&#34;&#34;
+        Format a PING message. If the server receives such a message it returns a Ping message itself.  
+
+        :return: msg string to send
+        &#34;&#34;&#34;
+        return ProtocolHandler.Ping_Msg_Identifier
+
+    @staticmethod
+    def parse_PING_msg(msg):
+        &#34;&#34;&#34;
+        Parse a PING message. If the receives such a message it returns a Ping message itself.  
+
+        :return: True if msg is a PING msg.
+        &#34;&#34;&#34;
+        msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+        return ProtocolHandler.Ping_Msg_Identifier == msg_identifier
+
+
+    @staticmethod
+    def format_EROR_msg(error_description_string):
+        &#34;&#34;&#34;
+        Format an erroe message.  
+
+        :param error_description_string: A string describing the error that has occurred (string)  
+        :return: msg string to send
+        &#34;&#34;&#34;
+        return ProtocolHandler.State_Msg_Identifier + pickle.dumps(error_description_string)
+
+    @staticmethod
+    def parse_EROR_msg(msg):
+        &#34;&#34;&#34;
+        Parse an error message.  
+
+        :param msg: message string  
+        :return: Returns an error description message (string)
+        &#34;&#34;&#34;
+        msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+        msg = msg[ProtocolHandler.MSG_IDENTIFIER_LEN:]
+        return pickle.loads(msg)
+
+    @staticmethod
+    def format_EXIT_msg():
+        &#34;&#34;&#34;
+        Format an exit message.  
+
+        :return: msg string to send
+        &#34;&#34;&#34;
+        return ProtocolHandler.Exit_Msg_Identifier
+
+    @staticmethod
+    def parse_EXIT_msg(msg):
+        &#34;&#34;&#34;
+        Parse an exit message.  
+
+        :return: None
+        &#34;&#34;&#34;
+        msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+        return None
+
+
+def read_file(path):
+    &#34;&#34;&#34;
+    Returns the contents of the file in the path.  
+
+    :param path: Path to the file.  
+    :return: Data in file. (bytes type)
+    &#34;&#34;&#34;
+    with open(path, &#34;rb&#34;) as f:
+        return f.read()
+
+
+def write_file(path, data):
+    &#34;&#34;&#34;
+    Writes data to the file in the path.  
+
+    :param path: Path to the file.  
+    :param data: Data to save to file.  
+    :return: None
+    &#34;&#34;&#34;
+    with open(path, &#34;wb&#34;) as f:
+        f.write(data)
+
+
+class Status:
+    &#34;&#34;&#34;
+    Enum class. Standardizes status codes for running objects (ones that inherit from thread or processes).
+    &#34;&#34;&#34;
+    ShutDown = &#34;ShutDown&#34;
+    Shutting_Down = &#34;Shutting_Down&#34;
+    Running = &#34;Running&#34;
+    Error_Occurred = &#34;Error_Occurred&#34;
+
+
+def send_by_size(sock, data):
+    &#34;&#34;&#34;
+    A function that sends a msg with a length prefix. Used in tandem with the receive_by_size() func.
+    Used together, the two functions make sure each message is received in full and that no left overs remain to
+    confuse future readings from the socket.  
+
+    :param sock: Socket to send data through. (socket.socket object)  
+    :param data: Data to send. (bytes object)  
+    :return: None
+    &#34;&#34;&#34;
+    # print(data[:ProtocolHandler.MSG_IDENTIFIER_LEN])
+    msg = str(len(data)).zfill(MSG_SIZE_HEADER_LENGTH).encode() + data
+    try:
+        sock.send(msg)
+    except socket.error:
+        raise SocketClosedRemotelyError()
+
+
+def receive_by_size(sock):
+    &#34;&#34;&#34;
+    A function that receives a msg with a length prefix. Used in tandem with the send_by_size() func.
+    Used together, the two functions make sure each message is received in full and that no left overs remain to
+    confuse future readings from the socket.  
+
+    :param sock: Socket to send data through. (socket.socket object)  
+    :return: Data received. (bytes object)
+    &#34;&#34;&#34;
+    data = b&#39;&#39;
+    try:
+        len_of_data_to_receive = sock.recv(MSG_SIZE_HEADER_LENGTH)
+    except socket.error:
+        raise SocketClosedRemotelyError()
+    if len_of_data_to_receive == b&#39;&#39;:
+        raise SocketClosedRemotelyError()
+    len_of_data_to_receive = int(len_of_data_to_receive)
+    while len_of_data_to_receive &gt; len(data):
+        data += sock.recv(len_of_data_to_receive - len(data))
+    # print(data[:ProtocolHandler.MSG_IDENTIFIER_LEN])
+    return data
+
+
+class SocketClosedRemotelyError(Exception):
+    def __init__(self):
+        self.message = &#34;The socket was closed remotely by the other machine&#34;
+
+
+class Threadable(threading.Thread):
+    def __init__(self):
+        &#34;&#34;&#34;
+        A class meant to standardize and facilitate the creation of classes meant to run on threads, in parallel.
+        Meant to be inherited from.
+        &#34;&#34;&#34;
+        super(Threadable, self).__init__()
+        self._status_Lock = threading.Lock()
+        self.status = Status.ShutDown
+
+    @property
+    def status(self):
+        &#34;&#34;&#34;
+        status Property getter. Safely returns the value of self._status.  
+
+        :return: The value of self._status.
+        &#34;&#34;&#34;
+        with self._status_Lock:
+            return self._status
+
+    @status.setter
+    def status(self, value):
+        &#34;&#34;&#34;
+        status Property setter. Safely sets the value of self._status.  
+
+        :param value: The value to which we set self._status  
+        :return: None
+        &#34;&#34;&#34;
+        with self._status_Lock:
+            self._status = value
+
+    def shutdown(self):
+        &#34;&#34;&#34;
+        Call to signal the thread to shutdown.  
+
+        :return: None
+        &#34;&#34;&#34;
+        self.status = Status.Shutting_Down
+
+    def _protected_run_maker(self, run_func):
+        &#34;&#34;&#34;
+        Takes a function and returns a function protected by a try statement.
+        Prevents the crash of the thread from affecting the rest of the threads running in parallel and the crash of the
+        program as a whole.  
+
+        :param run_func: The thread&#39;s unprotected run() method.  
+        :return: Protected run() method.
+        &#34;&#34;&#34;
+        self._unprotected_run_func = run_func
+
+        &#34;&#34;&#34;def protected_run():
+            self._unprotected_run_func()&#34;&#34;&#34;
+
+        def protected_run():
+            debug = False
+            if debug:
+                self._unprotected_run_func()
+            else:
+                try:
+                    self._unprotected_run_func()
+                except Exception as ex:
+                    self.status = Status.Error_Occurred
+                    raise ex
+
+        return protected_run
+
+    def start(self):
+        &#34;&#34;&#34;
+        Overrides the default start func, wrapping the run method with the self._protected_run_maker() method.  
+
+        :return: None
+        &#34;&#34;&#34;
+        self.run = self._protected_run_maker(self.run)
+        super(Threadable, self).start()
+
+    def run(self):
+        &#34;&#34;&#34;
+        Example Run method, meant to be overriden.
+        When overriding take care to mimic the function&#39;s structure so that a change in the self.status property
+        actually affects the running of the code. (as in make sure to check every once in a while if self.status isn&#39;t
+        equals to Status.Running and if it different, exit the loop and shutdown.
+        &#34;&#34;&#34;
+        self.status = Status.Running
+        while self.status == Status.Running:
+            pass  # do work
+        self._shutdown_procedure()
+
+    def _shutdown_procedure(self):
+        &#34;&#34;&#34;
+        Example _shutdown_procedure method, meant to be overriden.
+        Here you should go through the instances shutdown procedure as well as the shutdown of it&#39;s components should
+        they require such a thing.
+        Make sure you set the self.status to Status.ShutDown at the end, to mark that you have completed the necessary
+        shutdown procedures.
+        &#34;&#34;&#34;
+        self.status = Status.ShutDown
+
+
+def bytes2str(data):
+    &#34;&#34;&#34;
+    Converts bytes like object to strings.  
+
+    :param data: bytes type object  
+    :return: string type object
+    &#34;&#34;&#34;
+    return (b&#34;%s&#34; % data).encode(&#34;ascii&#34;)</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="Beta.Server.Shared_Code.bytes2str"><code class="name flex">
+<span>def <span class="ident">bytes2str</span></span>(<span>data)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Converts bytes like object to strings.
+</p>
+<p>:param data: bytes type object<br>
+:return: string type object</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def bytes2str(data):
+    &#34;&#34;&#34;
+    Converts bytes like object to strings.  
+
+    :param data: bytes type object  
+    :return: string type object
+    &#34;&#34;&#34;
+    return (b&#34;%s&#34; % data).encode(&#34;ascii&#34;)</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Shared_Code.read_file"><code class="name flex">
+<span>def <span class="ident">read_file</span></span>(<span>path)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Returns the contents of the file in the path.
+</p>
+<p>:param path: Path to the file.<br>
+:return: Data in file. (bytes type)</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def read_file(path):
+    &#34;&#34;&#34;
+    Returns the contents of the file in the path.  
+
+    :param path: Path to the file.  
+    :return: Data in file. (bytes type)
+    &#34;&#34;&#34;
+    with open(path, &#34;rb&#34;) as f:
+        return f.read()</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Shared_Code.receive_by_size"><code class="name flex">
+<span>def <span class="ident">receive_by_size</span></span>(<span>sock)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>A function that receives a msg with a length prefix. Used in tandem with the send_by_size() func.
+Used together, the two functions make sure each message is received in full and that no left overs remain to
+confuse future readings from the socket.
+</p>
+<p>:param sock: Socket to send data through. (socket.socket object)<br>
+:return: Data received. (bytes object)</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def receive_by_size(sock):
+    &#34;&#34;&#34;
+    A function that receives a msg with a length prefix. Used in tandem with the send_by_size() func.
+    Used together, the two functions make sure each message is received in full and that no left overs remain to
+    confuse future readings from the socket.  
+
+    :param sock: Socket to send data through. (socket.socket object)  
+    :return: Data received. (bytes object)
+    &#34;&#34;&#34;
+    data = b&#39;&#39;
+    try:
+        len_of_data_to_receive = sock.recv(MSG_SIZE_HEADER_LENGTH)
+    except socket.error:
+        raise SocketClosedRemotelyError()
+    if len_of_data_to_receive == b&#39;&#39;:
+        raise SocketClosedRemotelyError()
+    len_of_data_to_receive = int(len_of_data_to_receive)
+    while len_of_data_to_receive &gt; len(data):
+        data += sock.recv(len_of_data_to_receive - len(data))
+    # print(data[:ProtocolHandler.MSG_IDENTIFIER_LEN])
+    return data</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Shared_Code.send_by_size"><code class="name flex">
+<span>def <span class="ident">send_by_size</span></span>(<span>sock, data)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>A function that sends a msg with a length prefix. Used in tandem with the receive_by_size() func.
+Used together, the two functions make sure each message is received in full and that no left overs remain to
+confuse future readings from the socket.
+</p>
+<p>:param sock: Socket to send data through. (socket.socket object)<br>
+:param data: Data to send. (bytes object)<br>
+:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def send_by_size(sock, data):
+    &#34;&#34;&#34;
+    A function that sends a msg with a length prefix. Used in tandem with the receive_by_size() func.
+    Used together, the two functions make sure each message is received in full and that no left overs remain to
+    confuse future readings from the socket.  
+
+    :param sock: Socket to send data through. (socket.socket object)  
+    :param data: Data to send. (bytes object)  
+    :return: None
+    &#34;&#34;&#34;
+    # print(data[:ProtocolHandler.MSG_IDENTIFIER_LEN])
+    msg = str(len(data)).zfill(MSG_SIZE_HEADER_LENGTH).encode() + data
+    try:
+        sock.send(msg)
+    except socket.error:
+        raise SocketClosedRemotelyError()</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Shared_Code.write_file"><code class="name flex">
+<span>def <span class="ident">write_file</span></span>(<span>path, data)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Writes data to the file in the path.
+</p>
+<p>:param path: Path to the file.<br>
+:param data: Data to save to file.<br>
+:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def write_file(path, data):
+    &#34;&#34;&#34;
+    Writes data to the file in the path.  
+
+    :param path: Path to the file.  
+    :param data: Data to save to file.  
+    :return: None
+    &#34;&#34;&#34;
+    with open(path, &#34;wb&#34;) as f:
+        f.write(data)</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler"><code class="flex name class">
+<span>class <span class="ident">ProtocolHandler</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class ProtocolHandler(object):
+    MSG_IDENTIFIER_LEN = 4
+    State_Msg_Identifier = b&#34;STAT&#34;
+    Send_Action_Make_Msg_Identifier = b&#34;SA2M&#34;
+    Get_Post_Terminal_Step_Reward_Msg_Identifier = b&#34;GPTR&#34;
+    Post_Terminal_Step_Reward_Msg_Identifier = b&#34;PTSR&#34;
+    Setup_Environment_Msg_Identifier = b&#34;SEEN&#34;
+    New_Environment_Initiated_Msg_Identifier = b&#34;NEIN&#34;
+    Close_Environment_Msg_Identifier = b&#34;CLEN&#34;
+    Start_New_Episode_Msg_Identifier = b&#34;STNE&#34;
+    New_Episode_Started_Msg_Identifier = b&#34;NEST&#34;
+    Request_Available_Environment_Initialization_Strings_Msg_Identifier = b&#34;RAES&#34;
+    Available_Environment_Initialization_Strings_Msg_Identifier = b&#34;AEIS&#34;
+    Get_Unprocessed_Screen_Msg_Identifier = b&#34;GUPS&#34;
+    Unprocessed_Screen_Msg_Identifier = b&#34;UPSC&#34;
+    Ping_Msg_Identifier = b&#34;PING&#34;
+    Get_Menu_Msg_Identifier = b&#34;GTMN&#34;
+    Menu_Msg_Identifier = b&#34;MENU&#34;
+    Error_Msg_Identifier = b&#34;EROR&#34;
+    Exit_Msg_Identifier = b&#34;EXIT&#34;
+
+    &#34;&#34;&#34; 
+        STAT - State msg. Data Structure: 4 bytes msg identifier, pickled dict with values for the following keys:  
+               environment_id (str), state(numpy array), reward_for_last_action (float), is_terminal_state (boolean).  
+        SA2M - Send action to make msg. Data Structure: 4 bytes msg identifier, pickled dict with values for the  
+               following keys: environment_id (str), action (int - between 0 and a_size).  
+        GPTR - Get post terminal step reward msg. Data Structure: 4 bytes msg identifier, environment_id (str).  
+        PTSR - Post Terminal step reward msg. Data Structure: 4 bytes msg identifier, pickled dict with values for the  
+               following keys: environment_id (str), post_terminal_step_reward (float).  
+        SEEN - Setup environment msg. Data Structure: 4 bytes msg identifier, pickled dict with values for the following  
+               keys: environment_id (str), environment_string (string), s_size (int)).  
+        NEIN - New environment initiated msg. Data Structure: 4 bytes msg identifier, pickled dict with values for the  
+               following keys: new_environment_id (str), a_size (int).  
+        CLEN - Close Environment. Data Structure: 4 bytes msg identifier, pickled environment_id (string).  
+        STNE - Start a new episode. Data Structure: 4 bytes msg identifier, pickled environment_id (string).  
+        NEST - New episode started msg. 4 bytes msg identifier pickled dict with values for the following keys:  
+               environment_id, initial state (numpy array), is_terminal (bool).  
+        RAES - Request all available environment initialization strings msg. Data Structure: 4 bytes msg identifier.  
+        AEIS - All available environment initialization strings msg. Data Structure: 4 bytes msg identifier, pickled  
+               list of all available environments strings.  
+        GUPS - Get unprocessed screen message. Data Structure: 4 bytes msg identifier, pickled dict with values for the  
+               following keys: environment_id (str), requested_screen_size (tuple of ints, [width, height]).  
+        UPSC - Unprocessed screen message. Data Structure: 4 bytes msg identifier, pickled dict with values for the  
+               following keys: environment_id (str), state(numpy array).  
+        GTMN - Get menu message. Data Structure: 4 bytes msg identifier, pickled tuple of integers signifying the size  
+                                                 of the icon display (width (int) , height (int)).  
+        MENU - Menu message. Data Structure: 4 bytes msg identifier, pickled dict where each key is the initialization  
+               string of an available environment while it&#39;s value is the environment&#39;s icon (numpy array of image the  
+               size of icon_display_size as passed in the GTMN message).  
+        PING - Ping message. Data Structure: 4 bytes msg identifier.  
+        EROR - Error msg. Data Structure: 4 bytes msg identifier, pickled error description string.  
+        EXIT - exit msg. Data Structure: 4 bytes msg identifier  
+          
+        Just to make it clear, environment initialization strings are the string used to describe the type of the 
+        environment to initiate and are not to be confused with the environment_id strings which are used to identify 
+        and refer to instances of environments already initiated.  
+        Environment initialization strings are chosen from the list offered in AEIS messages while environment ids are 
+        chosen by the client.  
+    &#34;&#34;&#34;
+
+    @staticmethod
+    def format_STAT_msg(environment_id, state, reward_for_last_action, is_terminal_state):
+        &#34;&#34;&#34;
+        Format a state msg, sent by the server after receiving a SA2M message.  
+
+        :param environment_id: environment id (string)  
+        :param state: state at time t (numpy array)  
+        :param reward_for_last_action: reward for action made at time t-1 (float)  
+        :param is_terminal_state: True if state at time t is terminal state. False otherwise.  
+        :return: msg string to send
+        &#34;&#34;&#34;
+        msg_dict = {&#39;environment_id&#39;: environment_id, &#39;state&#39;: state, &#39;reward_for_last_action&#39;: reward_for_last_action,
+                    &#39;is_terminal_state&#39;: is_terminal_state}
+        return ProtocolHandler.State_Msg_Identifier + pickle.dumps(msg_dict)
+
+    @staticmethod
+    def parse_STAT_msg(msg):
+        &#34;&#34;&#34;
+        Parse a state msg, sent by the server after receiving a SA2M message.  
+
+        :param msg: message string  
+        :return: Returns msg dict containing values for keys: environment_id (string), state (numpy array of s_size), reward_for_last_action (float),
+                 is_terminal_state (boolean)
+        &#34;&#34;&#34;
+        msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+        msg = msg[ProtocolHandler.MSG_IDENTIFIER_LEN:]
+        return pickle.loads(msg)
+
+    @staticmethod
+    def format_SA2M_msg(environment_id, action2make):
+        &#34;&#34;&#34;
+        Format a send action to make msg, sent by the client.  
+
+        :param environment_id: environment id (string)  
+        :param action2make: action to make (one hot vector of action, numpy array)  
+        :return: msg string to send
+        &#34;&#34;&#34;
+        msg_dict = {&#39;environment_id&#39;: environment_id, &#39;action2make&#39;: np.argmax(action2make),
+                    &#39;a_size&#39;: np.size(action2make)}
+        return ProtocolHandler.Send_Action_Make_Msg_Identifier + pickle.dumps(msg_dict)
+
+    @staticmethod
+    def parse_SA2M_msg(msg):
+        &#34;&#34;&#34;
+        Parse a send action to make msg, sent by the client.&#34;  
+
+        :param msg: message string  
+        :param a_size: a_size (int)  
+        :return: Returns msg dict containing values for keys: environment_id (string), action2make (one hot vector of size [a_size], numpy array)
+        &#34;&#34;&#34;
+        msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+        msg = msg[ProtocolHandler.MSG_IDENTIFIER_LEN:]
+        msg_dict = pickle.loads(msg)
+        msg_dict[&#39;action2make&#39;] = np.identity(msg_dict[&#39;a_size&#39;], dtype=np.int32)[:, msg_dict[&#39;action2make&#39;]].tolist()
+        return msg_dict
+
+    @staticmethod
+    def format_GPTR_msg(environment_id):
+        &#34;&#34;&#34;
+        Format a get post terminal step reward msg, sent by the client.  
+
+        :param environment_id: environment id (string)  
+        :return: msg string to send
+        &#34;&#34;&#34;
+        return ProtocolHandler.Get_Post_Terminal_Step_Reward_Msg_Identifier + environment_id.encode()
+
+    @staticmethod
+    def parse_GPTR_msg(msg):
+        &#34;&#34;&#34;
+        Parse a get post terminal step reward msg, sent by the client.&#34;  
+
+        :param msg: message string  
+        :return: Returns environment_id (string)
+        &#34;&#34;&#34;
+        msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+        msg = msg[ProtocolHandler.MSG_IDENTIFIER_LEN:]
+        env_id = msg
+        return env_id.decode()
+
+    @staticmethod
+    def format_PTSR_msg(environment_id, post_terminal_step_reward):
+        &#34;&#34;&#34;
+        Format a post terminal step reward msg, sent by the server after receiving a GPTR message.  
+
+        :param environment_id: environment id (string)  
+        :param post_terminal_step_reward: The reward for a post terminal state.  
+        :return: msg string to send
+        &#34;&#34;&#34;
+        msg_dict = {&#39;environment_id&#39;: environment_id, &#39;post_terminal_step_reward&#39;: post_terminal_step_reward}
+        return ProtocolHandler.Post_Terminal_Step_Reward_Msg_Identifier + pickle.dumps(msg_dict)
+
+    @staticmethod
+    def parse_PTSR_msg(msg):
+        &#34;&#34;&#34;
+        Parse a post terminal step reward msg, sent by the server after receiving a GPTR message.  
+
+        :param msg: message string  
+        :return: Returns msg dict containing value for keys: environment_id (string), post_terminal_step_reward (float)
+        &#34;&#34;&#34;
+        msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+        msg = msg[ProtocolHandler.MSG_IDENTIFIER_LEN:]
+        msg_dict = pickle.loads(msg)
+        return msg_dict
+
+    @staticmethod
+    def format_SEEN_msg(environment_id, environment_initialization_string, s_size):
+        &#34;&#34;&#34;
+        Format a setup a new environment message, sent by the client to initiate an environment instance on the server side.  
+
+        :param new_environment_id: The environment id for the new environment(string)  
+        :param environment_initialization_string: A string from the ones offered in th AEIS message detailing the
+                                                  requested environment (string).  
+        :param s_size: a_size (int)  
+        :return: msg string to send
+        &#34;&#34;&#34;
+        msg_dict = {&#39;environment_id&#39;: environment_id,
+                    &#39;environment_initialization_string&#39;: environment_initialization_string, &#39;s_size&#39;: s_size}
+        return ProtocolHandler.Setup_Environment_Msg_Identifier + pickle.dumps(msg_dict)
+
+    @staticmethod
+    def parse_SEEN_msg(msg):
+        &#34;&#34;&#34;
+        Parse a setup a new environment message, sent by the client to initiate an environment instance on the server side.  
+
+        :param msg: message string  
+        :return: Returns msg dict containing values for keys: environment_id (string), environment_initialization_string (string), s_size (int).
+        &#34;&#34;&#34;
+        msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+        msg = msg[ProtocolHandler.MSG_IDENTIFIER_LEN:]
+        return pickle.loads(msg)
+
+    @staticmethod
+    def format_NEIN_msg(environment_id, a_size):
+        &#34;&#34;&#34;
+        Format a new environment initiated msg, sent by the sever after receiving a SEEN message.  
+
+        :param environment_id: environment id (string)  
+        :param a_size: a_size (int)  
+        :return: msg string to send
+        &#34;&#34;&#34;
+        msg_dict = {&#39;environment_id&#39;: environment_id, &#39;a_size&#39;: a_size}
+        return ProtocolHandler.New_Environment_Initiated_Msg_Identifier + pickle.dumps(msg_dict)
+
+    @staticmethod
+    def parse_NEIN_msg(msg):
+        &#34;&#34;&#34;
+        Parse a new environment initiated msg, sent by the sever after receiving a SEEN message.  
+
+        :param msg: message string  
+        :return: Returns a pickled dict containing values for keys: environment_id (string), a_size (int)
+        &#34;&#34;&#34;
+        msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+        msg = msg[ProtocolHandler.MSG_IDENTIFIER_LEN:]
+        return pickle.loads(msg)
+
+    @staticmethod
+    def format_STNE_msg(environment_id):
+        &#34;&#34;&#34;
+        Format a start a new episode message, sent by the client.  
+
+        :param environment_id: environment id (string)  
+        :return: msg string to send
+        &#34;&#34;&#34;
+        return ProtocolHandler.Start_New_Episode_Msg_Identifier + pickle.dumps(environment_id)
+
+    @staticmethod
+    def parse_STNE_msg(msg):
+        &#34;&#34;&#34;
+        Parse a start a new episode message, sent by the client.  
+
+        :param msg: message string  
+        :return: Returns environment_id
+        &#34;&#34;&#34;
+        msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+        msg = msg[ProtocolHandler.MSG_IDENTIFIER_LEN:]
+        return pickle.loads(msg)
+
+    @staticmethod
+    def format_CLEN_msg(environment_id):
+        &#34;&#34;&#34;
+        Format a close environment message, sent by the client.  
+
+        :param environment_id: environment id (string)  
+        :return: msg string to send
+        &#34;&#34;&#34;
+        return ProtocolHandler.Close_Environment_Msg_Identifier + pickle.dumps(environment_id)
+
+    @staticmethod
+    def parse_CLEN_msg(msg):
+        &#34;&#34;&#34;
+        Parse a close environment message, sent by the client.  
+
+        :param msg: message string  
+        :return: Returns environment_id
+        &#34;&#34;&#34;
+        msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+        msg = msg[ProtocolHandler.MSG_IDENTIFIER_LEN:]
+        return pickle.loads(msg)
+
+    @staticmethod
+    def format_NEST_msg(environment_id, initial_state, is_terminal):
+        &#34;&#34;&#34;
+        Format a new episode started msg, sent by the server after receiving a STNE message.  
+
+        :param environment_id: environment id (string)  
+        :param initial_state: initial state at time step 0 (numpy array)  
+        :param is_terminal: is the initial state also the terminal state (bool)  
+        :return: msg string to send
+        &#34;&#34;&#34;
+        msg_dict = {&#39;environment_id&#39;: environment_id, &#39;initial_state&#39;: initial_state, &#39;is_terminal&#39;: is_terminal}
+        return ProtocolHandler.New_Episode_Started_Msg_Identifier + pickle.dumps(msg_dict)
+
+    @staticmethod
+    def parse_NEST_msg(msg):
+        &#34;&#34;&#34;
+        Parse a new episode started msg, sent by the server after receiving a STNE message.  
+
+        :param msg: message string  
+        :return: Returns msg dict containing values for keys: environment_id (string),
+                 initial_state (numpy array of s_size), is_terminal (bool)
+        &#34;&#34;&#34;
+        msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+        msg = msg[ProtocolHandler.MSG_IDENTIFIER_LEN:]
+        return pickle.loads(msg)
+
+    @staticmethod
+    def format_RAES_msg():
+        &#34;&#34;&#34;
+        Format a request all available environment initialization strings msg, sent by client.  
+
+        :return: msg string to send
+        &#34;&#34;&#34;
+        return ProtocolHandler.Request_Available_Environment_Initialization_Strings_Msg_Identifier
+
+    @staticmethod
+    def parse_RAES_msg(msg):
+        &#34;&#34;&#34;
+        Parse a request all available environment initialization strings msg, sent by client.  
+
+        :param msg: message string  
+        :return: None
+        &#34;&#34;&#34;
+        msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+        return None
+
+    @staticmethod
+    def format_AEIS_msg(all_available_environment_initialization_strings):
+        &#34;&#34;&#34;
+        Format a all available environment initialization strings msg, sent by the server after receiving a RAES message.  
+
+        :param all_available_environment_initialization_strings: A list of all available environment initialization strings. (list of strings)  
+        :return: msg string to send
+        &#34;&#34;&#34;
+        return ProtocolHandler.Available_Environment_Initialization_Strings_Msg_Identifier + \
+               pickle.dumps(all_available_environment_initialization_strings)
+
+    @staticmethod
+    def parse_AEIS_msg(msg):
+        &#34;&#34;&#34;
+        Parse an all available environment initialization strings msg, sent by the server after receiving a RAES message.  
+
+        :return: Returns a list of all available environments strings
+        &#34;&#34;&#34;
+        msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+        msg = msg[ProtocolHandler.MSG_IDENTIFIER_LEN:]
+        return pickle.loads(msg)
+
+    @staticmethod
+    def format_GUPS_msg(environment_id, requested_screen_size):
+        &#34;&#34;&#34;
+        Format a get unprocessed screen sent by the client.  
+
+        :param environment_id: environment id (string)  
+        :param requested_screen_size: requested screen size (tuple of ints, [width, height])  
+        :return: msg string to send
+        &#34;&#34;&#34;
+        msg_dict = {&#39;environment_id&#39;: environment_id, &#39;requested_screen_size&#39;: requested_screen_size}
+        return ProtocolHandler.Get_Unprocessed_Screen_Msg_Identifier + pickle.dumps(msg_dict)
+
+    @staticmethod
+    def parse_GUPS_msg(msg):
+        &#34;&#34;&#34;
+        Parse a get unprocessed screen sent by the client.  
+
+        :param msg: message string  
+        :return: Returns msg dict containing values for keys: environment_id (str),
+                                                              requested_screen_size (tuple of ints, [width, height])
+        &#34;&#34;&#34;
+        msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+        msg = msg[ProtocolHandler.MSG_IDENTIFIER_LEN:]
+        return pickle.loads(msg)
+
+    @staticmethod
+    def format_UPSC_msg(environment_id, state):
+        &#34;&#34;&#34;
+        Format an unprocessed screen message sent by the server as response to a GUPS message.  
+
+        :param environment_id: environment id (string)  
+        :param state: state (numpy array)  
+        :return: msg string to send
+        &#34;&#34;&#34;
+        msg_dict = {&#39;environment_id&#39;: environment_id, &#39;state&#39;: state}
+        return ProtocolHandler.Unprocessed_Screen_Msg_Identifier + pickle.dumps(msg_dict)
+
+    @staticmethod
+    def parse_UPSC_msg(msg):
+        &#34;&#34;&#34;
+        Parse an unprocessed screen message sent by the server as response to a GUPS message.  
+
+        :param msg: message string  
+        :return: Returns msg dict containing values for keys: environment_id (str), state(numpy array)
+        &#34;&#34;&#34;
+        msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+        msg = msg[ProtocolHandler.MSG_IDENTIFIER_LEN:]
+        return pickle.loads(msg)
+
+    @staticmethod
+    def format_GTMN_msg(icon_display_size):
+        &#34;&#34;&#34;
+        Format a GTMN message sent by the client to request a MENU message.  
+
+        :param icon_display_size: tupple of integers. ( width (int) , height (int) )  
+        :return: msg string to send
+        &#34;&#34;&#34;
+        return ProtocolHandler.Get_Menu_Msg_Identifier + pickle.dumps(icon_display_size)
+
+    @staticmethod
+    def parse_GTMN_msg(msg):
+        &#34;&#34;&#34;
+        Parse a GTMN message sent by the client to request a MENU message.  
+
+        :return: icon_display_size: tupple of integers. ( width (int) , height (int) )
+        &#34;&#34;&#34;
+        msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+        msg = msg[ProtocolHandler.MSG_IDENTIFIER_LEN:]
+        return pickle.loads(msg)
+
+    @staticmethod
+    def format_MENU_msg(env_init_str_to_env_icon_dict):
+        &#34;&#34;&#34;
+        Format a menu sent by the server as response to a GTMN message.  
+
+        :param env_init_str_to_env_icon_dict: dict of the following structure: {environment_name (string):
+                                               environment icon (numpy array of image the size of icon_display_size as
+                                               passed in the GTMN message)} for all available environments  
+        :return: msg string to send
+        &#34;&#34;&#34;
+        return ProtocolHandler.Menu_Msg_Identifier + pickle.dumps(env_init_str_to_env_icon_dict)
+
+    @staticmethod
+    def parse_MENU_msg(msg):
+        &#34;&#34;&#34;
+        Parse a Menu sent by the server as response to a GTMN message.  
+
+        :param msg: message string  
+        :return: Returns msg dict where each key is the initialization string of an available environment while it&#39;s
+                 value is the environment&#39;s icon (numpy array of image the size of icon_display_size as passed in the
+                 GTMN message).
+        &#34;&#34;&#34;
+        msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+        msg = msg[ProtocolHandler.MSG_IDENTIFIER_LEN:]
+        return pickle.loads(msg)
+
+    @staticmethod
+    def format_PING_msg():
+        &#34;&#34;&#34;
+        Format a PING message. If the server receives such a message it returns a Ping message itself.  
+
+        :return: msg string to send
+        &#34;&#34;&#34;
+        return ProtocolHandler.Ping_Msg_Identifier
+
+    @staticmethod
+    def parse_PING_msg(msg):
+        &#34;&#34;&#34;
+        Parse a PING message. If the receives such a message it returns a Ping message itself.  
+
+        :return: True if msg is a PING msg.
+        &#34;&#34;&#34;
+        msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+        return ProtocolHandler.Ping_Msg_Identifier == msg_identifier
+
+
+    @staticmethod
+    def format_EROR_msg(error_description_string):
+        &#34;&#34;&#34;
+        Format an erroe message.  
+
+        :param error_description_string: A string describing the error that has occurred (string)  
+        :return: msg string to send
+        &#34;&#34;&#34;
+        return ProtocolHandler.State_Msg_Identifier + pickle.dumps(error_description_string)
+
+    @staticmethod
+    def parse_EROR_msg(msg):
+        &#34;&#34;&#34;
+        Parse an error message.  
+
+        :param msg: message string  
+        :return: Returns an error description message (string)
+        &#34;&#34;&#34;
+        msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+        msg = msg[ProtocolHandler.MSG_IDENTIFIER_LEN:]
+        return pickle.loads(msg)
+
+    @staticmethod
+    def format_EXIT_msg():
+        &#34;&#34;&#34;
+        Format an exit message.  
+
+        :return: msg string to send
+        &#34;&#34;&#34;
+        return ProtocolHandler.Exit_Msg_Identifier
+
+    @staticmethod
+    def parse_EXIT_msg(msg):
+        &#34;&#34;&#34;
+        Parse an exit message.  
+
+        :return: None
+        &#34;&#34;&#34;
+        msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+        return None</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.Available_Environment_Initialization_Strings_Msg_Identifier"><code class="name">var <span class="ident">Available_Environment_Initialization_Strings_Msg_Identifier</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.Close_Environment_Msg_Identifier"><code class="name">var <span class="ident">Close_Environment_Msg_Identifier</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.Error_Msg_Identifier"><code class="name">var <span class="ident">Error_Msg_Identifier</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.Exit_Msg_Identifier"><code class="name">var <span class="ident">Exit_Msg_Identifier</span></code></dt>
+<dd>
+<section class="desc"><p>STAT - State msg. Data Structure: 4 bytes msg identifier, pickled dict with values for the following keys:<br>
+environment_id (str), state(numpy array), reward_for_last_action (float), is_terminal_state (boolean).<br>
+SA2M - Send action to make msg. Data Structure: 4 bytes msg identifier, pickled dict with values for the<br>
+following keys: environment_id (str), action (int - between 0 and a_size).<br>
+GPTR - Get post terminal step reward msg. Data Structure: 4 bytes msg identifier, environment_id (str).<br>
+PTSR - Post Terminal step reward msg. Data Structure: 4 bytes msg identifier, pickled dict with values for the<br>
+following keys: environment_id (str), post_terminal_step_reward (float).<br>
+SEEN - Setup environment msg. Data Structure: 4 bytes msg identifier, pickled dict with values for the following<br>
+keys: environment_id (str), environment_string (string), s_size (int)).<br>
+NEIN - New environment initiated msg. Data Structure: 4 bytes msg identifier, pickled dict with values for the<br>
+following keys: new_environment_id (str), a_size (int).<br>
+CLEN - Close Environment. Data Structure: 4 bytes msg identifier, pickled environment_id (string).<br>
+STNE - Start a new episode. Data Structure: 4 bytes msg identifier, pickled environment_id (string).<br>
+NEST - New episode started msg. 4 bytes msg identifier pickled dict with values for the following keys:<br>
+environment_id, initial state (numpy array), is_terminal (bool).<br>
+RAES - Request all available environment initialization strings msg. Data Structure: 4 bytes msg identifier.<br>
+AEIS - All available environment initialization strings msg. Data Structure: 4 bytes msg identifier, pickled<br>
+list of all available environments strings.<br>
+GUPS - Get unprocessed screen message. Data Structure: 4 bytes msg identifier, pickled dict with values for the<br>
+following keys: environment_id (str), requested_screen_size (tuple of ints, [width, height]).<br>
+UPSC - Unprocessed screen message. Data Structure: 4 bytes msg identifier, pickled dict with values for the<br>
+following keys: environment_id (str), state(numpy array).<br>
+GTMN - Get menu message. Data Structure: 4 bytes msg identifier, pickled tuple of integers signifying the size<br>
+of the icon display (width (int) , height (int)).<br>
+MENU - Menu message. Data Structure: 4 bytes msg identifier, pickled dict where each key is the initialization<br>
+string of an available environment while it's value is the environment's icon (numpy array of image the<br>
+size of icon_display_size as passed in the GTMN message).<br>
+PING - Ping message. Data Structure: 4 bytes msg identifier.<br>
+EROR - Error msg. Data Structure: 4 bytes msg identifier, pickled error description string.<br>
+EXIT - exit msg. Data Structure: 4 bytes msg identifier
+</p>
+<p>Just to make it clear, environment initialization strings are the string used to describe the type of the
+environment to initiate and are not to be confused with the environment_id strings which are used to identify
+and refer to instances of environments already initiated.<br>
+Environment initialization strings are chosen from the list offered in AEIS messages while environment ids are
+chosen by the client.</p></section>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.Get_Menu_Msg_Identifier"><code class="name">var <span class="ident">Get_Menu_Msg_Identifier</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.Get_Post_Terminal_Step_Reward_Msg_Identifier"><code class="name">var <span class="ident">Get_Post_Terminal_Step_Reward_Msg_Identifier</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.Get_Unprocessed_Screen_Msg_Identifier"><code class="name">var <span class="ident">Get_Unprocessed_Screen_Msg_Identifier</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.MSG_IDENTIFIER_LEN"><code class="name">var <span class="ident">MSG_IDENTIFIER_LEN</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.Menu_Msg_Identifier"><code class="name">var <span class="ident">Menu_Msg_Identifier</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.New_Environment_Initiated_Msg_Identifier"><code class="name">var <span class="ident">New_Environment_Initiated_Msg_Identifier</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.New_Episode_Started_Msg_Identifier"><code class="name">var <span class="ident">New_Episode_Started_Msg_Identifier</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.Ping_Msg_Identifier"><code class="name">var <span class="ident">Ping_Msg_Identifier</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.Post_Terminal_Step_Reward_Msg_Identifier"><code class="name">var <span class="ident">Post_Terminal_Step_Reward_Msg_Identifier</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.Request_Available_Environment_Initialization_Strings_Msg_Identifier"><code class="name">var <span class="ident">Request_Available_Environment_Initialization_Strings_Msg_Identifier</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.Send_Action_Make_Msg_Identifier"><code class="name">var <span class="ident">Send_Action_Make_Msg_Identifier</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.Setup_Environment_Msg_Identifier"><code class="name">var <span class="ident">Setup_Environment_Msg_Identifier</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.Start_New_Episode_Msg_Identifier"><code class="name">var <span class="ident">Start_New_Episode_Msg_Identifier</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.State_Msg_Identifier"><code class="name">var <span class="ident">State_Msg_Identifier</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.Unprocessed_Screen_Msg_Identifier"><code class="name">var <span class="ident">Unprocessed_Screen_Msg_Identifier</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+</dl>
+<h3>Static methods</h3>
+<dl>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.format_AEIS_msg"><code class="name flex">
+<span>def <span class="ident">format_AEIS_msg</span></span>(<span>all_available_environment_initialization_strings)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Format a all available environment initialization strings msg, sent by the server after receiving a RAES message.
+</p>
+<p>:param all_available_environment_initialization_strings: A list of all available environment initialization strings. (list of strings)<br>
+:return: msg string to send</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@staticmethod
+def format_AEIS_msg(all_available_environment_initialization_strings):
+    &#34;&#34;&#34;
+    Format a all available environment initialization strings msg, sent by the server after receiving a RAES message.  
+
+    :param all_available_environment_initialization_strings: A list of all available environment initialization strings. (list of strings)  
+    :return: msg string to send
+    &#34;&#34;&#34;
+    return ProtocolHandler.Available_Environment_Initialization_Strings_Msg_Identifier + \
+           pickle.dumps(all_available_environment_initialization_strings)</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.format_CLEN_msg"><code class="name flex">
+<span>def <span class="ident">format_CLEN_msg</span></span>(<span>environment_id)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Format a close environment message, sent by the client.
+</p>
+<p>:param environment_id: environment id (string)<br>
+:return: msg string to send</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@staticmethod
+def format_CLEN_msg(environment_id):
+    &#34;&#34;&#34;
+    Format a close environment message, sent by the client.  
+
+    :param environment_id: environment id (string)  
+    :return: msg string to send
+    &#34;&#34;&#34;
+    return ProtocolHandler.Close_Environment_Msg_Identifier + pickle.dumps(environment_id)</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.format_EROR_msg"><code class="name flex">
+<span>def <span class="ident">format_EROR_msg</span></span>(<span>error_description_string)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Format an erroe message.
+</p>
+<p>:param error_description_string: A string describing the error that has occurred (string)<br>
+:return: msg string to send</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@staticmethod
+def format_EROR_msg(error_description_string):
+    &#34;&#34;&#34;
+    Format an erroe message.  
+
+    :param error_description_string: A string describing the error that has occurred (string)  
+    :return: msg string to send
+    &#34;&#34;&#34;
+    return ProtocolHandler.State_Msg_Identifier + pickle.dumps(error_description_string)</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.format_EXIT_msg"><code class="name flex">
+<span>def <span class="ident">format_EXIT_msg</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Format an exit message.
+</p>
+<p>:return: msg string to send</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@staticmethod
+def format_EXIT_msg():
+    &#34;&#34;&#34;
+    Format an exit message.  
+
+    :return: msg string to send
+    &#34;&#34;&#34;
+    return ProtocolHandler.Exit_Msg_Identifier</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.format_GPTR_msg"><code class="name flex">
+<span>def <span class="ident">format_GPTR_msg</span></span>(<span>environment_id)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Format a get post terminal step reward msg, sent by the client.
+</p>
+<p>:param environment_id: environment id (string)<br>
+:return: msg string to send</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@staticmethod
+def format_GPTR_msg(environment_id):
+    &#34;&#34;&#34;
+    Format a get post terminal step reward msg, sent by the client.  
+
+    :param environment_id: environment id (string)  
+    :return: msg string to send
+    &#34;&#34;&#34;
+    return ProtocolHandler.Get_Post_Terminal_Step_Reward_Msg_Identifier + environment_id.encode()</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.format_GTMN_msg"><code class="name flex">
+<span>def <span class="ident">format_GTMN_msg</span></span>(<span>icon_display_size)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Format a GTMN message sent by the client to request a MENU message.
+</p>
+<p>:param icon_display_size: tupple of integers. ( width (int) , height (int) )<br>
+:return: msg string to send</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@staticmethod
+def format_GTMN_msg(icon_display_size):
+    &#34;&#34;&#34;
+    Format a GTMN message sent by the client to request a MENU message.  
+
+    :param icon_display_size: tupple of integers. ( width (int) , height (int) )  
+    :return: msg string to send
+    &#34;&#34;&#34;
+    return ProtocolHandler.Get_Menu_Msg_Identifier + pickle.dumps(icon_display_size)</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.format_GUPS_msg"><code class="name flex">
+<span>def <span class="ident">format_GUPS_msg</span></span>(<span>environment_id, requested_screen_size)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Format a get unprocessed screen sent by the client.
+</p>
+<p>:param environment_id: environment id (string)<br>
+:param requested_screen_size: requested screen size (tuple of ints, [width, height])<br>
+:return: msg string to send</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@staticmethod
+def format_GUPS_msg(environment_id, requested_screen_size):
+    &#34;&#34;&#34;
+    Format a get unprocessed screen sent by the client.  
+
+    :param environment_id: environment id (string)  
+    :param requested_screen_size: requested screen size (tuple of ints, [width, height])  
+    :return: msg string to send
+    &#34;&#34;&#34;
+    msg_dict = {&#39;environment_id&#39;: environment_id, &#39;requested_screen_size&#39;: requested_screen_size}
+    return ProtocolHandler.Get_Unprocessed_Screen_Msg_Identifier + pickle.dumps(msg_dict)</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.format_MENU_msg"><code class="name flex">
+<span>def <span class="ident">format_MENU_msg</span></span>(<span>env_init_str_to_env_icon_dict)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Format a menu sent by the server as response to a GTMN message.
+</p>
+<p>:param env_init_str_to_env_icon_dict: dict of the following structure: {environment_name (string):
+environment icon (numpy array of image the size of icon_display_size as
+passed in the GTMN message)} for all available environments<br>
+:return: msg string to send</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@staticmethod
+def format_MENU_msg(env_init_str_to_env_icon_dict):
+    &#34;&#34;&#34;
+    Format a menu sent by the server as response to a GTMN message.  
+
+    :param env_init_str_to_env_icon_dict: dict of the following structure: {environment_name (string):
+                                           environment icon (numpy array of image the size of icon_display_size as
+                                           passed in the GTMN message)} for all available environments  
+    :return: msg string to send
+    &#34;&#34;&#34;
+    return ProtocolHandler.Menu_Msg_Identifier + pickle.dumps(env_init_str_to_env_icon_dict)</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.format_NEIN_msg"><code class="name flex">
+<span>def <span class="ident">format_NEIN_msg</span></span>(<span>environment_id, a_size)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Format a new environment initiated msg, sent by the sever after receiving a SEEN message.
+</p>
+<p>:param environment_id: environment id (string)<br>
+:param a_size: a_size (int)<br>
+:return: msg string to send</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@staticmethod
+def format_NEIN_msg(environment_id, a_size):
+    &#34;&#34;&#34;
+    Format a new environment initiated msg, sent by the sever after receiving a SEEN message.  
+
+    :param environment_id: environment id (string)  
+    :param a_size: a_size (int)  
+    :return: msg string to send
+    &#34;&#34;&#34;
+    msg_dict = {&#39;environment_id&#39;: environment_id, &#39;a_size&#39;: a_size}
+    return ProtocolHandler.New_Environment_Initiated_Msg_Identifier + pickle.dumps(msg_dict)</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.format_NEST_msg"><code class="name flex">
+<span>def <span class="ident">format_NEST_msg</span></span>(<span>environment_id, initial_state, is_terminal)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Format a new episode started msg, sent by the server after receiving a STNE message.
+</p>
+<p>:param environment_id: environment id (string)<br>
+:param initial_state: initial state at time step 0 (numpy array)<br>
+:param is_terminal: is the initial state also the terminal state (bool)<br>
+:return: msg string to send</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@staticmethod
+def format_NEST_msg(environment_id, initial_state, is_terminal):
+    &#34;&#34;&#34;
+    Format a new episode started msg, sent by the server after receiving a STNE message.  
+
+    :param environment_id: environment id (string)  
+    :param initial_state: initial state at time step 0 (numpy array)  
+    :param is_terminal: is the initial state also the terminal state (bool)  
+    :return: msg string to send
+    &#34;&#34;&#34;
+    msg_dict = {&#39;environment_id&#39;: environment_id, &#39;initial_state&#39;: initial_state, &#39;is_terminal&#39;: is_terminal}
+    return ProtocolHandler.New_Episode_Started_Msg_Identifier + pickle.dumps(msg_dict)</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.format_PING_msg"><code class="name flex">
+<span>def <span class="ident">format_PING_msg</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Format a PING message. If the server receives such a message it returns a Ping message itself.
+</p>
+<p>:return: msg string to send</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@staticmethod
+def format_PING_msg():
+    &#34;&#34;&#34;
+    Format a PING message. If the server receives such a message it returns a Ping message itself.  
+
+    :return: msg string to send
+    &#34;&#34;&#34;
+    return ProtocolHandler.Ping_Msg_Identifier</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.format_PTSR_msg"><code class="name flex">
+<span>def <span class="ident">format_PTSR_msg</span></span>(<span>environment_id, post_terminal_step_reward)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Format a post terminal step reward msg, sent by the server after receiving a GPTR message.
+</p>
+<p>:param environment_id: environment id (string)<br>
+:param post_terminal_step_reward: The reward for a post terminal state.<br>
+:return: msg string to send</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@staticmethod
+def format_PTSR_msg(environment_id, post_terminal_step_reward):
+    &#34;&#34;&#34;
+    Format a post terminal step reward msg, sent by the server after receiving a GPTR message.  
+
+    :param environment_id: environment id (string)  
+    :param post_terminal_step_reward: The reward for a post terminal state.  
+    :return: msg string to send
+    &#34;&#34;&#34;
+    msg_dict = {&#39;environment_id&#39;: environment_id, &#39;post_terminal_step_reward&#39;: post_terminal_step_reward}
+    return ProtocolHandler.Post_Terminal_Step_Reward_Msg_Identifier + pickle.dumps(msg_dict)</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.format_RAES_msg"><code class="name flex">
+<span>def <span class="ident">format_RAES_msg</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Format a request all available environment initialization strings msg, sent by client.
+</p>
+<p>:return: msg string to send</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@staticmethod
+def format_RAES_msg():
+    &#34;&#34;&#34;
+    Format a request all available environment initialization strings msg, sent by client.  
+
+    :return: msg string to send
+    &#34;&#34;&#34;
+    return ProtocolHandler.Request_Available_Environment_Initialization_Strings_Msg_Identifier</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.format_SA2M_msg"><code class="name flex">
+<span>def <span class="ident">format_SA2M_msg</span></span>(<span>environment_id, action2make)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Format a send action to make msg, sent by the client.
+</p>
+<p>:param environment_id: environment id (string)<br>
+:param action2make: action to make (one hot vector of action, numpy array)<br>
+:return: msg string to send</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@staticmethod
+def format_SA2M_msg(environment_id, action2make):
+    &#34;&#34;&#34;
+    Format a send action to make msg, sent by the client.  
+
+    :param environment_id: environment id (string)  
+    :param action2make: action to make (one hot vector of action, numpy array)  
+    :return: msg string to send
+    &#34;&#34;&#34;
+    msg_dict = {&#39;environment_id&#39;: environment_id, &#39;action2make&#39;: np.argmax(action2make),
+                &#39;a_size&#39;: np.size(action2make)}
+    return ProtocolHandler.Send_Action_Make_Msg_Identifier + pickle.dumps(msg_dict)</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.format_SEEN_msg"><code class="name flex">
+<span>def <span class="ident">format_SEEN_msg</span></span>(<span>environment_id, environment_initialization_string, s_size)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Format a setup a new environment message, sent by the client to initiate an environment instance on the server side.
+</p>
+<p>:param new_environment_id: The environment id for the new environment(string)<br>
+:param environment_initialization_string: A string from the ones offered in th AEIS message detailing the
+requested environment (string).<br>
+:param s_size: a_size (int)<br>
+:return: msg string to send</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@staticmethod
+def format_SEEN_msg(environment_id, environment_initialization_string, s_size):
+    &#34;&#34;&#34;
+    Format a setup a new environment message, sent by the client to initiate an environment instance on the server side.  
+
+    :param new_environment_id: The environment id for the new environment(string)  
+    :param environment_initialization_string: A string from the ones offered in th AEIS message detailing the
+                                              requested environment (string).  
+    :param s_size: a_size (int)  
+    :return: msg string to send
+    &#34;&#34;&#34;
+    msg_dict = {&#39;environment_id&#39;: environment_id,
+                &#39;environment_initialization_string&#39;: environment_initialization_string, &#39;s_size&#39;: s_size}
+    return ProtocolHandler.Setup_Environment_Msg_Identifier + pickle.dumps(msg_dict)</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.format_STAT_msg"><code class="name flex">
+<span>def <span class="ident">format_STAT_msg</span></span>(<span>environment_id, state, reward_for_last_action, is_terminal_state)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Format a state msg, sent by the server after receiving a SA2M message.
+</p>
+<p>:param environment_id: environment id (string)<br>
+:param state: state at time t (numpy array)<br>
+:param reward_for_last_action: reward for action made at time t-1 (float)<br>
+:param is_terminal_state: True if state at time t is terminal state. False otherwise.<br>
+:return: msg string to send</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@staticmethod
+def format_STAT_msg(environment_id, state, reward_for_last_action, is_terminal_state):
+    &#34;&#34;&#34;
+    Format a state msg, sent by the server after receiving a SA2M message.  
+
+    :param environment_id: environment id (string)  
+    :param state: state at time t (numpy array)  
+    :param reward_for_last_action: reward for action made at time t-1 (float)  
+    :param is_terminal_state: True if state at time t is terminal state. False otherwise.  
+    :return: msg string to send
+    &#34;&#34;&#34;
+    msg_dict = {&#39;environment_id&#39;: environment_id, &#39;state&#39;: state, &#39;reward_for_last_action&#39;: reward_for_last_action,
+                &#39;is_terminal_state&#39;: is_terminal_state}
+    return ProtocolHandler.State_Msg_Identifier + pickle.dumps(msg_dict)</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.format_STNE_msg"><code class="name flex">
+<span>def <span class="ident">format_STNE_msg</span></span>(<span>environment_id)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Format a start a new episode message, sent by the client.
+</p>
+<p>:param environment_id: environment id (string)<br>
+:return: msg string to send</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@staticmethod
+def format_STNE_msg(environment_id):
+    &#34;&#34;&#34;
+    Format a start a new episode message, sent by the client.  
+
+    :param environment_id: environment id (string)  
+    :return: msg string to send
+    &#34;&#34;&#34;
+    return ProtocolHandler.Start_New_Episode_Msg_Identifier + pickle.dumps(environment_id)</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.format_UPSC_msg"><code class="name flex">
+<span>def <span class="ident">format_UPSC_msg</span></span>(<span>environment_id, state)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Format an unprocessed screen message sent by the server as response to a GUPS message.
+</p>
+<p>:param environment_id: environment id (string)<br>
+:param state: state (numpy array)<br>
+:return: msg string to send</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@staticmethod
+def format_UPSC_msg(environment_id, state):
+    &#34;&#34;&#34;
+    Format an unprocessed screen message sent by the server as response to a GUPS message.  
+
+    :param environment_id: environment id (string)  
+    :param state: state (numpy array)  
+    :return: msg string to send
+    &#34;&#34;&#34;
+    msg_dict = {&#39;environment_id&#39;: environment_id, &#39;state&#39;: state}
+    return ProtocolHandler.Unprocessed_Screen_Msg_Identifier + pickle.dumps(msg_dict)</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.parse_AEIS_msg"><code class="name flex">
+<span>def <span class="ident">parse_AEIS_msg</span></span>(<span>msg)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Parse an all available environment initialization strings msg, sent by the server after receiving a RAES message.
+</p>
+<p>:return: Returns a list of all available environments strings</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@staticmethod
+def parse_AEIS_msg(msg):
+    &#34;&#34;&#34;
+    Parse an all available environment initialization strings msg, sent by the server after receiving a RAES message.  
+
+    :return: Returns a list of all available environments strings
+    &#34;&#34;&#34;
+    msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+    msg = msg[ProtocolHandler.MSG_IDENTIFIER_LEN:]
+    return pickle.loads(msg)</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.parse_CLEN_msg"><code class="name flex">
+<span>def <span class="ident">parse_CLEN_msg</span></span>(<span>msg)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Parse a close environment message, sent by the client.
+</p>
+<p>:param msg: message string<br>
+:return: Returns environment_id</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@staticmethod
+def parse_CLEN_msg(msg):
+    &#34;&#34;&#34;
+    Parse a close environment message, sent by the client.  
+
+    :param msg: message string  
+    :return: Returns environment_id
+    &#34;&#34;&#34;
+    msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+    msg = msg[ProtocolHandler.MSG_IDENTIFIER_LEN:]
+    return pickle.loads(msg)</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.parse_EROR_msg"><code class="name flex">
+<span>def <span class="ident">parse_EROR_msg</span></span>(<span>msg)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Parse an error message.
+</p>
+<p>:param msg: message string<br>
+:return: Returns an error description message (string)</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@staticmethod
+def parse_EROR_msg(msg):
+    &#34;&#34;&#34;
+    Parse an error message.  
+
+    :param msg: message string  
+    :return: Returns an error description message (string)
+    &#34;&#34;&#34;
+    msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+    msg = msg[ProtocolHandler.MSG_IDENTIFIER_LEN:]
+    return pickle.loads(msg)</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.parse_EXIT_msg"><code class="name flex">
+<span>def <span class="ident">parse_EXIT_msg</span></span>(<span>msg)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Parse an exit message.
+</p>
+<p>:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@staticmethod
+def parse_EXIT_msg(msg):
+    &#34;&#34;&#34;
+    Parse an exit message.  
+
+    :return: None
+    &#34;&#34;&#34;
+    msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+    return None</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.parse_GPTR_msg"><code class="name flex">
+<span>def <span class="ident">parse_GPTR_msg</span></span>(<span>msg)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Parse a get post terminal step reward msg, sent by the client."
+</p>
+<p>:param msg: message string<br>
+:return: Returns environment_id (string)</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@staticmethod
+def parse_GPTR_msg(msg):
+    &#34;&#34;&#34;
+    Parse a get post terminal step reward msg, sent by the client.&#34;  
+
+    :param msg: message string  
+    :return: Returns environment_id (string)
+    &#34;&#34;&#34;
+    msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+    msg = msg[ProtocolHandler.MSG_IDENTIFIER_LEN:]
+    env_id = msg
+    return env_id.decode()</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.parse_GTMN_msg"><code class="name flex">
+<span>def <span class="ident">parse_GTMN_msg</span></span>(<span>msg)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Parse a GTMN message sent by the client to request a MENU message.
+</p>
+<p>:return: icon_display_size: tupple of integers. ( width (int) , height (int) )</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@staticmethod
+def parse_GTMN_msg(msg):
+    &#34;&#34;&#34;
+    Parse a GTMN message sent by the client to request a MENU message.  
+
+    :return: icon_display_size: tupple of integers. ( width (int) , height (int) )
+    &#34;&#34;&#34;
+    msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+    msg = msg[ProtocolHandler.MSG_IDENTIFIER_LEN:]
+    return pickle.loads(msg)</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.parse_GUPS_msg"><code class="name flex">
+<span>def <span class="ident">parse_GUPS_msg</span></span>(<span>msg)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Parse a get unprocessed screen sent by the client.
+</p>
+<p>:param msg: message string<br>
+:return: Returns msg dict containing values for keys: environment_id (str),
+requested_screen_size (tuple of ints, [width, height])</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@staticmethod
+def parse_GUPS_msg(msg):
+    &#34;&#34;&#34;
+    Parse a get unprocessed screen sent by the client.  
+
+    :param msg: message string  
+    :return: Returns msg dict containing values for keys: environment_id (str),
+                                                          requested_screen_size (tuple of ints, [width, height])
+    &#34;&#34;&#34;
+    msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+    msg = msg[ProtocolHandler.MSG_IDENTIFIER_LEN:]
+    return pickle.loads(msg)</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.parse_MENU_msg"><code class="name flex">
+<span>def <span class="ident">parse_MENU_msg</span></span>(<span>msg)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Parse a Menu sent by the server as response to a GTMN message.
+</p>
+<p>:param msg: message string<br>
+:return: Returns msg dict where each key is the initialization string of an available environment while it's
+value is the environment's icon (numpy array of image the size of icon_display_size as passed in the
+GTMN message).</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@staticmethod
+def parse_MENU_msg(msg):
+    &#34;&#34;&#34;
+    Parse a Menu sent by the server as response to a GTMN message.  
+
+    :param msg: message string  
+    :return: Returns msg dict where each key is the initialization string of an available environment while it&#39;s
+             value is the environment&#39;s icon (numpy array of image the size of icon_display_size as passed in the
+             GTMN message).
+    &#34;&#34;&#34;
+    msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+    msg = msg[ProtocolHandler.MSG_IDENTIFIER_LEN:]
+    return pickle.loads(msg)</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.parse_NEIN_msg"><code class="name flex">
+<span>def <span class="ident">parse_NEIN_msg</span></span>(<span>msg)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Parse a new environment initiated msg, sent by the sever after receiving a SEEN message.
+</p>
+<p>:param msg: message string<br>
+:return: Returns a pickled dict containing values for keys: environment_id (string), a_size (int)</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@staticmethod
+def parse_NEIN_msg(msg):
+    &#34;&#34;&#34;
+    Parse a new environment initiated msg, sent by the sever after receiving a SEEN message.  
+
+    :param msg: message string  
+    :return: Returns a pickled dict containing values for keys: environment_id (string), a_size (int)
+    &#34;&#34;&#34;
+    msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+    msg = msg[ProtocolHandler.MSG_IDENTIFIER_LEN:]
+    return pickle.loads(msg)</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.parse_NEST_msg"><code class="name flex">
+<span>def <span class="ident">parse_NEST_msg</span></span>(<span>msg)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Parse a new episode started msg, sent by the server after receiving a STNE message.
+</p>
+<p>:param msg: message string<br>
+:return: Returns msg dict containing values for keys: environment_id (string),
+initial_state (numpy array of s_size), is_terminal (bool)</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@staticmethod
+def parse_NEST_msg(msg):
+    &#34;&#34;&#34;
+    Parse a new episode started msg, sent by the server after receiving a STNE message.  
+
+    :param msg: message string  
+    :return: Returns msg dict containing values for keys: environment_id (string),
+             initial_state (numpy array of s_size), is_terminal (bool)
+    &#34;&#34;&#34;
+    msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+    msg = msg[ProtocolHandler.MSG_IDENTIFIER_LEN:]
+    return pickle.loads(msg)</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.parse_PING_msg"><code class="name flex">
+<span>def <span class="ident">parse_PING_msg</span></span>(<span>msg)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Parse a PING message. If the receives such a message it returns a Ping message itself.
+</p>
+<p>:return: True if msg is a PING msg.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@staticmethod
+def parse_PING_msg(msg):
+    &#34;&#34;&#34;
+    Parse a PING message. If the receives such a message it returns a Ping message itself.  
+
+    :return: True if msg is a PING msg.
+    &#34;&#34;&#34;
+    msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+    return ProtocolHandler.Ping_Msg_Identifier == msg_identifier</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.parse_PTSR_msg"><code class="name flex">
+<span>def <span class="ident">parse_PTSR_msg</span></span>(<span>msg)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Parse a post terminal step reward msg, sent by the server after receiving a GPTR message.
+</p>
+<p>:param msg: message string<br>
+:return: Returns msg dict containing value for keys: environment_id (string), post_terminal_step_reward (float)</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@staticmethod
+def parse_PTSR_msg(msg):
+    &#34;&#34;&#34;
+    Parse a post terminal step reward msg, sent by the server after receiving a GPTR message.  
+
+    :param msg: message string  
+    :return: Returns msg dict containing value for keys: environment_id (string), post_terminal_step_reward (float)
+    &#34;&#34;&#34;
+    msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+    msg = msg[ProtocolHandler.MSG_IDENTIFIER_LEN:]
+    msg_dict = pickle.loads(msg)
+    return msg_dict</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.parse_RAES_msg"><code class="name flex">
+<span>def <span class="ident">parse_RAES_msg</span></span>(<span>msg)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Parse a request all available environment initialization strings msg, sent by client.
+</p>
+<p>:param msg: message string<br>
+:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@staticmethod
+def parse_RAES_msg(msg):
+    &#34;&#34;&#34;
+    Parse a request all available environment initialization strings msg, sent by client.  
+
+    :param msg: message string  
+    :return: None
+    &#34;&#34;&#34;
+    msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+    return None</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.parse_SA2M_msg"><code class="name flex">
+<span>def <span class="ident">parse_SA2M_msg</span></span>(<span>msg)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Parse a send action to make msg, sent by the client."
+</p>
+<p>:param msg: message string<br>
+:param a_size: a_size (int)<br>
+:return: Returns msg dict containing values for keys: environment_id (string), action2make (one hot vector of size [a_size], numpy array)</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@staticmethod
+def parse_SA2M_msg(msg):
+    &#34;&#34;&#34;
+    Parse a send action to make msg, sent by the client.&#34;  
+
+    :param msg: message string  
+    :param a_size: a_size (int)  
+    :return: Returns msg dict containing values for keys: environment_id (string), action2make (one hot vector of size [a_size], numpy array)
+    &#34;&#34;&#34;
+    msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+    msg = msg[ProtocolHandler.MSG_IDENTIFIER_LEN:]
+    msg_dict = pickle.loads(msg)
+    msg_dict[&#39;action2make&#39;] = np.identity(msg_dict[&#39;a_size&#39;], dtype=np.int32)[:, msg_dict[&#39;action2make&#39;]].tolist()
+    return msg_dict</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.parse_SEEN_msg"><code class="name flex">
+<span>def <span class="ident">parse_SEEN_msg</span></span>(<span>msg)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Parse a setup a new environment message, sent by the client to initiate an environment instance on the server side.
+</p>
+<p>:param msg: message string<br>
+:return: Returns msg dict containing values for keys: environment_id (string), environment_initialization_string (string), s_size (int).</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@staticmethod
+def parse_SEEN_msg(msg):
+    &#34;&#34;&#34;
+    Parse a setup a new environment message, sent by the client to initiate an environment instance on the server side.  
+
+    :param msg: message string  
+    :return: Returns msg dict containing values for keys: environment_id (string), environment_initialization_string (string), s_size (int).
+    &#34;&#34;&#34;
+    msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+    msg = msg[ProtocolHandler.MSG_IDENTIFIER_LEN:]
+    return pickle.loads(msg)</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.parse_STAT_msg"><code class="name flex">
+<span>def <span class="ident">parse_STAT_msg</span></span>(<span>msg)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Parse a state msg, sent by the server after receiving a SA2M message.
+</p>
+<p>:param msg: message string<br>
+:return: Returns msg dict containing values for keys: environment_id (string), state (numpy array of s_size), reward_for_last_action (float),
+is_terminal_state (boolean)</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@staticmethod
+def parse_STAT_msg(msg):
+    &#34;&#34;&#34;
+    Parse a state msg, sent by the server after receiving a SA2M message.  
+
+    :param msg: message string  
+    :return: Returns msg dict containing values for keys: environment_id (string), state (numpy array of s_size), reward_for_last_action (float),
+             is_terminal_state (boolean)
+    &#34;&#34;&#34;
+    msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+    msg = msg[ProtocolHandler.MSG_IDENTIFIER_LEN:]
+    return pickle.loads(msg)</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.parse_STNE_msg"><code class="name flex">
+<span>def <span class="ident">parse_STNE_msg</span></span>(<span>msg)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Parse a start a new episode message, sent by the client.
+</p>
+<p>:param msg: message string<br>
+:return: Returns environment_id</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@staticmethod
+def parse_STNE_msg(msg):
+    &#34;&#34;&#34;
+    Parse a start a new episode message, sent by the client.  
+
+    :param msg: message string  
+    :return: Returns environment_id
+    &#34;&#34;&#34;
+    msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+    msg = msg[ProtocolHandler.MSG_IDENTIFIER_LEN:]
+    return pickle.loads(msg)</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Shared_Code.ProtocolHandler.parse_UPSC_msg"><code class="name flex">
+<span>def <span class="ident">parse_UPSC_msg</span></span>(<span>msg)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Parse an unprocessed screen message sent by the server as response to a GUPS message.
+</p>
+<p>:param msg: message string<br>
+:return: Returns msg dict containing values for keys: environment_id (str), state(numpy array)</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@staticmethod
+def parse_UPSC_msg(msg):
+    &#34;&#34;&#34;
+    Parse an unprocessed screen message sent by the server as response to a GUPS message.  
+
+    :param msg: message string  
+    :return: Returns msg dict containing values for keys: environment_id (str), state(numpy array)
+    &#34;&#34;&#34;
+    msg_identifier = msg[:ProtocolHandler.MSG_IDENTIFIER_LEN]
+    msg = msg[ProtocolHandler.MSG_IDENTIFIER_LEN:]
+    return pickle.loads(msg)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="Beta.Server.Shared_Code.SocketClosedRemotelyError"><code class="flex name class">
+<span>class <span class="ident">SocketClosedRemotelyError</span></span>
+</code></dt>
+<dd>
+<section class="desc"><p>Common base class for all non-exit exceptions.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class SocketClosedRemotelyError(Exception):
+    def __init__(self):
+        self.message = &#34;The socket was closed remotely by the other machine&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="Beta.Server.Shared_Code.Status"><code class="flex name class">
+<span>class <span class="ident">Status</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Enum class. Standardizes status codes for running objects (ones that inherit from thread or processes).</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class Status:
+    &#34;&#34;&#34;
+    Enum class. Standardizes status codes for running objects (ones that inherit from thread or processes).
+    &#34;&#34;&#34;
+    ShutDown = &#34;ShutDown&#34;
+    Shutting_Down = &#34;Shutting_Down&#34;
+    Running = &#34;Running&#34;
+    Error_Occurred = &#34;Error_Occurred&#34;</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="Beta.Server.Shared_Code.Status.Error_Occurred"><code class="name">var <span class="ident">Error_Occurred</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="Beta.Server.Shared_Code.Status.Running"><code class="name">var <span class="ident">Running</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="Beta.Server.Shared_Code.Status.ShutDown"><code class="name">var <span class="ident">ShutDown</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="Beta.Server.Shared_Code.Status.Shutting_Down"><code class="name">var <span class="ident">Shutting_Down</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+</dl>
+</dd>
+<dt id="Beta.Server.Shared_Code.Threadable"><code class="flex name class">
+<span>class <span class="ident">Threadable</span></span>
+</code></dt>
+<dd>
+<section class="desc"><p>A class that represents a thread of control.</p>
+<p>This class can be safely subclassed in a limited fashion. There are two ways
+to specify the activity: by passing a callable object to the constructor, or
+by overriding the run() method in a subclass.</p>
+<p>A class meant to standardize and facilitate the creation of classes meant to run on threads, in parallel.
+Meant to be inherited from.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class Threadable(threading.Thread):
+    def __init__(self):
+        &#34;&#34;&#34;
+        A class meant to standardize and facilitate the creation of classes meant to run on threads, in parallel.
+        Meant to be inherited from.
+        &#34;&#34;&#34;
+        super(Threadable, self).__init__()
+        self._status_Lock = threading.Lock()
+        self.status = Status.ShutDown
+
+    @property
+    def status(self):
+        &#34;&#34;&#34;
+        status Property getter. Safely returns the value of self._status.  
+
+        :return: The value of self._status.
+        &#34;&#34;&#34;
+        with self._status_Lock:
+            return self._status
+
+    @status.setter
+    def status(self, value):
+        &#34;&#34;&#34;
+        status Property setter. Safely sets the value of self._status.  
+
+        :param value: The value to which we set self._status  
+        :return: None
+        &#34;&#34;&#34;
+        with self._status_Lock:
+            self._status = value
+
+    def shutdown(self):
+        &#34;&#34;&#34;
+        Call to signal the thread to shutdown.  
+
+        :return: None
+        &#34;&#34;&#34;
+        self.status = Status.Shutting_Down
+
+    def _protected_run_maker(self, run_func):
+        &#34;&#34;&#34;
+        Takes a function and returns a function protected by a try statement.
+        Prevents the crash of the thread from affecting the rest of the threads running in parallel and the crash of the
+        program as a whole.  
+
+        :param run_func: The thread&#39;s unprotected run() method.  
+        :return: Protected run() method.
+        &#34;&#34;&#34;
+        self._unprotected_run_func = run_func
+
+        &#34;&#34;&#34;def protected_run():
+            self._unprotected_run_func()&#34;&#34;&#34;
+
+        def protected_run():
+            debug = False
+            if debug:
+                self._unprotected_run_func()
+            else:
+                try:
+                    self._unprotected_run_func()
+                except Exception as ex:
+                    self.status = Status.Error_Occurred
+                    raise ex
+
+        return protected_run
+
+    def start(self):
+        &#34;&#34;&#34;
+        Overrides the default start func, wrapping the run method with the self._protected_run_maker() method.  
+
+        :return: None
+        &#34;&#34;&#34;
+        self.run = self._protected_run_maker(self.run)
+        super(Threadable, self).start()
+
+    def run(self):
+        &#34;&#34;&#34;
+        Example Run method, meant to be overriden.
+        When overriding take care to mimic the function&#39;s structure so that a change in the self.status property
+        actually affects the running of the code. (as in make sure to check every once in a while if self.status isn&#39;t
+        equals to Status.Running and if it different, exit the loop and shutdown.
+        &#34;&#34;&#34;
+        self.status = Status.Running
+        while self.status == Status.Running:
+            pass  # do work
+        self._shutdown_procedure()
+
+    def _shutdown_procedure(self):
+        &#34;&#34;&#34;
+        Example _shutdown_procedure method, meant to be overriden.
+        Here you should go through the instances shutdown procedure as well as the shutdown of it&#39;s components should
+        they require such a thing.
+        Make sure you set the self.status to Status.ShutDown at the end, to mark that you have completed the necessary
+        shutdown procedures.
+        &#34;&#34;&#34;
+        self.status = Status.ShutDown</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>threading.Thread</li>
+</ul>
+<h3>Instance variables</h3>
+<dl>
+<dt id="Beta.Server.Shared_Code.Threadable.status"><code class="name">var <span class="ident">status</span></code></dt>
+<dd>
+<section class="desc"><p>status Property getter. Safely returns the value of self._status.
+</p>
+<p>:return: The value of self._status.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@property
+def status(self):
+    &#34;&#34;&#34;
+    status Property getter. Safely returns the value of self._status.  
+
+    :return: The value of self._status.
+    &#34;&#34;&#34;
+    with self._status_Lock:
+        return self._status</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="Beta.Server.Shared_Code.Threadable.run"><code class="name flex">
+<span>def <span class="ident">run</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Example Run method, meant to be overriden.
+When overriding take care to mimic the function's structure so that a change in the self.status property
+actually affects the running of the code. (as in make sure to check every once in a while if self.status isn't
+equals to Status.Running and if it different, exit the loop and shutdown.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def run(self):
+    &#34;&#34;&#34;
+    Example Run method, meant to be overriden.
+    When overriding take care to mimic the function&#39;s structure so that a change in the self.status property
+    actually affects the running of the code. (as in make sure to check every once in a while if self.status isn&#39;t
+    equals to Status.Running and if it different, exit the loop and shutdown.
+    &#34;&#34;&#34;
+    self.status = Status.Running
+    while self.status == Status.Running:
+        pass  # do work
+    self._shutdown_procedure()</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Shared_Code.Threadable.shutdown"><code class="name flex">
+<span>def <span class="ident">shutdown</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Call to signal the thread to shutdown.
+</p>
+<p>:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def shutdown(self):
+    &#34;&#34;&#34;
+    Call to signal the thread to shutdown.  
+
+    :return: None
+    &#34;&#34;&#34;
+    self.status = Status.Shutting_Down</code></pre>
+</details>
+</dd>
+<dt id="Beta.Server.Shared_Code.Threadable.start"><code class="name flex">
+<span>def <span class="ident">start</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Overrides the default start func, wrapping the run method with the self._protected_run_maker() method.
+</p>
+<p>:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def start(self):
+    &#34;&#34;&#34;
+    Overrides the default start func, wrapping the run method with the self._protected_run_maker() method.  
+
+    :return: None
+    &#34;&#34;&#34;
+    self.run = self._protected_run_maker(self.run)
+    super(Threadable, self).start()</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="Beta.Server" href="index.html">Beta.Server</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="Beta.Server.Shared_Code.bytes2str" href="#Beta.Server.Shared_Code.bytes2str">bytes2str</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.read_file" href="#Beta.Server.Shared_Code.read_file">read_file</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.receive_by_size" href="#Beta.Server.Shared_Code.receive_by_size">receive_by_size</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.send_by_size" href="#Beta.Server.Shared_Code.send_by_size">send_by_size</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.write_file" href="#Beta.Server.Shared_Code.write_file">write_file</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="Beta.Server.Shared_Code.ProtocolHandler" href="#Beta.Server.Shared_Code.ProtocolHandler">ProtocolHandler</a></code></h4>
+<ul class="">
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.Available_Environment_Initialization_Strings_Msg_Identifier" href="#Beta.Server.Shared_Code.ProtocolHandler.Available_Environment_Initialization_Strings_Msg_Identifier">Available_Environment_Initialization_Strings_Msg_Identifier</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.Close_Environment_Msg_Identifier" href="#Beta.Server.Shared_Code.ProtocolHandler.Close_Environment_Msg_Identifier">Close_Environment_Msg_Identifier</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.Error_Msg_Identifier" href="#Beta.Server.Shared_Code.ProtocolHandler.Error_Msg_Identifier">Error_Msg_Identifier</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.Exit_Msg_Identifier" href="#Beta.Server.Shared_Code.ProtocolHandler.Exit_Msg_Identifier">Exit_Msg_Identifier</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.Get_Menu_Msg_Identifier" href="#Beta.Server.Shared_Code.ProtocolHandler.Get_Menu_Msg_Identifier">Get_Menu_Msg_Identifier</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.Get_Post_Terminal_Step_Reward_Msg_Identifier" href="#Beta.Server.Shared_Code.ProtocolHandler.Get_Post_Terminal_Step_Reward_Msg_Identifier">Get_Post_Terminal_Step_Reward_Msg_Identifier</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.Get_Unprocessed_Screen_Msg_Identifier" href="#Beta.Server.Shared_Code.ProtocolHandler.Get_Unprocessed_Screen_Msg_Identifier">Get_Unprocessed_Screen_Msg_Identifier</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.MSG_IDENTIFIER_LEN" href="#Beta.Server.Shared_Code.ProtocolHandler.MSG_IDENTIFIER_LEN">MSG_IDENTIFIER_LEN</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.Menu_Msg_Identifier" href="#Beta.Server.Shared_Code.ProtocolHandler.Menu_Msg_Identifier">Menu_Msg_Identifier</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.New_Environment_Initiated_Msg_Identifier" href="#Beta.Server.Shared_Code.ProtocolHandler.New_Environment_Initiated_Msg_Identifier">New_Environment_Initiated_Msg_Identifier</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.New_Episode_Started_Msg_Identifier" href="#Beta.Server.Shared_Code.ProtocolHandler.New_Episode_Started_Msg_Identifier">New_Episode_Started_Msg_Identifier</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.Ping_Msg_Identifier" href="#Beta.Server.Shared_Code.ProtocolHandler.Ping_Msg_Identifier">Ping_Msg_Identifier</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.Post_Terminal_Step_Reward_Msg_Identifier" href="#Beta.Server.Shared_Code.ProtocolHandler.Post_Terminal_Step_Reward_Msg_Identifier">Post_Terminal_Step_Reward_Msg_Identifier</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.Request_Available_Environment_Initialization_Strings_Msg_Identifier" href="#Beta.Server.Shared_Code.ProtocolHandler.Request_Available_Environment_Initialization_Strings_Msg_Identifier">Request_Available_Environment_Initialization_Strings_Msg_Identifier</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.Send_Action_Make_Msg_Identifier" href="#Beta.Server.Shared_Code.ProtocolHandler.Send_Action_Make_Msg_Identifier">Send_Action_Make_Msg_Identifier</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.Setup_Environment_Msg_Identifier" href="#Beta.Server.Shared_Code.ProtocolHandler.Setup_Environment_Msg_Identifier">Setup_Environment_Msg_Identifier</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.Start_New_Episode_Msg_Identifier" href="#Beta.Server.Shared_Code.ProtocolHandler.Start_New_Episode_Msg_Identifier">Start_New_Episode_Msg_Identifier</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.State_Msg_Identifier" href="#Beta.Server.Shared_Code.ProtocolHandler.State_Msg_Identifier">State_Msg_Identifier</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.Unprocessed_Screen_Msg_Identifier" href="#Beta.Server.Shared_Code.ProtocolHandler.Unprocessed_Screen_Msg_Identifier">Unprocessed_Screen_Msg_Identifier</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.format_AEIS_msg" href="#Beta.Server.Shared_Code.ProtocolHandler.format_AEIS_msg">format_AEIS_msg</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.format_CLEN_msg" href="#Beta.Server.Shared_Code.ProtocolHandler.format_CLEN_msg">format_CLEN_msg</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.format_EROR_msg" href="#Beta.Server.Shared_Code.ProtocolHandler.format_EROR_msg">format_EROR_msg</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.format_EXIT_msg" href="#Beta.Server.Shared_Code.ProtocolHandler.format_EXIT_msg">format_EXIT_msg</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.format_GPTR_msg" href="#Beta.Server.Shared_Code.ProtocolHandler.format_GPTR_msg">format_GPTR_msg</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.format_GTMN_msg" href="#Beta.Server.Shared_Code.ProtocolHandler.format_GTMN_msg">format_GTMN_msg</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.format_GUPS_msg" href="#Beta.Server.Shared_Code.ProtocolHandler.format_GUPS_msg">format_GUPS_msg</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.format_MENU_msg" href="#Beta.Server.Shared_Code.ProtocolHandler.format_MENU_msg">format_MENU_msg</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.format_NEIN_msg" href="#Beta.Server.Shared_Code.ProtocolHandler.format_NEIN_msg">format_NEIN_msg</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.format_NEST_msg" href="#Beta.Server.Shared_Code.ProtocolHandler.format_NEST_msg">format_NEST_msg</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.format_PING_msg" href="#Beta.Server.Shared_Code.ProtocolHandler.format_PING_msg">format_PING_msg</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.format_PTSR_msg" href="#Beta.Server.Shared_Code.ProtocolHandler.format_PTSR_msg">format_PTSR_msg</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.format_RAES_msg" href="#Beta.Server.Shared_Code.ProtocolHandler.format_RAES_msg">format_RAES_msg</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.format_SA2M_msg" href="#Beta.Server.Shared_Code.ProtocolHandler.format_SA2M_msg">format_SA2M_msg</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.format_SEEN_msg" href="#Beta.Server.Shared_Code.ProtocolHandler.format_SEEN_msg">format_SEEN_msg</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.format_STAT_msg" href="#Beta.Server.Shared_Code.ProtocolHandler.format_STAT_msg">format_STAT_msg</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.format_STNE_msg" href="#Beta.Server.Shared_Code.ProtocolHandler.format_STNE_msg">format_STNE_msg</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.format_UPSC_msg" href="#Beta.Server.Shared_Code.ProtocolHandler.format_UPSC_msg">format_UPSC_msg</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.parse_AEIS_msg" href="#Beta.Server.Shared_Code.ProtocolHandler.parse_AEIS_msg">parse_AEIS_msg</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.parse_CLEN_msg" href="#Beta.Server.Shared_Code.ProtocolHandler.parse_CLEN_msg">parse_CLEN_msg</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.parse_EROR_msg" href="#Beta.Server.Shared_Code.ProtocolHandler.parse_EROR_msg">parse_EROR_msg</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.parse_EXIT_msg" href="#Beta.Server.Shared_Code.ProtocolHandler.parse_EXIT_msg">parse_EXIT_msg</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.parse_GPTR_msg" href="#Beta.Server.Shared_Code.ProtocolHandler.parse_GPTR_msg">parse_GPTR_msg</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.parse_GTMN_msg" href="#Beta.Server.Shared_Code.ProtocolHandler.parse_GTMN_msg">parse_GTMN_msg</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.parse_GUPS_msg" href="#Beta.Server.Shared_Code.ProtocolHandler.parse_GUPS_msg">parse_GUPS_msg</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.parse_MENU_msg" href="#Beta.Server.Shared_Code.ProtocolHandler.parse_MENU_msg">parse_MENU_msg</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.parse_NEIN_msg" href="#Beta.Server.Shared_Code.ProtocolHandler.parse_NEIN_msg">parse_NEIN_msg</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.parse_NEST_msg" href="#Beta.Server.Shared_Code.ProtocolHandler.parse_NEST_msg">parse_NEST_msg</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.parse_PING_msg" href="#Beta.Server.Shared_Code.ProtocolHandler.parse_PING_msg">parse_PING_msg</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.parse_PTSR_msg" href="#Beta.Server.Shared_Code.ProtocolHandler.parse_PTSR_msg">parse_PTSR_msg</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.parse_RAES_msg" href="#Beta.Server.Shared_Code.ProtocolHandler.parse_RAES_msg">parse_RAES_msg</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.parse_SA2M_msg" href="#Beta.Server.Shared_Code.ProtocolHandler.parse_SA2M_msg">parse_SA2M_msg</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.parse_SEEN_msg" href="#Beta.Server.Shared_Code.ProtocolHandler.parse_SEEN_msg">parse_SEEN_msg</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.parse_STAT_msg" href="#Beta.Server.Shared_Code.ProtocolHandler.parse_STAT_msg">parse_STAT_msg</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.parse_STNE_msg" href="#Beta.Server.Shared_Code.ProtocolHandler.parse_STNE_msg">parse_STNE_msg</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.ProtocolHandler.parse_UPSC_msg" href="#Beta.Server.Shared_Code.ProtocolHandler.parse_UPSC_msg">parse_UPSC_msg</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="Beta.Server.Shared_Code.SocketClosedRemotelyError" href="#Beta.Server.Shared_Code.SocketClosedRemotelyError">SocketClosedRemotelyError</a></code></h4>
+</li>
+<li>
+<h4><code><a title="Beta.Server.Shared_Code.Status" href="#Beta.Server.Shared_Code.Status">Status</a></code></h4>
+<ul class="">
+<li><code><a title="Beta.Server.Shared_Code.Status.Error_Occurred" href="#Beta.Server.Shared_Code.Status.Error_Occurred">Error_Occurred</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.Status.Running" href="#Beta.Server.Shared_Code.Status.Running">Running</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.Status.ShutDown" href="#Beta.Server.Shared_Code.Status.ShutDown">ShutDown</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.Status.Shutting_Down" href="#Beta.Server.Shared_Code.Status.Shutting_Down">Shutting_Down</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="Beta.Server.Shared_Code.Threadable" href="#Beta.Server.Shared_Code.Threadable">Threadable</a></code></h4>
+<ul class="">
+<li><code><a title="Beta.Server.Shared_Code.Threadable.run" href="#Beta.Server.Shared_Code.Threadable.run">run</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.Threadable.shutdown" href="#Beta.Server.Shared_Code.Threadable.shutdown">shutdown</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.Threadable.start" href="#Beta.Server.Shared_Code.Threadable.start">start</a></code></li>
+<li><code><a title="Beta.Server.Shared_Code.Threadable.status" href="#Beta.Server.Shared_Code.Threadable.status">status</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.6.2</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

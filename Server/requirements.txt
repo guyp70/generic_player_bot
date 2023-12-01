@@ -1,0 +1,9 @@
+numpy==1.16.1
+gym==0.10.9
+gym-super-mario-bros==7.2.3
+opencv_python==4.0.0.21
+Pillow==6.0.0
+pygame==1.9.1
+ple==0.0.1
+vizdoom==1.1.7
+

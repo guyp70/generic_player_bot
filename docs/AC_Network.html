@@ -1,0 +1,856 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.6.2" />
+<title>Beta.AC_Network API documentation</title>
+<meta name="description" content="" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase;cursor:pointer}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>Beta.AC_Network</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">import threading
+import numpy as np
+import tensorflow as tf
+from tensorflow.contrib.layers import conv2d, fully_connected
+from tensorflow.contrib.rnn import LSTMStateTuple
+from tensorflow.nn import elu, softmax
+import sys
+
+TRY_TENSORFLOW_GPU = False
+if TRY_TENSORFLOW_GPU:  # tries to use tensorflow-gpu
+    try:
+        from tensorflow.python.client import device_lib
+        print(device_lib.list_local_devices())
+        TENSORFLOW_GPU = True
+    except:
+        TENSORFLOW_GPU = False
+else:
+    TENSORFLOW_GPU = False
+
+if TENSORFLOW_GPU:
+    from tensorflow.python.keras.layers import CuDNNLSTM as LSTM
+else:
+    from tensorflow.python.keras.layers import LSTM
+
+
+def normalized_columns_initializer(std=1.0):
+    &#34;&#34;&#34;
+    Used to initialize weights for policy and value output layers  
+
+    :param std:  
+    :return: An array of normalized random values.
+    &#34;&#34;&#34;
+    def _initializer(shape, dtype=None, partition_info=None):
+        out = np.random.randn(*shape).astype(np.float32)
+        out *= std / np.sqrt(np.square(out).sum(axis=0, keepdims=True))
+        return tf.constant(out)
+    return _initializer
+
+
+class AC_Network(object):
+    ConvLayer1Params = {&#39;num_outputs&#39;: 16, &#39;kernel_size&#39;: 8, &#39;stride&#39;: 4, &#39;activation_fn&#39;: elu, &#39;padding&#39;: &#39;VALID&#39;}
+    ConvLayer2Params = {&#39;num_outputs&#39;: 32, &#39;kernel_size&#39;: 4, &#39;stride&#39;: 2, &#39;activation_fn&#39;: elu, &#39;padding&#39;: &#39;VALID&#39;}
+    FCLayerParams = {&#39;num_outputs&#39;: 256, &#39;activation_fn&#39;: elu}
+    LSTMParams = {&#39;units&#39;: 256, &#39;return_state&#39;: True, &#39;unit_forget_bias&#39;: True}  #, &#39;recurrent_activation&#39;: None}  # , &#39;state_is_tuple&#39;: True}
+    # When &#39;activation_fn&#39; is set to None it means to skip the activation function and return the product of the linear
+    # function. Likewise, when &#39;biases_initializer&#39; is set to None the biases&#39; initialization is skipped and the layer
+    # doesn&#39;t use biases.
+    ValueLayerParams = {&#39;num_outputs&#39;: 1, &#39;activation_fn&#39;: None,
+                        &#39;weights_initializer&#39;: normalized_columns_initializer(1.0), &#39;biases_initializer&#39;: None}
+    ClipNorm = 40.0
+    Beta = 0.01  # The Entropy coefficient in the combined loss function.
+    SmallValue = 1e-20  # added to the policy vector and used to make sure no value in the policy vector is 0 or Nan as
+    #                     log(0) does not exist. (log(0) is minus infinity)
+
+    def __init__(self, s_size, a_size, scope, trainer, train_network_scope=&#39;global&#39;):
+        &#34;&#34;&#34;
+        Defines the Actor critic network. Handles computing gradients.
+        Based heavily on Arthur Juliani&#39;s implementation posted on github and on MatheusMRFM&#39;s published on GitHub.
+        (https://medium.com/emergent-future/simple-reinforcement-learning-with-tensorflow-part-8-asynchronous-actor-critic-agents-a3c-c88f72a5e9f2
+        https://github.com/MatheusMRFM/A3C-LSTM-with-Tensorflow/blob/master/Network.py)  
+
+        :param s_size: Input size, essentially the size of pixels in the screen.(int)  
+        :param a_size: Action space. The number of actions possible in our environment. (int)  
+        :param scope: Tensorflow Varables scope. (string)  
+        :param trainer: A tf.trainer() instance  
+        :param train_network_scope: Tensorflow Varables scope of the global model. (string)
+        &#34;&#34;&#34;
+        self.scope = scope
+        self.train_network_scope = train_network_scope
+        self.a_size = a_size
+        self.s_size = s_size
+        self.trainer = trainer
+        # When &#39;biases_initializer&#39; is set to None the biases&#39; initialization is skipped and the layer doesn&#39;t use
+        # biases. By the way, we only initialized this dict here because we need to have a_size to initialize it.
+        self.PolicyLayerParams = {&#39;num_outputs&#39;: self.a_size, &#39;activation_fn&#39;: softmax,
+                                  &#39;weights_initializer&#39;: normalized_columns_initializer(0.01),
+                                  &#39;biases_initializer&#39;: None}
+
+        &#34;&#34;&#34;Build the networks graph&#34;&#34;&#34;
+        with tf.variable_scope(self.scope, reuse=tf.AUTO_REUSE):
+            # Here we define our network graph.
+            self.build_network()
+            # Here we focus on the loss functions and the training process happening in the threads. Not needed in the
+            # global network.
+            if self.scope != train_network_scope:
+                self.build_loss_function()
+
+    def build_network(self):
+        &#34;&#34;&#34;
+        Builds the actor critic network&#39;s graph  
+
+        :return: None
+        &#34;&#34;&#34;
+        # input layer
+        self.inputs = tf.placeholder(dtype=tf.float32, shape=[None, self.s_size], name=&#39;inputs&#39;)
+
+        # convolution layers
+        self.image_input = tf.reshape(self.inputs, [-1, 84, 84, 1])  # it&#39;s -1 in shape index 0 because we want to
+        #                                                              be capable of handling input of multiple
+        #                                                              images at once
+        self.conv1 = conv2d(inputs=self.image_input, **self.ConvLayer1Params)
+        self.conv2 = conv2d(inputs=self.conv1, **self.ConvLayer2Params)
+        # fully connected (dense) layer
+        self.fc = fully_connected(tf.layers.flatten(self.conv2), **self.FCLayerParams)
+
+        # LSTM Recurrent Network to deal with temporal differences
+        lstm_layer = LSTM(**self.LSTMParams)
+
+        # make init states to be used at time step 0
+        state_size = lstm_layer.cell.state_size  # the initial lstm state
+        h_init = tf.zeros(shape=[1, state_size[0]], dtype=tf.float32)
+        c_init = tf.zeros(shape=[1, state_size[1]], dtype=tf.float32)
+        self.init_context = LSTMStateTuple(c_init, h_init)
+
+        batch_size = tf.shape(self.inputs)[0]
+        max_time = 1  # since we pass the state manually from time step to time step, we let tensorflow believe it
+        #               is 1.
+        depth = self.FCLayerParams[&#39;num_outputs&#39;]  # the input to the lstm is the output of the fc layer, the num of
+        #                                            features given at each step is called the depth.
+        rnn_in = tf.reshape(self.fc, [batch_size, max_time, depth])  # adds a dimension for fc output.
+        #                                   We do that because the RNN call func takes input of shape
+        #                                   [batch_size, max_time, depth] when time_major=false.
+        #                                   Our batch size is the first value of the shape array describing
+        #                                   self.inputs.
+        # as for why the c and h are sized the way they are, read:
+        # https://www.quora.com/In-LSTM-how-do-you-figure-out-what-size-the-weights-are-supposed-to-be
+        h_in = tf.placeholder(dtype=tf.float32, shape=[None, depth], name=&#34;h_in&#34;)
+        c_in = tf.placeholder(dtype=tf.float32, shape=[None, depth], name=&#34;c_in&#34;)
+        self.context_in = h_in, c_in  # will be used to store the lstm state tuple
+        # debug_state = LSTMStateTuple(tf.zeros(shape=[batch_size, depth]), tf.zeros(shape=[batch_size, depth]))
+        self.lstm_outputs, h_out, c_out = lstm_layer(rnn_in, initial_state=LSTMStateTuple(c_in, h_in))
+        self.context_out = [h_out, c_out]
+
+        &#34;&#34;&#34;
+        # ---------------------DEBUG---------------------
+        with tf.control_dependencies([tf.print(&#34;lstm_outs:&#34;, tf.shape(lstm_outputs), &#34;lstm_c:&#34;, tf.shape(c_out),
+                                               &#34;lstm_h:&#34;, tf.shape(h_out), &#34;lstm_all:&#34;, 
+                                               tf.shape(lstm_outputs_state_tensor))]):
+            self.print = tf.constant(1, dtype=tf.int32)
+        # ---------------------DEBUG---------------------
+        &#34;&#34;&#34;
+
+        # output layers for policy and values estimations
+        self.policy = fully_connected(inputs=self.lstm_outputs, **self.PolicyLayerParams)
+        self.value = fully_connected(inputs=self.lstm_outputs, **self.ValueLayerParams)
+        # with tf.control_dependencies([tf.print(&#34;lstm: &#34;, lstm_outputs, &#34;\nc_out: &#34;, c_out, &#34;\nh_out: &#34;, h_out, output_stream=sys.stdout)]):
+        self.value = tf.squeeze(self.value)  # removes dimensions of size 1 from the shape of self.value
+
+        global_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, self.train_network_scope)
+        self.log_histograms_for_all_global_vars = tf.summary.merge([tf.summary.histogram(var.name, var)
+                                                                    for var in global_vars])
+        # activations = [self.value, self.policy]
+        # self.log_histograms_for_activations = tf.summary.merge([tf.summary.histogram(var.name, var)
+        #                                                            for var in activations])
+
+    def build_loss_function(self):
+        &#34;&#34;&#34;
+        Builds the graph to calculate the loss functions and enable the agents&#39; training capabilities  
+
+        :return: None
+        &#34;&#34;&#34;
+        self.actions = tf.placeholder(dtype=tf.int32, shape=[None], name=&#34;actions&#34;)
+        self.actions_one_hot = tf.one_hot(self.actions, self.a_size, dtype=tf.float32)  # i.e. considering:
+        #                                                           (actions = [0, 2], a_zise = 3) =&gt;
+        #                                                          actions_one_hot = [[1, 0, 0], [0, 0, 2]]
+        self.target_v = tf.placeholder(dtype=tf.float32, shape=[None], name=&#34;target_v&#34;)
+        self.advantages = tf.placeholder(dtype=tf.float32, shape=[None], name=&#34;advantages&#34;)
+
+        &#34;&#34;&#34;
+        # ---------------------DEBUG---------------------
+         with tf.control_dependencies([tf.print(&#34;TargetV:&#34;, self.target_v, &#34;\nValue: &#34;,
+                                               tf.reshape(self.value, shape=[-1]), &#34;\nAdvantage:&#34;,
+                                               self.advantages)]):
+        # use to check that all values make sense (in the basic doom scenario: targevt_v should be
+        # between ~-350 and 100, Value should oscillate between iterations and remain in the same range as the
+        # target_v and advantage should have a small abs value (-5&lt;adv&lt;5)
+        # ---------------------DEBUG---------------------
+        &#34;&#34;&#34;
+        &#34;&#34;&#34;with tf.control_dependencies([tf.print(&#34;advantages:&#34;, self.advantages,
+                                               &#34;targetv :&#34;,self.target_v,
+                                               &#34;advantages shape:&#34;, tf.shape(self.advantages),
+                                               &#34;\nlstm_out:&#34;, lstm_outputs[-1], &#34;\nh_out:&#34;, h_out[-1],
+                                               &#34;\nc_out:&#34;, c_out[-1], &#34;\nex:&#34;, tf.reduce_sum(self.policy * self.actions_one_hot, axis=1) * self.advantages)]):&#34;&#34;&#34;
+
+
+        # Loss functions (formulae in Arthur Juliani&#39;s article. The formulae are also explained at
+        # https://www.reddit.com/r/MachineLearning/comments/8hu2y5/d_a2ca3c_sharing_the_weights_and_same_loss/ )
+
+        # Value loss function.
+        self.value_loss = 0.5 * tf.reduce_sum(tf.square(self.target_v - self.value))
+
+        # sometimes, the vector will contain Nan or even strightforward 0 values. Since log(0) is undefined (minus
+        # infinity) we make all our values at least of self.SmallValue size. We assume the value is small enough not to
+        # harm our calculations while preventing the log from yielding errors.
+        log_policy = tf.log(tf.clip_by_value(self.policy, clip_value_min=self.SmallValue,
+                                             clip_value_max=1.0))
+
+        responsible_outputs = tf.reduce_sum(log_policy * self.actions_one_hot, axis=1)
+
+        self.entropy = - tf.reduce_sum(self.policy * log_policy)  # entropy is highest when agent is unsure i.e when it
+        #                                                           output an actions&#39; probabilities vector of the
+        #                                                           following fashion: [0.25, 0.25, 0.25, 0.25] or
+        #                                                                              [0.33, 0.33, 0.33].
+
+        # Policy loss function.
+        self.policy_loss = - tf.reduce_sum(responsible_outputs * self.advantages)
+
+        # The combined loss function. This is the function we will use to train the model.
+        self.loss = 0.5 * self.value_loss + self.policy_loss - self.entropy * self.Beta  # we use entropy to try and
+        #                                                                                  prevent our agent from
+        #                                                                                  becoming too sure of
+        #                                                                                  itself.
+        #                                                                                  It&#39;s basically used to
+        #                                                                                  encourage exploration.
+
+        # Get gradients from local network using local losses
+        local_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, self.scope)
+        self.gradients = [g for g, v in self.trainer.compute_gradients(self.loss, var_list=local_vars)]  # tf.gradients(self.loss, local_vars)  #
+        self.var_norms = tf.global_norm(local_vars)
+
+        &#34;&#34;&#34;
+        Compute the gradient with respect to the local weights and biases and apply them on the train network&#39;s vars 
+        weights and biases.
+        &#34;&#34;&#34;
+        # get vars from the global ACNN. (global ACNN = the train model)
+        global_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, self.train_network_scope)
+
+        # clipped_grads = self.gradients * clip_norm / max(global_norm, clip_norm)
+        clipped_grads, self.grad_norms = tf.clip_by_global_norm(self.gradients, clip_norm=self.ClipNorm)
+        #  pair clipped gradients with their matching vars in the global ACNN
+        grads_and_corresponding_global_vars = list(zip(clipped_grads, global_vars))
+        # Apply local gradients to global network
+        #with tf.control_dependencies([tf.print(&#34;Num of Vars:&#34;, len(global_vars), &#34;Vars Names:&#34;, [v.name for v in global_vars])]):
+        self.apply_grads = self.trainer.apply_gradients(grads_and_corresponding_global_vars,
+                                                   name=&#34;ApplyGradsOnGlobal&#34;)
+
+        self.log_histograms_for_all_global_vars = tf.summary.merge([tf.summary.histogram(var.name, var)
+                                                                    for var in global_vars])
+        &#34;&#34;&#34;
+        # ---------------------DEBUG---------------------
+        #with tf.control_dependencies([tf.print(&#34;\nConv1: &#34;, self.conv1[0], &#34;\nConv2: &#34;, self.conv2[0], &#34;\nFC: &#34;, self.fc[0],
+        #                                       &#34;\nlstm: &#34;, lstm_outputs[0], &#34;\nPolicy: &#34;, self.policy[0], &#34;\nValue: &#34;,
+        #                                       self.value[0], output_stream=sys.stdout)]):
+        #with tf.control_dependencies([tf.print(&#34;Grad Mean:&#34;, tf.reduce_mean([tf.reduce_mean(g) for g in self.gradients]),
+        #                                       &#34;Mean Global Vars:&#34;, tf.reduce_mean([tf.reduce_mean(g) for g in global_vars]))]):
+        before = [gv[0] for gv in global_vars]
+
+        with tf.control_dependencies([self.apply_grads]):
+            with tf.control_dependencies([tf.print(&#34;TargetV:&#34;, self.target_v, &#34;\nValue: &#34;,
+                                                   self.value, &#34;\nAdvantage:&#34;, self.advantages, &#34;\nResponsible Outputs:&#34;,
+                                                   self.responsible_outputs, &#34;\nLoss: &#34;, self.loss, &#34;\nValue Loss: &#34;
+                    , self.value_loss, &#34;\nPolicy Loss: &#34;, self.policy_loss), tf.print(&#34;\nConv1: &#34;, self.conv1[0], &#34;\nConv2: &#34;, self.conv2[0], &#34;\nFC: &#34;, self.fc[0],
+                                               &#34;\nlstm: &#34;, lstm_outputs[:,0], &#34;\nPolicy: &#34;, self.policy[:, 0], &#34;\nValue: &#34;,
+                                               self.value[0], output_stream=sys.stdout)]):
+                self.apply_grads = tf.print(&#34;Global Vars Update: &#34;, [[&#34;Var: &#34;, before.name, &#34;Before Update: &#34;,
+                                                                      before, *[&#34;After Update: &#34;, after[0],
+                                                                                &#34;Clipped Grad: &#34;, clip_g[0],
+                                                                                &#34;Real Grad:&#34;, real_g[0]]]
+                                                                     for before, after, clip_g, real_g
+                                                                     in zip(before, global_vars, clipped_grads,
+                                                                     self.gradients)][5])
+        # ---------------------DEBUG---------------------
+        &#34;&#34;&#34;</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="Beta.AC_Network.normalized_columns_initializer"><code class="name flex">
+<span>def <span class="ident">normalized_columns_initializer</span></span>(<span>std=1.0)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Used to initialize weights for policy and value output layers
+</p>
+<p>:param std:<br>
+:return: An array of normalized random values.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def normalized_columns_initializer(std=1.0):
+    &#34;&#34;&#34;
+    Used to initialize weights for policy and value output layers  
+
+    :param std:  
+    :return: An array of normalized random values.
+    &#34;&#34;&#34;
+    def _initializer(shape, dtype=None, partition_info=None):
+        out = np.random.randn(*shape).astype(np.float32)
+        out *= std / np.sqrt(np.square(out).sum(axis=0, keepdims=True))
+        return tf.constant(out)
+    return _initializer</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="Beta.AC_Network.AC_Network"><code class="flex name class">
+<span>class <span class="ident">AC_Network</span></span>
+<span>(</span><span>s_size, a_size, scope, trainer, train_network_scope='global')</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Defines the Actor critic network. Handles computing gradients.
+Based heavily on Arthur Juliani's implementation posted on github and on MatheusMRFM's published on GitHub.
+(<a href="https://medium.com/emergent-future/simple-reinforcement-learning-with-tensorflow-part-8-asynchronous-actor-critic-agents-a3c-c88f72a5e9f2">https://medium.com/emergent-future/simple-reinforcement-learning-with-tensorflow-part-8-asynchronous-actor-critic-agents-a3c-c88f72a5e9f2</a>
+<a href="https://github.com/MatheusMRFM/A3C-LSTM-with-Tensorflow/blob/master/Network.py">https://github.com/MatheusMRFM/A3C-LSTM-with-Tensorflow/blob/master/Network.py</a>)
+</p>
+<p>:param s_size: Input size, essentially the size of pixels in the screen.(int)<br>
+:param a_size: Action space. The number of actions possible in our environment. (int)<br>
+:param scope: Tensorflow Varables scope. (string)<br>
+:param trainer: A tf.trainer() instance<br>
+:param train_network_scope: Tensorflow Varables scope of the global model. (string)</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class AC_Network(object):
+    ConvLayer1Params = {&#39;num_outputs&#39;: 16, &#39;kernel_size&#39;: 8, &#39;stride&#39;: 4, &#39;activation_fn&#39;: elu, &#39;padding&#39;: &#39;VALID&#39;}
+    ConvLayer2Params = {&#39;num_outputs&#39;: 32, &#39;kernel_size&#39;: 4, &#39;stride&#39;: 2, &#39;activation_fn&#39;: elu, &#39;padding&#39;: &#39;VALID&#39;}
+    FCLayerParams = {&#39;num_outputs&#39;: 256, &#39;activation_fn&#39;: elu}
+    LSTMParams = {&#39;units&#39;: 256, &#39;return_state&#39;: True, &#39;unit_forget_bias&#39;: True}  #, &#39;recurrent_activation&#39;: None}  # , &#39;state_is_tuple&#39;: True}
+    # When &#39;activation_fn&#39; is set to None it means to skip the activation function and return the product of the linear
+    # function. Likewise, when &#39;biases_initializer&#39; is set to None the biases&#39; initialization is skipped and the layer
+    # doesn&#39;t use biases.
+    ValueLayerParams = {&#39;num_outputs&#39;: 1, &#39;activation_fn&#39;: None,
+                        &#39;weights_initializer&#39;: normalized_columns_initializer(1.0), &#39;biases_initializer&#39;: None}
+    ClipNorm = 40.0
+    Beta = 0.01  # The Entropy coefficient in the combined loss function.
+    SmallValue = 1e-20  # added to the policy vector and used to make sure no value in the policy vector is 0 or Nan as
+    #                     log(0) does not exist. (log(0) is minus infinity)
+
+    def __init__(self, s_size, a_size, scope, trainer, train_network_scope=&#39;global&#39;):
+        &#34;&#34;&#34;
+        Defines the Actor critic network. Handles computing gradients.
+        Based heavily on Arthur Juliani&#39;s implementation posted on github and on MatheusMRFM&#39;s published on GitHub.
+        (https://medium.com/emergent-future/simple-reinforcement-learning-with-tensorflow-part-8-asynchronous-actor-critic-agents-a3c-c88f72a5e9f2
+        https://github.com/MatheusMRFM/A3C-LSTM-with-Tensorflow/blob/master/Network.py)  
+
+        :param s_size: Input size, essentially the size of pixels in the screen.(int)  
+        :param a_size: Action space. The number of actions possible in our environment. (int)  
+        :param scope: Tensorflow Varables scope. (string)  
+        :param trainer: A tf.trainer() instance  
+        :param train_network_scope: Tensorflow Varables scope of the global model. (string)
+        &#34;&#34;&#34;
+        self.scope = scope
+        self.train_network_scope = train_network_scope
+        self.a_size = a_size
+        self.s_size = s_size
+        self.trainer = trainer
+        # When &#39;biases_initializer&#39; is set to None the biases&#39; initialization is skipped and the layer doesn&#39;t use
+        # biases. By the way, we only initialized this dict here because we need to have a_size to initialize it.
+        self.PolicyLayerParams = {&#39;num_outputs&#39;: self.a_size, &#39;activation_fn&#39;: softmax,
+                                  &#39;weights_initializer&#39;: normalized_columns_initializer(0.01),
+                                  &#39;biases_initializer&#39;: None}
+
+        &#34;&#34;&#34;Build the networks graph&#34;&#34;&#34;
+        with tf.variable_scope(self.scope, reuse=tf.AUTO_REUSE):
+            # Here we define our network graph.
+            self.build_network()
+            # Here we focus on the loss functions and the training process happening in the threads. Not needed in the
+            # global network.
+            if self.scope != train_network_scope:
+                self.build_loss_function()
+
+    def build_network(self):
+        &#34;&#34;&#34;
+        Builds the actor critic network&#39;s graph  
+
+        :return: None
+        &#34;&#34;&#34;
+        # input layer
+        self.inputs = tf.placeholder(dtype=tf.float32, shape=[None, self.s_size], name=&#39;inputs&#39;)
+
+        # convolution layers
+        self.image_input = tf.reshape(self.inputs, [-1, 84, 84, 1])  # it&#39;s -1 in shape index 0 because we want to
+        #                                                              be capable of handling input of multiple
+        #                                                              images at once
+        self.conv1 = conv2d(inputs=self.image_input, **self.ConvLayer1Params)
+        self.conv2 = conv2d(inputs=self.conv1, **self.ConvLayer2Params)
+        # fully connected (dense) layer
+        self.fc = fully_connected(tf.layers.flatten(self.conv2), **self.FCLayerParams)
+
+        # LSTM Recurrent Network to deal with temporal differences
+        lstm_layer = LSTM(**self.LSTMParams)
+
+        # make init states to be used at time step 0
+        state_size = lstm_layer.cell.state_size  # the initial lstm state
+        h_init = tf.zeros(shape=[1, state_size[0]], dtype=tf.float32)
+        c_init = tf.zeros(shape=[1, state_size[1]], dtype=tf.float32)
+        self.init_context = LSTMStateTuple(c_init, h_init)
+
+        batch_size = tf.shape(self.inputs)[0]
+        max_time = 1  # since we pass the state manually from time step to time step, we let tensorflow believe it
+        #               is 1.
+        depth = self.FCLayerParams[&#39;num_outputs&#39;]  # the input to the lstm is the output of the fc layer, the num of
+        #                                            features given at each step is called the depth.
+        rnn_in = tf.reshape(self.fc, [batch_size, max_time, depth])  # adds a dimension for fc output.
+        #                                   We do that because the RNN call func takes input of shape
+        #                                   [batch_size, max_time, depth] when time_major=false.
+        #                                   Our batch size is the first value of the shape array describing
+        #                                   self.inputs.
+        # as for why the c and h are sized the way they are, read:
+        # https://www.quora.com/In-LSTM-how-do-you-figure-out-what-size-the-weights-are-supposed-to-be
+        h_in = tf.placeholder(dtype=tf.float32, shape=[None, depth], name=&#34;h_in&#34;)
+        c_in = tf.placeholder(dtype=tf.float32, shape=[None, depth], name=&#34;c_in&#34;)
+        self.context_in = h_in, c_in  # will be used to store the lstm state tuple
+        # debug_state = LSTMStateTuple(tf.zeros(shape=[batch_size, depth]), tf.zeros(shape=[batch_size, depth]))
+        self.lstm_outputs, h_out, c_out = lstm_layer(rnn_in, initial_state=LSTMStateTuple(c_in, h_in))
+        self.context_out = [h_out, c_out]
+
+        &#34;&#34;&#34;
+        # ---------------------DEBUG---------------------
+        with tf.control_dependencies([tf.print(&#34;lstm_outs:&#34;, tf.shape(lstm_outputs), &#34;lstm_c:&#34;, tf.shape(c_out),
+                                               &#34;lstm_h:&#34;, tf.shape(h_out), &#34;lstm_all:&#34;, 
+                                               tf.shape(lstm_outputs_state_tensor))]):
+            self.print = tf.constant(1, dtype=tf.int32)
+        # ---------------------DEBUG---------------------
+        &#34;&#34;&#34;
+
+        # output layers for policy and values estimations
+        self.policy = fully_connected(inputs=self.lstm_outputs, **self.PolicyLayerParams)
+        self.value = fully_connected(inputs=self.lstm_outputs, **self.ValueLayerParams)
+        # with tf.control_dependencies([tf.print(&#34;lstm: &#34;, lstm_outputs, &#34;\nc_out: &#34;, c_out, &#34;\nh_out: &#34;, h_out, output_stream=sys.stdout)]):
+        self.value = tf.squeeze(self.value)  # removes dimensions of size 1 from the shape of self.value
+
+        global_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, self.train_network_scope)
+        self.log_histograms_for_all_global_vars = tf.summary.merge([tf.summary.histogram(var.name, var)
+                                                                    for var in global_vars])
+        # activations = [self.value, self.policy]
+        # self.log_histograms_for_activations = tf.summary.merge([tf.summary.histogram(var.name, var)
+        #                                                            for var in activations])
+
+    def build_loss_function(self):
+        &#34;&#34;&#34;
+        Builds the graph to calculate the loss functions and enable the agents&#39; training capabilities  
+
+        :return: None
+        &#34;&#34;&#34;
+        self.actions = tf.placeholder(dtype=tf.int32, shape=[None], name=&#34;actions&#34;)
+        self.actions_one_hot = tf.one_hot(self.actions, self.a_size, dtype=tf.float32)  # i.e. considering:
+        #                                                           (actions = [0, 2], a_zise = 3) =&gt;
+        #                                                          actions_one_hot = [[1, 0, 0], [0, 0, 2]]
+        self.target_v = tf.placeholder(dtype=tf.float32, shape=[None], name=&#34;target_v&#34;)
+        self.advantages = tf.placeholder(dtype=tf.float32, shape=[None], name=&#34;advantages&#34;)
+
+        &#34;&#34;&#34;
+        # ---------------------DEBUG---------------------
+         with tf.control_dependencies([tf.print(&#34;TargetV:&#34;, self.target_v, &#34;\nValue: &#34;,
+                                               tf.reshape(self.value, shape=[-1]), &#34;\nAdvantage:&#34;,
+                                               self.advantages)]):
+        # use to check that all values make sense (in the basic doom scenario: targevt_v should be
+        # between ~-350 and 100, Value should oscillate between iterations and remain in the same range as the
+        # target_v and advantage should have a small abs value (-5&lt;adv&lt;5)
+        # ---------------------DEBUG---------------------
+        &#34;&#34;&#34;
+        &#34;&#34;&#34;with tf.control_dependencies([tf.print(&#34;advantages:&#34;, self.advantages,
+                                               &#34;targetv :&#34;,self.target_v,
+                                               &#34;advantages shape:&#34;, tf.shape(self.advantages),
+                                               &#34;\nlstm_out:&#34;, lstm_outputs[-1], &#34;\nh_out:&#34;, h_out[-1],
+                                               &#34;\nc_out:&#34;, c_out[-1], &#34;\nex:&#34;, tf.reduce_sum(self.policy * self.actions_one_hot, axis=1) * self.advantages)]):&#34;&#34;&#34;
+
+
+        # Loss functions (formulae in Arthur Juliani&#39;s article. The formulae are also explained at
+        # https://www.reddit.com/r/MachineLearning/comments/8hu2y5/d_a2ca3c_sharing_the_weights_and_same_loss/ )
+
+        # Value loss function.
+        self.value_loss = 0.5 * tf.reduce_sum(tf.square(self.target_v - self.value))
+
+        # sometimes, the vector will contain Nan or even strightforward 0 values. Since log(0) is undefined (minus
+        # infinity) we make all our values at least of self.SmallValue size. We assume the value is small enough not to
+        # harm our calculations while preventing the log from yielding errors.
+        log_policy = tf.log(tf.clip_by_value(self.policy, clip_value_min=self.SmallValue,
+                                             clip_value_max=1.0))
+
+        responsible_outputs = tf.reduce_sum(log_policy * self.actions_one_hot, axis=1)
+
+        self.entropy = - tf.reduce_sum(self.policy * log_policy)  # entropy is highest when agent is unsure i.e when it
+        #                                                           output an actions&#39; probabilities vector of the
+        #                                                           following fashion: [0.25, 0.25, 0.25, 0.25] or
+        #                                                                              [0.33, 0.33, 0.33].
+
+        # Policy loss function.
+        self.policy_loss = - tf.reduce_sum(responsible_outputs * self.advantages)
+
+        # The combined loss function. This is the function we will use to train the model.
+        self.loss = 0.5 * self.value_loss + self.policy_loss - self.entropy * self.Beta  # we use entropy to try and
+        #                                                                                  prevent our agent from
+        #                                                                                  becoming too sure of
+        #                                                                                  itself.
+        #                                                                                  It&#39;s basically used to
+        #                                                                                  encourage exploration.
+
+        # Get gradients from local network using local losses
+        local_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, self.scope)
+        self.gradients = [g for g, v in self.trainer.compute_gradients(self.loss, var_list=local_vars)]  # tf.gradients(self.loss, local_vars)  #
+        self.var_norms = tf.global_norm(local_vars)
+
+        &#34;&#34;&#34;
+        Compute the gradient with respect to the local weights and biases and apply them on the train network&#39;s vars 
+        weights and biases.
+        &#34;&#34;&#34;
+        # get vars from the global ACNN. (global ACNN = the train model)
+        global_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, self.train_network_scope)
+
+        # clipped_grads = self.gradients * clip_norm / max(global_norm, clip_norm)
+        clipped_grads, self.grad_norms = tf.clip_by_global_norm(self.gradients, clip_norm=self.ClipNorm)
+        #  pair clipped gradients with their matching vars in the global ACNN
+        grads_and_corresponding_global_vars = list(zip(clipped_grads, global_vars))
+        # Apply local gradients to global network
+        #with tf.control_dependencies([tf.print(&#34;Num of Vars:&#34;, len(global_vars), &#34;Vars Names:&#34;, [v.name for v in global_vars])]):
+        self.apply_grads = self.trainer.apply_gradients(grads_and_corresponding_global_vars,
+                                                   name=&#34;ApplyGradsOnGlobal&#34;)
+
+        self.log_histograms_for_all_global_vars = tf.summary.merge([tf.summary.histogram(var.name, var)
+                                                                    for var in global_vars])
+        &#34;&#34;&#34;
+        # ---------------------DEBUG---------------------
+        #with tf.control_dependencies([tf.print(&#34;\nConv1: &#34;, self.conv1[0], &#34;\nConv2: &#34;, self.conv2[0], &#34;\nFC: &#34;, self.fc[0],
+        #                                       &#34;\nlstm: &#34;, lstm_outputs[0], &#34;\nPolicy: &#34;, self.policy[0], &#34;\nValue: &#34;,
+        #                                       self.value[0], output_stream=sys.stdout)]):
+        #with tf.control_dependencies([tf.print(&#34;Grad Mean:&#34;, tf.reduce_mean([tf.reduce_mean(g) for g in self.gradients]),
+        #                                       &#34;Mean Global Vars:&#34;, tf.reduce_mean([tf.reduce_mean(g) for g in global_vars]))]):
+        before = [gv[0] for gv in global_vars]
+
+        with tf.control_dependencies([self.apply_grads]):
+            with tf.control_dependencies([tf.print(&#34;TargetV:&#34;, self.target_v, &#34;\nValue: &#34;,
+                                                   self.value, &#34;\nAdvantage:&#34;, self.advantages, &#34;\nResponsible Outputs:&#34;,
+                                                   self.responsible_outputs, &#34;\nLoss: &#34;, self.loss, &#34;\nValue Loss: &#34;
+                    , self.value_loss, &#34;\nPolicy Loss: &#34;, self.policy_loss), tf.print(&#34;\nConv1: &#34;, self.conv1[0], &#34;\nConv2: &#34;, self.conv2[0], &#34;\nFC: &#34;, self.fc[0],
+                                               &#34;\nlstm: &#34;, lstm_outputs[:,0], &#34;\nPolicy: &#34;, self.policy[:, 0], &#34;\nValue: &#34;,
+                                               self.value[0], output_stream=sys.stdout)]):
+                self.apply_grads = tf.print(&#34;Global Vars Update: &#34;, [[&#34;Var: &#34;, before.name, &#34;Before Update: &#34;,
+                                                                      before, *[&#34;After Update: &#34;, after[0],
+                                                                                &#34;Clipped Grad: &#34;, clip_g[0],
+                                                                                &#34;Real Grad:&#34;, real_g[0]]]
+                                                                     for before, after, clip_g, real_g
+                                                                     in zip(before, global_vars, clipped_grads,
+                                                                     self.gradients)][5])
+        # ---------------------DEBUG---------------------
+        &#34;&#34;&#34;</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="Beta.AC_Network.AC_Network.Beta"><code class="name">var <span class="ident">Beta</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="Beta.AC_Network.AC_Network.ClipNorm"><code class="name">var <span class="ident">ClipNorm</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="Beta.AC_Network.AC_Network.ConvLayer1Params"><code class="name">var <span class="ident">ConvLayer1Params</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="Beta.AC_Network.AC_Network.ConvLayer2Params"><code class="name">var <span class="ident">ConvLayer2Params</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="Beta.AC_Network.AC_Network.FCLayerParams"><code class="name">var <span class="ident">FCLayerParams</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="Beta.AC_Network.AC_Network.LSTMParams"><code class="name">var <span class="ident">LSTMParams</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="Beta.AC_Network.AC_Network.SmallValue"><code class="name">var <span class="ident">SmallValue</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="Beta.AC_Network.AC_Network.ValueLayerParams"><code class="name">var <span class="ident">ValueLayerParams</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+</dl>
+<h3>Instance variables</h3>
+<dl>
+<dt id="Beta.AC_Network.AC_Network.PolicyLayerParams"><code class="name">var <span class="ident">PolicyLayerParams</span></code></dt>
+<dd>
+<section class="desc"><p>Build the networks graph</p></section>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="Beta.AC_Network.AC_Network.build_loss_function"><code class="name flex">
+<span>def <span class="ident">build_loss_function</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Builds the graph to calculate the loss functions and enable the agents' training capabilities
+</p>
+<p>:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def build_loss_function(self):
+    &#34;&#34;&#34;
+    Builds the graph to calculate the loss functions and enable the agents&#39; training capabilities  
+
+    :return: None
+    &#34;&#34;&#34;
+    self.actions = tf.placeholder(dtype=tf.int32, shape=[None], name=&#34;actions&#34;)
+    self.actions_one_hot = tf.one_hot(self.actions, self.a_size, dtype=tf.float32)  # i.e. considering:
+    #                                                           (actions = [0, 2], a_zise = 3) =&gt;
+    #                                                          actions_one_hot = [[1, 0, 0], [0, 0, 2]]
+    self.target_v = tf.placeholder(dtype=tf.float32, shape=[None], name=&#34;target_v&#34;)
+    self.advantages = tf.placeholder(dtype=tf.float32, shape=[None], name=&#34;advantages&#34;)
+
+    &#34;&#34;&#34;
+    # ---------------------DEBUG---------------------
+     with tf.control_dependencies([tf.print(&#34;TargetV:&#34;, self.target_v, &#34;\nValue: &#34;,
+                                           tf.reshape(self.value, shape=[-1]), &#34;\nAdvantage:&#34;,
+                                           self.advantages)]):
+    # use to check that all values make sense (in the basic doom scenario: targevt_v should be
+    # between ~-350 and 100, Value should oscillate between iterations and remain in the same range as the
+    # target_v and advantage should have a small abs value (-5&lt;adv&lt;5)
+    # ---------------------DEBUG---------------------
+    &#34;&#34;&#34;
+    &#34;&#34;&#34;with tf.control_dependencies([tf.print(&#34;advantages:&#34;, self.advantages,
+                                           &#34;targetv :&#34;,self.target_v,
+                                           &#34;advantages shape:&#34;, tf.shape(self.advantages),
+                                           &#34;\nlstm_out:&#34;, lstm_outputs[-1], &#34;\nh_out:&#34;, h_out[-1],
+                                           &#34;\nc_out:&#34;, c_out[-1], &#34;\nex:&#34;, tf.reduce_sum(self.policy * self.actions_one_hot, axis=1) * self.advantages)]):&#34;&#34;&#34;
+
+
+    # Loss functions (formulae in Arthur Juliani&#39;s article. The formulae are also explained at
+    # https://www.reddit.com/r/MachineLearning/comments/8hu2y5/d_a2ca3c_sharing_the_weights_and_same_loss/ )
+
+    # Value loss function.
+    self.value_loss = 0.5 * tf.reduce_sum(tf.square(self.target_v - self.value))
+
+    # sometimes, the vector will contain Nan or even strightforward 0 values. Since log(0) is undefined (minus
+    # infinity) we make all our values at least of self.SmallValue size. We assume the value is small enough not to
+    # harm our calculations while preventing the log from yielding errors.
+    log_policy = tf.log(tf.clip_by_value(self.policy, clip_value_min=self.SmallValue,
+                                         clip_value_max=1.0))
+
+    responsible_outputs = tf.reduce_sum(log_policy * self.actions_one_hot, axis=1)
+
+    self.entropy = - tf.reduce_sum(self.policy * log_policy)  # entropy is highest when agent is unsure i.e when it
+    #                                                           output an actions&#39; probabilities vector of the
+    #                                                           following fashion: [0.25, 0.25, 0.25, 0.25] or
+    #                                                                              [0.33, 0.33, 0.33].
+
+    # Policy loss function.
+    self.policy_loss = - tf.reduce_sum(responsible_outputs * self.advantages)
+
+    # The combined loss function. This is the function we will use to train the model.
+    self.loss = 0.5 * self.value_loss + self.policy_loss - self.entropy * self.Beta  # we use entropy to try and
+    #                                                                                  prevent our agent from
+    #                                                                                  becoming too sure of
+    #                                                                                  itself.
+    #                                                                                  It&#39;s basically used to
+    #                                                                                  encourage exploration.
+
+    # Get gradients from local network using local losses
+    local_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, self.scope)
+    self.gradients = [g for g, v in self.trainer.compute_gradients(self.loss, var_list=local_vars)]  # tf.gradients(self.loss, local_vars)  #
+    self.var_norms = tf.global_norm(local_vars)
+
+    &#34;&#34;&#34;
+    Compute the gradient with respect to the local weights and biases and apply them on the train network&#39;s vars 
+    weights and biases.
+    &#34;&#34;&#34;
+    # get vars from the global ACNN. (global ACNN = the train model)
+    global_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, self.train_network_scope)
+
+    # clipped_grads = self.gradients * clip_norm / max(global_norm, clip_norm)
+    clipped_grads, self.grad_norms = tf.clip_by_global_norm(self.gradients, clip_norm=self.ClipNorm)
+    #  pair clipped gradients with their matching vars in the global ACNN
+    grads_and_corresponding_global_vars = list(zip(clipped_grads, global_vars))
+    # Apply local gradients to global network
+    #with tf.control_dependencies([tf.print(&#34;Num of Vars:&#34;, len(global_vars), &#34;Vars Names:&#34;, [v.name for v in global_vars])]):
+    self.apply_grads = self.trainer.apply_gradients(grads_and_corresponding_global_vars,
+                                               name=&#34;ApplyGradsOnGlobal&#34;)
+
+    self.log_histograms_for_all_global_vars = tf.summary.merge([tf.summary.histogram(var.name, var)
+                                                                for var in global_vars])
+    &#34;&#34;&#34;
+    # ---------------------DEBUG---------------------
+    #with tf.control_dependencies([tf.print(&#34;\nConv1: &#34;, self.conv1[0], &#34;\nConv2: &#34;, self.conv2[0], &#34;\nFC: &#34;, self.fc[0],
+    #                                       &#34;\nlstm: &#34;, lstm_outputs[0], &#34;\nPolicy: &#34;, self.policy[0], &#34;\nValue: &#34;,
+    #                                       self.value[0], output_stream=sys.stdout)]):
+    #with tf.control_dependencies([tf.print(&#34;Grad Mean:&#34;, tf.reduce_mean([tf.reduce_mean(g) for g in self.gradients]),
+    #                                       &#34;Mean Global Vars:&#34;, tf.reduce_mean([tf.reduce_mean(g) for g in global_vars]))]):
+    before = [gv[0] for gv in global_vars]
+
+    with tf.control_dependencies([self.apply_grads]):
+        with tf.control_dependencies([tf.print(&#34;TargetV:&#34;, self.target_v, &#34;\nValue: &#34;,
+                                               self.value, &#34;\nAdvantage:&#34;, self.advantages, &#34;\nResponsible Outputs:&#34;,
+                                               self.responsible_outputs, &#34;\nLoss: &#34;, self.loss, &#34;\nValue Loss: &#34;
+                , self.value_loss, &#34;\nPolicy Loss: &#34;, self.policy_loss), tf.print(&#34;\nConv1: &#34;, self.conv1[0], &#34;\nConv2: &#34;, self.conv2[0], &#34;\nFC: &#34;, self.fc[0],
+                                           &#34;\nlstm: &#34;, lstm_outputs[:,0], &#34;\nPolicy: &#34;, self.policy[:, 0], &#34;\nValue: &#34;,
+                                           self.value[0], output_stream=sys.stdout)]):
+            self.apply_grads = tf.print(&#34;Global Vars Update: &#34;, [[&#34;Var: &#34;, before.name, &#34;Before Update: &#34;,
+                                                                  before, *[&#34;After Update: &#34;, after[0],
+                                                                            &#34;Clipped Grad: &#34;, clip_g[0],
+                                                                            &#34;Real Grad:&#34;, real_g[0]]]
+                                                                 for before, after, clip_g, real_g
+                                                                 in zip(before, global_vars, clipped_grads,
+                                                                 self.gradients)][5])
+    # ---------------------DEBUG---------------------
+    &#34;&#34;&#34;</code></pre>
+</details>
+</dd>
+<dt id="Beta.AC_Network.AC_Network.build_network"><code class="name flex">
+<span>def <span class="ident">build_network</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Builds the actor critic network's graph
+</p>
+<p>:return: None</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def build_network(self):
+    &#34;&#34;&#34;
+    Builds the actor critic network&#39;s graph  
+
+    :return: None
+    &#34;&#34;&#34;
+    # input layer
+    self.inputs = tf.placeholder(dtype=tf.float32, shape=[None, self.s_size], name=&#39;inputs&#39;)
+
+    # convolution layers
+    self.image_input = tf.reshape(self.inputs, [-1, 84, 84, 1])  # it&#39;s -1 in shape index 0 because we want to
+    #                                                              be capable of handling input of multiple
+    #                                                              images at once
+    self.conv1 = conv2d(inputs=self.image_input, **self.ConvLayer1Params)
+    self.conv2 = conv2d(inputs=self.conv1, **self.ConvLayer2Params)
+    # fully connected (dense) layer
+    self.fc = fully_connected(tf.layers.flatten(self.conv2), **self.FCLayerParams)
+
+    # LSTM Recurrent Network to deal with temporal differences
+    lstm_layer = LSTM(**self.LSTMParams)
+
+    # make init states to be used at time step 0
+    state_size = lstm_layer.cell.state_size  # the initial lstm state
+    h_init = tf.zeros(shape=[1, state_size[0]], dtype=tf.float32)
+    c_init = tf.zeros(shape=[1, state_size[1]], dtype=tf.float32)
+    self.init_context = LSTMStateTuple(c_init, h_init)
+
+    batch_size = tf.shape(self.inputs)[0]
+    max_time = 1  # since we pass the state manually from time step to time step, we let tensorflow believe it
+    #               is 1.
+    depth = self.FCLayerParams[&#39;num_outputs&#39;]  # the input to the lstm is the output of the fc layer, the num of
+    #                                            features given at each step is called the depth.
+    rnn_in = tf.reshape(self.fc, [batch_size, max_time, depth])  # adds a dimension for fc output.
+    #                                   We do that because the RNN call func takes input of shape
+    #                                   [batch_size, max_time, depth] when time_major=false.
+    #                                   Our batch size is the first value of the shape array describing
+    #                                   self.inputs.
+    # as for why the c and h are sized the way they are, read:
+    # https://www.quora.com/In-LSTM-how-do-you-figure-out-what-size-the-weights-are-supposed-to-be
+    h_in = tf.placeholder(dtype=tf.float32, shape=[None, depth], name=&#34;h_in&#34;)
+    c_in = tf.placeholder(dtype=tf.float32, shape=[None, depth], name=&#34;c_in&#34;)
+    self.context_in = h_in, c_in  # will be used to store the lstm state tuple
+    # debug_state = LSTMStateTuple(tf.zeros(shape=[batch_size, depth]), tf.zeros(shape=[batch_size, depth]))
+    self.lstm_outputs, h_out, c_out = lstm_layer(rnn_in, initial_state=LSTMStateTuple(c_in, h_in))
+    self.context_out = [h_out, c_out]
+
+    &#34;&#34;&#34;
+    # ---------------------DEBUG---------------------
+    with tf.control_dependencies([tf.print(&#34;lstm_outs:&#34;, tf.shape(lstm_outputs), &#34;lstm_c:&#34;, tf.shape(c_out),
+                                           &#34;lstm_h:&#34;, tf.shape(h_out), &#34;lstm_all:&#34;, 
+                                           tf.shape(lstm_outputs_state_tensor))]):
+        self.print = tf.constant(1, dtype=tf.int32)
+    # ---------------------DEBUG---------------------
+    &#34;&#34;&#34;
+
+    # output layers for policy and values estimations
+    self.policy = fully_connected(inputs=self.lstm_outputs, **self.PolicyLayerParams)
+    self.value = fully_connected(inputs=self.lstm_outputs, **self.ValueLayerParams)
+    # with tf.control_dependencies([tf.print(&#34;lstm: &#34;, lstm_outputs, &#34;\nc_out: &#34;, c_out, &#34;\nh_out: &#34;, h_out, output_stream=sys.stdout)]):
+    self.value = tf.squeeze(self.value)  # removes dimensions of size 1 from the shape of self.value
+
+    global_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, self.train_network_scope)
+    self.log_histograms_for_all_global_vars = tf.summary.merge([tf.summary.histogram(var.name, var)
+                                                                for var in global_vars])</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="Beta" href="index.html">Beta</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="Beta.AC_Network.normalized_columns_initializer" href="#Beta.AC_Network.normalized_columns_initializer">normalized_columns_initializer</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="Beta.AC_Network.AC_Network" href="#Beta.AC_Network.AC_Network">AC_Network</a></code></h4>
+<ul class="two-column">
+<li><code><a title="Beta.AC_Network.AC_Network.Beta" href="#Beta.AC_Network.AC_Network.Beta">Beta</a></code></li>
+<li><code><a title="Beta.AC_Network.AC_Network.ClipNorm" href="#Beta.AC_Network.AC_Network.ClipNorm">ClipNorm</a></code></li>
+<li><code><a title="Beta.AC_Network.AC_Network.ConvLayer1Params" href="#Beta.AC_Network.AC_Network.ConvLayer1Params">ConvLayer1Params</a></code></li>
+<li><code><a title="Beta.AC_Network.AC_Network.ConvLayer2Params" href="#Beta.AC_Network.AC_Network.ConvLayer2Params">ConvLayer2Params</a></code></li>
+<li><code><a title="Beta.AC_Network.AC_Network.FCLayerParams" href="#Beta.AC_Network.AC_Network.FCLayerParams">FCLayerParams</a></code></li>
+<li><code><a title="Beta.AC_Network.AC_Network.LSTMParams" href="#Beta.AC_Network.AC_Network.LSTMParams">LSTMParams</a></code></li>
+<li><code><a title="Beta.AC_Network.AC_Network.PolicyLayerParams" href="#Beta.AC_Network.AC_Network.PolicyLayerParams">PolicyLayerParams</a></code></li>
+<li><code><a title="Beta.AC_Network.AC_Network.SmallValue" href="#Beta.AC_Network.AC_Network.SmallValue">SmallValue</a></code></li>
+<li><code><a title="Beta.AC_Network.AC_Network.ValueLayerParams" href="#Beta.AC_Network.AC_Network.ValueLayerParams">ValueLayerParams</a></code></li>
+<li><code><a title="Beta.AC_Network.AC_Network.build_loss_function" href="#Beta.AC_Network.AC_Network.build_loss_function">build_loss_function</a></code></li>
+<li><code><a title="Beta.AC_Network.AC_Network.build_network" href="#Beta.AC_Network.AC_Network.build_network">build_network</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.6.2</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>
